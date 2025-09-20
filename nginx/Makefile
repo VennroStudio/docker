@@ -1,8 +1,6 @@
 # Init
 init:
-	@echo "Создание сети proxy"
 	$(MAKE) nginx-network
-	@echo "Инициализация nginx"
 	$(MAKE) up
 	@echo ""
 	@echo "✅ Nginx Proxy Manager запущен!"
@@ -15,7 +13,7 @@ up:
 	docker compose -f docker-compose.yml up -d --build
 
 down:
-	docker compose -f docker-compose.yml down --remove-orphans
+	docker compose -f docker-compose.yml down
 
 start:
 	docker compose -f docker-compose.yml start

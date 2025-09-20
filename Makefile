@@ -15,4 +15,9 @@ down-all:
 	$(MAKE) -C nginx down
 	$(MAKE) -C phpmyadmin down
 
-.PHONY: init-all up-all down-all
+push:
+	git add .
+	git commit -m "update"
+	git push
+
+.PHONY: init-all up-all down-all push

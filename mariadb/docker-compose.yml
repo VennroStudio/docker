@@ -8,6 +8,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
     volumes:
       - mariadb-public:/var/lib/mysql
       - ./config.cnf:/etc/mysql/conf.d/config.cnf

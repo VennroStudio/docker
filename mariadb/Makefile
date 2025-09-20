@@ -3,26 +3,28 @@ export
 
 # Init
 init:
-	@echo "Создание сети mariadb-public"
 	$(MAKE) mariadb-network
-	@echo "Инициализация mariadb"
 	$(MAKE) up
 
 # DB
-import-db:
-#	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH} # для импорта с хоста
-	docker exec -i mariadb-container bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}" # для импорта с контейнера
+# Для импорта с хоста
+import-db-h:
+	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}
+
+# Для импорта с контейнера
+import-db-c:
+	docker exec -i mariadb-container bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}"
 
 
 clear-db:
-	docker exec mariadb sh -c "mysql -u root -p${MYSQL_ROOT_PASSWORD} -e 'DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\`;'"
+	docker exec mariadb-container sh -c "mysql -u root -p${MYSQL_ROOT_PASSWORD} -e 'DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\`;'"
 
 # Docker
 up:
 	docker compose -f docker-compose.yml up -d --build
 
 down:
-	docker compose -f docker-compose.yml down --remove-orphans
+	docker compose -f docker-compose.yml down
 
 start:
 	docker compose -f docker-compose.yml start
