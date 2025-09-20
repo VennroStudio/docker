@@ -10,7 +10,9 @@ init:
 
 # DB
 import-db:
-	docker exec -i mariadb mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}
+#	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH} # для импорта с хоста
+	docker exec -i mariadb-container bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}" # для импорта с контейнера
+
 
 clear-db:
 	docker exec mariadb sh -c "mysql -u root -p${MYSQL_ROOT_PASSWORD} -e 'DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\`;'"
