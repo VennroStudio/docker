@@ -1,0 +1,4 @@
+nginx/data
+nginx/letsencrypt
+/certs
+.DS_Store

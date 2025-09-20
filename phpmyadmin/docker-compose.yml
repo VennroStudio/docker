@@ -1,0 +1,22 @@
+name: vennro
+
+services:
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    platform: linux/amd64
+    container_name: phpmyadmin-container
+    restart: unless-stopped
+    environment:
+      - PMA_HOST=mariadb-container
+    volumes:
+      - ./config.inc.php:/etc/phpmyadmin/config.inc.php
+    networks:
+      - mariadb-public
+      - proxy
+
+networks:
+  mariadb-public:
+    external: true
+  proxy:
+    external: true
