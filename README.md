@@ -21,7 +21,7 @@ mkdir ./certs
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 -keyout ./certs/pma.key \
 -out ./certs/pma.crt \
--subj "/CN=is.wowban.local"
+-subj "/CN=pma.local"
 ```
 
 # Подключение к базе данных 
