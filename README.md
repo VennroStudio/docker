@@ -21,5 +21,24 @@ mkdir ./certs
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 -keyout ./certs/pma.key \
 -out ./certs/pma.crt \
--subj "/CN=pma.local"
+-subj "/CN=is.wowban.local"
+```
+
+# Подключение к базе данных 
+
+#### Host
+```
+host.docker.internal:3306
+```
+#### User
+```
+root
+```
+#### Password
+```
+root
+```
+#### Port
+```
+3306
 ```
