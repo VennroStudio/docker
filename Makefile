@@ -20,4 +20,7 @@ push:
 	git commit -m "update"
 	git push
 
-.PHONY: init-all up-all down-all push
+go-db:
+	docker exec -it mariadb-container sh
+
+.PHONY: init-all up-all down-all push go-db
