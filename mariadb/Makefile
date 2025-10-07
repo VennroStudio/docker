@@ -15,9 +15,11 @@ import-db-h:
 import-db-c:
 	docker exec -i mariadb-container bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}"
 
-
 clear-db:
 	docker exec mariadb-container sh -c "mysql -u root -p${MYSQL_ROOT_PASSWORD} -e 'DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\`;'"
+
+export-db:
+	docker exec mariadb-container mysqldump -h${HOST_IP} -P${HOST_PORT} -u${HOST_USER} -p${HOST_PASS} ${HOST_DB} --result-file=${DUMP_PATH}
 
 # Docker
 up:
