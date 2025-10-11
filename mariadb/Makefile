@@ -11,6 +11,9 @@ init:
 import-db-h:
 	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}
 
+import-db-h-gz:
+	cat ${DUMP_PATH} | gunzip -c | docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME}
+
 # Для импорта с контейнера
 import-db-c:
 	docker exec -i mariadb-container bash -c "mysql -uroot -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}"
@@ -20,6 +23,9 @@ clear-db:
 
 export-db:
 	docker exec mariadb-container mysqldump -h${HOST_IP} -P${HOST_PORT} -u${HOST_USER} -p${HOST_PASS} ${HOST_DB} --result-file=${DUMP_PATH}
+
+go-root:
+	scp ${HOME_PATH} ${SSH}:${DUMP_PATH}
 
 # Docker
 up:
