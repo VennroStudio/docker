@@ -42,3 +42,39 @@ root
 ```
 3306
 ```
+
+Установка на сервере:
+```angular2html
+apt-get update
+
+apt-get install -y \
+  curl \
+  software-properties-common \
+  ca-certificates \
+  apt-transport-https \
+  gnupg \
+  git \
+  make
+
+mkdir -p /etc/apt/keyrings
+wget -O- https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor | tee /etc/apt/keyrings/docker.gpg > /dev/null
+chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list
+
+apt-get update
+
+apt-get install -y make docker-ce apache2-utils docker-compose-plugin
+
+systemctl enable docker
+systemctl start docker
+
+mkdir -p /var/www
+cd /var/www
+
+git clone https://github.com/VennroStudio/docker data
+
+cd /var/www/data
+
+make init-all
+```

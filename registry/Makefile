@@ -12,22 +12,22 @@ init:
 	else \
 		echo "✅ Пользователь 'admin' уже существует"; \
 	fi
-	@docker-compose up -d
+	@docker compose up -d
 
 up:
-	@docker-compose up -d
+	@docker compose up -d
 
 down:
-	@docker-compose down
+	@docker compose down
 
 restart:
-	@docker-compose restart
+	@docker compose restart
 
 logs:
-	@docker-compose logs -f
+	@docker compose logs -f
 
 ps:
-	@docker-compose ps
+	@docker compose ps
 
 # Добавить нового пользователя
 add-user:
