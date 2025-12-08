@@ -3,17 +3,20 @@ init-all:
 	$(MAKE) -C nginx init
 	$(MAKE) -C mariadb init
 	$(MAKE) -C phpmyadmin up
+	$(MAKE) -C registry init
 	@echo "✅ Все контейнеры запущены!"
 
 up-all:
 	$(MAKE) -C mariadb up
 	$(MAKE) -C nginx up
 	$(MAKE) -C phpmyadmin up
+	$(MAKE) -C registry up
 
 down-all:
 	$(MAKE) -C mariadb down
 	$(MAKE) -C nginx down
 	$(MAKE) -C phpmyadmin down
+	$(MAKE) -C registry down
 
 push:
 	git add .
