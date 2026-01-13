@@ -9,7 +9,10 @@ init:
 # DB
 # Для импорта с хоста
 import-db-h:
-	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${DUMP_PATH}
+	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${HOME_PATH}
+
+import-db-gz:
+	gunzip -c ${HOME_PATH} | docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME}
 
 import-db-h-gz:
 	cat ${DUMP_PATH} | gunzip -c | docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME}
