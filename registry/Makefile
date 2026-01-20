@@ -1,3 +1,6 @@
+-include .env
+export
+
 # Docker Registry Management
 init:
 	@echo "🐳 Инициализация Docker Registry..."
@@ -5,8 +8,13 @@ init:
 	@if [ ! -f auth/htpasswd ]; then \
 		echo ""; \
 		echo "Создание пользователя 'admin' для Registry..."; \
-		echo "Введите пароль для пользователя admin:"; \
-		htpasswd -Bc auth/htpasswd admin; \
+		if [ -f .env ]; then \
+			. ./.env && echo "Используется пароль из .env" && \
+			htpasswd -Bbc auth/htpasswd admin "$$REGISTRY_PASSWORD"; \
+		else \
+			echo "Введите пароль для пользователя admin:"; \
+			htpasswd -Bc auth/htpasswd admin; \
+		fi; \
 		echo ""; \
 		echo "✅ Пользователь 'admin' создан"; \
 	else \
