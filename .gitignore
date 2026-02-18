@@ -7,3 +7,4 @@ mariadb/.env
 registry/data/
 registry/auth/
 registry/*.log
+ansible
