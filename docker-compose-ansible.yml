@@ -2,7 +2,7 @@ name: vennro
 
 services:
   ansible:
-    container_name: vennro-ansible
+    container_name: ansible-container
     build:
       context: docker
       dockerfile: ansible/Dockerfile

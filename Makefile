@@ -46,6 +46,16 @@ generate-user:
 	mkdir -p ./docker/server/registry/auth
 	htpasswd -Bbc ./docker/server/registry/auth/htpasswd ${REGISTRY_USER} ${REGISTRY_PASSWORD}
 
+ansible-build:
+	docker compose -f docker-compose-ansible.yml build
+
+ansible-setup:
+	docker compose -f docker-compose-ansible.yml run --rm ansible -i inventory.ini deploy.yml
+
+ansible-clean:
+	docker compose -f docker-compose-ansible.yml down
+	docker rmi vs-project-ansible 2>/dev/null || true
+
 push:
 	git add .
 	git commit -m "update"
@@ -67,5 +77,8 @@ help:
 	@echo "  make import-db-gz   - Импорт сжатого дампа (.sql.gz)"
 	@echo "  make upload-dump    - Загрузка дампа на сервер"
 	@echo "  make generate-user  - Создание пользователя Registry"
+	@echo "  make ansible-build  - Собрать контейнер Ansible"
+	@echo "  make ansible-setup  - Выполнить установку Ansible на сервере"
+	@echo "  make ansible-clean  - Удалить контейнер Ansible"
 
-.PHONY: init up down start stop clean logs-nginx logs-db logs-pma go-db import-db-h import-db-gz upload-dump generate-user push help
+.PHONY: init up down start stop clean logs-nginx logs-db logs-pma go-db import-db-h import-db-gz upload-dump generate-user ansible-build ansible-setup ansible-clean push help
