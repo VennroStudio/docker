@@ -1,10 +1,7 @@
-nginx/data
-nginx/letsencrypt
+/docker/local/nginx/data
+/docker/local/nginx/letsencrypt
 /certs
 .DS_Store
-mariadb/.env
 .idea/
-registry/data/
-registry/auth/
-registry/*.log
-ansible
+.env
+docker/ansible/.env.server
