@@ -64,7 +64,7 @@ services:
     container_name: registry-ui-container
     restart: unless-stopped
     environment:
-      - REGISTRY_URL=http://registry:5000
+      - NGINX_PROXY_PASS_URL=http://registry:5000
       - REGISTRY_AUTH=true
       - REGISTRY_TITLE=Vennro Private Registry
       - DELETE_IMAGES=true
