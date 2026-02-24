@@ -3,7 +3,7 @@ export
 
 COMPOSE_FILE := docker-compose-$(ENV).yml
 
-init: down up
+init: down delete-proxy add-proxy up
 
 up:
 	docker compose -f $(COMPOSE_FILE) pull && \
@@ -55,6 +55,12 @@ ansible-setup:
 ansible-clean:
 	docker compose -f docker-compose-ansible.yml down
 	docker rmi vs-project-ansible 2>/dev/null || true
+
+add-proxy:
+	docker network create proxy
+
+delete-proxy:
+	docker network rm proxy
 
 push:
 	git add .
