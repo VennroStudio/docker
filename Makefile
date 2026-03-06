@@ -33,6 +33,9 @@ logs-pma:
 go-db:
 	docker exec -it mariadb-container sh
 
+import-env:
+	scp -P $(SERVER_PORT) docker/ansible/.env.server $(SSH):$(SERVER_DUMP_PATH).env
+
 import-db-h:
 	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${HOME_DUMP_PATH}${DUMP_NAME}
 
