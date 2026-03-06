@@ -14,9 +14,8 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     restart: unless-stopped
-
-volumes:
-  minio_data:
+    networks:
+      - proxy
 
 networks:
   proxy:
