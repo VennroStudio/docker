@@ -79,7 +79,7 @@ rclone-config:
 	rclone config
 
 rclone-test:
-	rclone ls yadisk:
+	rclone ls yadisk:test-connect/
 
 rclone-backup-s3:
 	rclone copy /home/vennro/infrastructure/cdn-data yadisk:backup/cdn-data
