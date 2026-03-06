@@ -82,7 +82,7 @@ rclone-test:
 	rclone ls yadisk:
 
 rclone-backup-s3:
-	rclone copy /path/to/infrastructure/data yadisk:backup/minio
+	rclone copy /home/vennro/infrastructure/cdn-data yadisk:backup/cdn-data
 
 add-proxy:
 	docker network create proxy
@@ -123,4 +123,4 @@ help:
 	@echo "  make rclone-test       - Проверить подключение к Яндекс Диску"
 	@echo "  make rclone-backup-s3  - Создать бекап MinIO на Яндекс Диск"
 
-.PHONY: init up down start stop clean logs-nginx logs-db logs-pma go-db import-db-h import-db-gz upload-dump generate-user ansible-build ansible-setup ansible-clean push help
+.PHONY: init up down start stop clean logs-nginx logs-db logs-pma go-db import-db-h import-db-gz upload-dump generate-user ansible-build ansible-setup ansible-clean minio-up minio-pull minio-stop minio-clean rclone-install rclone-config rclone-test rclone-backup-s3 push help
