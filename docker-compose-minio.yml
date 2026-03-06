@@ -1,0 +1,23 @@
+name: vennro
+
+services:
+  minio:
+    image: minio/minio
+    container_name: minio-container
+    ports:
+      - "3900:9000"
+      - "3901:9001"
+    volumes:
+      - ./data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+volumes:
+  minio_data:
+
+networks:
+  proxy:
+    external: true
