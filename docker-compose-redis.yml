@@ -3,7 +3,7 @@ name: vennro
 services:
   redis:
     image: redis:7-alpine
-    container_name: vennro-redis
+    container_name: redis-container
     restart: unless-stopped
     env_file: .env
     command: redis-server --requirepass ${REDIS_PASSWORD}
