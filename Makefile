@@ -72,6 +72,19 @@ minio-clean:
 	docker compose -f docker-compose-minio.yml down
 	docker rmi minio/minio 2>/dev/null || true
 
+redis-up:
+	docker compose -f docker-compose-redis.yml up -d
+
+redis-pull:
+	docker compose -f docker-compose-redis.yml pull
+
+redis-stop:
+	docker compose -f docker-compose-redis.yml stop
+
+redis-clean:
+	docker compose -f docker-compose-redis.yml down
+	docker rmi redis:7-alpine 2>/dev/null || true
+
 rclone-install:
 	sudo -v ; curl https://rclone.org/install.sh | sudo bash
 
@@ -97,30 +110,34 @@ push:
 
 help:
 	@echo "Доступные команды:"
-	@echo "  make init           	- Полная перезагрузка (down + up)"
-	@echo "  make up             	- Запуск с пересборкой образов"
-	@echo "  make down           	- Остановка контейнеров"
-	@echo "  make start          	- Запуск существующих контейнеров"
-	@echo "  make stop           	- Остановка контейнеров"
-	@echo "  make clean          	- Очистка (удаление volumes)"
-	@echo "  make logs-nginx     	- Логи Nginx"
-	@echo "  make logs-db        	- Логи MariaDB"
-	@echo "  make logs-pma       	- Логи phpMyAdmin"
-	@echo "  make go-db          	- Вход в shell MariaDB"
-	@echo "  make import-db-h    	- Импорт SQL дампа (.sql)"
-	@echo "  make import-db-gz   	- Импорт сжатого дампа (.sql.gz)"
-	@echo "  make upload-dump    	- Загрузка дампа на сервер"
-	@echo "  make generate-user  	- Создание пользователя Registry"
-	@echo "  make ansible-build  	- Собрать контейнер Ansible"
-	@echo "  make ansible-setup  	- Выполнить установку Ansible на сервере"
-	@echo "  make ansible-clean  	- Удалить контейнер Ansible"
-	@echo "  make minio-up          - Запустить контейнер MinIO"
-	@echo "  make minio-pull        - Скачать/обновить образ MinIO"
-	@echo "  make minio-stop        - Остановить контейнер MinIO"
-	@echo "  make minio-clean       - Удалить контейнер и образ MinIO"
-	@echo "  make rclone-install    - Установить rclone на сервер"
-	@echo "  make rclone-config     - Настроить подключение к Яндекс Диску"
-	@echo "  make rclone-test       - Проверить подключение к Яндекс Диску"
-	@echo "  make rclone-backup-s3  - Создать бекап MinIO на Яндекс Диск"
+	@echo "  make init             - Полная перезагрузка (down + up)"
+	@echo "  make up               - Запуск с пересборкой образов"
+	@echo "  make down             - Остановка контейнеров"
+	@echo "  make start            - Запуск существующих контейнеров"
+	@echo "  make stop             - Остановка контейнеров"
+	@echo "  make clean            - Очистка (удаление volumes)"
+	@echo "  make logs-nginx       - Логи Nginx"
+	@echo "  make logs-db          - Логи MariaDB"
+	@echo "  make logs-pma         - Логи phpMyAdmin"
+	@echo "  make go-db            - Вход в shell MariaDB"
+	@echo "  make import-db-h      - Импорт SQL дампа (.sql)"
+	@echo "  make import-db-gz     - Импорт сжатого дампа (.sql.gz)"
+	@echo "  make upload-dump      - Загрузка дампа на сервер"
+	@echo "  make generate-user    - Создание пользователя Registry"
+	@echo "  make ansible-build    - Собрать контейнер Ansible"
+	@echo "  make ansible-setup    - Выполнить установку Ansible на сервере"
+	@echo "  make ansible-clean    - Удалить контейнер Ansible"
+	@echo "  make minio-up         - Запустить контейнер MinIO"
+	@echo "  make minio-pull       - Скачать/обновить образ MinIO"
+	@echo "  make minio-stop       - Остановить контейнер MinIO"
+	@echo "  make minio-clean      - Удалить контейнер и образ MinIO"
+	@echo "  make redis-up         - Запустить контейнер Redis"
+	@echo "  make redis-pull       - Скачать/обновить образ Redis"
+	@echo "  make redis-stop       - Остановить контейнер Redis"
+	@echo "  make redis-clean      - Удалить контейнер и образ Redis"
+	@echo "  make rclone-install   - Установить rclone на сервер"
+	@echo "  make rclone-config    - Настроить подключение к Яндекс Диску"
+	@echo "  make rclone-test      - Проверить подключение к Яндекс Диску"
+	@echo "  make rclone-backup-s3 - Создать бекап MinIO на Яндекс Диск"
 
-.PHONY: init up down start stop clean logs-nginx logs-db logs-pma go-db import-db-h import-db-gz upload-dump generate-user ansible-build ansible-setup ansible-clean minio-up minio-pull minio-stop minio-clean rclone-install rclone-config rclone-test rclone-backup-s3 push help
+.PHONY: init up down start stop clean logs-nginx logs-db logs-pma go-db import-db-h import-db-gz upload-dump generate-user ansible-build ansible-setup ansible-clean minio-up minio-pull minio-stop minio-clean redis-up redis-pull redis-stop redis-clean rclone-install rclone-config rclone-test rclone-backup-s3 push help
