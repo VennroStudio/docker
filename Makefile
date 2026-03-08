@@ -95,7 +95,7 @@ rclone-test:
 	rclone ls yadisk:test-connect/
 
 rclone-backup-s3:
-	rclone copy /home/vennro/infrastructure/cdn-data yadisk:backup/cdn-data
+	rclone copy /home/vennro/infrastructure/storage yadisk:backup/storage
 
 add-proxy:
 	docker network create proxy
