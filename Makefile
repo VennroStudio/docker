@@ -2,6 +2,7 @@ include .env
 export
 
 COMPOSE_FILE := docker-compose-$(ENV).yml
+DATE := $(shell date +%d-%m-%Y)
 
 init: down delete-proxy add-proxy up
 
@@ -102,6 +103,12 @@ add-proxy:
 
 delete-proxy:
 	docker network rm proxy
+
+archive:
+	tar -czvf "data-$(DATE).tar.gz" "$(FOLDER)/"
+
+unarchive:
+	tar -xzvf "data-$(DATA-ARG).tar.gz"
 
 push:
 	git add .
