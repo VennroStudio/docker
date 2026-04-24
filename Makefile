@@ -4,147 +4,127 @@ export
 COMPOSE_FILE := docker-compose-$(ENV).yml
 DATE := $(shell date +%d-%m-%Y)
 
-init: down delete-proxy add-proxy up
+help: ## Показать список команд
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-up:
+init: down delete-proxy add-proxy up ## Запустить инициализацию проекта
+
+up: ## Запуск с пересборкой образов
 	docker compose -f $(COMPOSE_FILE) pull && \
 	docker compose -f $(COMPOSE_FILE) up -d --build --pull always --force-recreate
 
-down:
+down: ## Остановка контейнеров
 	docker compose -f $(COMPOSE_FILE) down
 
-start:
+start: ## Запуск существующих контейнеров
 	docker compose -f $(COMPOSE_FILE) start
 
-stop:
+stop: ## Остановка контейнеров
 	docker compose -f $(COMPOSE_FILE) stop
 
-clean:
+clean: ## Очистка (удаление volumes)
 	docker compose -f $(COMPOSE_FILE) down -v
 
-logs-nginx:
+logs-nginx: ## Логи Nginx
 	docker compose -f $(COMPOSE_FILE) logs -f nginx-container
 
-logs-db:
+logs-db: ## Логи MariaDB
 	docker compose -f $(COMPOSE_FILE) logs -f mariadb-container
 
-logs-pma:
+logs-pma: ## Логи phpMyAdmin
 	docker compose -f $(COMPOSE_FILE) logs -f phpmyadmin-container
 
-go-db:
+go-db: ## Вход в shell MariaDB
 	docker exec -it mariadb-container sh
 
-import-env:
+import-env: ## Импорт .env.server на сервер
 	scp -P $(SERVER_PORT) docker/ansible/.env.server $(SSH):$(SERVER_DUMP_PATH).env
 
-import-db-h:
+import-db-h: ## Импорт SQL дампа (.sql)
 	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${HOME_DUMP_PATH}${DUMP_NAME}
 
-import-db-gz:
+import-db-gz: ## Импорт сжатого дампа (.sql.gz)
 	gunzip -c ${HOME_DUMP_PATH}${DUMP_NAME} | docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME}
 
-upload-dump:
+upload-dump: ## Загрузка дампа на сервер
 	scp ${HOME_DUMP_PATH}${DUMP_NAME} ${SSH}:${SERVER_DUMP_PATH}
 
-generate-user:
+generate-user: ## Создание пользователя Registry
 	mkdir -p ./docker/server/registry/auth
 	htpasswd -Bbc ./docker/server/registry/auth/htpasswd ${REGISTRY_USER} ${REGISTRY_PASSWORD}
 
-ansible-build:
+ansible-build: ## Собрать контейнер Ansible
 	docker compose -f docker-compose-ansible.yml build
 
-ansible-setup:
+ansible-setup: ## Выполнить установку Ansible на сервере
 	docker compose -f docker-compose-ansible.yml run --rm ansible -i inventory.ini deploy.yml
 
-ansible-clean:
+ansible-clean: ## Удалить контейнер Ansible
 	docker compose -f docker-compose-ansible.yml down
 	docker rmi vennro-ansible 2>/dev/null || true
 
-minio-up:
+minio-up: ## Запустить контейнер MinIO
 	docker compose -f docker-compose-minio.yml up -d
 
-minio-pull:
+minio-pull: ## Скачать/обновить образ MinIO
 	docker compose -f docker-compose-minio.yml pull
 
-minio-stop:
+minio-stop: ## Остановить контейнер MinIO
 	docker compose -f docker-compose-minio.yml stop
 
-minio-clean:
+minio-clean: ## Удалить контейнер и образ MinIO
 	docker compose -f docker-compose-minio.yml down
 	docker rmi minio/minio 2>/dev/null || true
 
-redis-up:
+redis-up: ## Запустить контейнер Redis
 	docker compose -f docker-compose-redis.yml up -d
 
-redis-pull:
+redis-pull: ## Скачать/обновить образ Redis
 	docker compose -f docker-compose-redis.yml pull
 
-redis-stop:
+redis-stop: ## Остановить контейнер Redis
 	docker compose -f docker-compose-redis.yml stop
 
-redis-clean:
+redis-clean: ## Удалить контейнер и образ Redis
 	docker compose -f docker-compose-redis.yml down
 	docker rmi redis:7-alpine 2>/dev/null || true
 
-rclone-install:
+rclone-install: ## Установить rclone на сервер
 	sudo -v ; curl https://rclone.org/install.sh | sudo bash
 
-rclone-config:
+rclone-config: ## Настроить подключение к Яндекс Диску
 	rclone config
 
-rclone-test:
+rclone-test: ## Проверить подключение к Яндекс Диску
 	rclone ls yadisk:test-connect/
 
-rclone-backup-s3:
+rclone-backup-s3: ## Создать бекап MinIO на Яндекс Диск
 	rclone copy /home/vennro/infrastructure/storage yadisk:backup/storage
 
-add-proxy:
+add-proxy: ## Создать общую сеть
 	docker network create proxy
 
-delete-proxy:
+delete-proxy: ## Удалить общую сеть
 	docker network rm proxy
 
-archive:
+archive: ## Архивирование в формате data-DD-MM-YYYY, передать FOLDER=folderName
 	tar -czvf "data-$(DATE).tar.gz" "$(FOLDER)/"
 
-unarchive:
-	tar -xzvf "data-$(DATA-ARG).tar.gz"
+unarchive: ## Разархивирование для формата data-DD-MM-YYYY, передать DATE-ARG=DD-MM-YYYY
+	tar -xzvf "data-$(DATE-ARG).tar.gz"
 
-push:
+push: ## Auto save
 	git add .
 	git commit -m "update"
 	git push
 
-help:
-	@echo "Доступные команды:"
-	@echo "  make init             - Полная перезагрузка (down + up)"
-	@echo "  make up               - Запуск с пересборкой образов"
-	@echo "  make down             - Остановка контейнеров"
-	@echo "  make start            - Запуск существующих контейнеров"
-	@echo "  make stop             - Остановка контейнеров"
-	@echo "  make clean            - Очистка (удаление volumes)"
-	@echo "  make logs-nginx       - Логи Nginx"
-	@echo "  make logs-db          - Логи MariaDB"
-	@echo "  make logs-pma         - Логи phpMyAdmin"
-	@echo "  make go-db            - Вход в shell MariaDB"
-	@echo "  make import-db-h      - Импорт SQL дампа (.sql)"
-	@echo "  make import-db-gz     - Импорт сжатого дампа (.sql.gz)"
-	@echo "  make upload-dump      - Загрузка дампа на сервер"
-	@echo "  make generate-user    - Создание пользователя Registry"
-	@echo "  make ansible-build    - Собрать контейнер Ansible"
-	@echo "  make ansible-setup    - Выполнить установку Ansible на сервере"
-	@echo "  make ansible-clean    - Удалить контейнер Ansible"
-	@echo "  make minio-up         - Запустить контейнер MinIO"
-	@echo "  make minio-pull       - Скачать/обновить образ MinIO"
-	@echo "  make minio-stop       - Остановить контейнер MinIO"
-	@echo "  make minio-clean      - Удалить контейнер и образ MinIO"
-	@echo "  make redis-up         - Запустить контейнер Redis"
-	@echo "  make redis-pull       - Скачать/обновить образ Redis"
-	@echo "  make redis-stop       - Остановить контейнер Redis"
-	@echo "  make redis-clean      - Удалить контейнер и образ Redis"
-	@echo "  make rclone-install   - Установить rclone на сервер"
-	@echo "  make rclone-config    - Настроить подключение к Яндекс Диску"
-	@echo "  make rclone-test      - Проверить подключение к Яндекс Диску"
-	@echo "  make rclone-backup-s3 - Создать бекап MinIO на Яндекс Диск"
-
-.PHONY: init up down start stop clean logs-nginx logs-db logs-pma go-db import-db-h import-db-gz upload-dump generate-user ansible-build ansible-setup ansible-clean minio-up minio-pull minio-stop minio-clean redis-up redis-pull redis-stop redis-clean rclone-install rclone-config rclone-test rclone-backup-s3 push help
+.PHONY: init up down start stop clean
+.PHONY: logs-nginx logs-db logs-pma go-db
+.PHONY: import-db-h import-db-gz upload-dump
+.PHONY: generate-user ansible-build ansible-setup ansible-clean
+.PHONY: minio-up minio-pull minio-stop minio-clean
+.PHONY: redis-up redis-pull redis-stop redis-clean
+.PHONY: rclone-install rclone-config rclone-test rclone-backup-s3
+.PHONY: add-proxy delete-proxy
+.PHONY: archive unarchive
+.PHONY: push help
