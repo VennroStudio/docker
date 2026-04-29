@@ -113,6 +113,9 @@ archive: ## Архивирование в формате data-DD-MM-YYYY, пер
 unarchive: ## Разархивирование для формата data-DD-MM-YYYY, передать DATE-ARG=DD-MM-YYYY
 	tar -xzvf "data-$(DATE-ARG).tar.gz"
 
+clear-mac-copy: ## Очистка файлов MAC в архиве
+	find . -type f -name '._*' -delete
+
 push: ## Auto save
 	git add .
 	git commit -m "update"
