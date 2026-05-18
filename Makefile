@@ -38,13 +38,28 @@ clean: ## Очистка (удаление volumes)
 	docker compose -f $(COMPOSE_FILE) down -v
 
 logs-nginx: ## Логи Nginx
-	docker compose -f $(COMPOSE_FILE) logs -f nginx-container
+	docker compose -f $(COMPOSE_FILE) logs -f nginx-proxy-manager
 
 logs-db: ## Логи MariaDB
-	docker compose -f $(COMPOSE_FILE) logs -f mariadb-container
+	docker compose -f $(COMPOSE_FILE) logs -f db
 
 logs-pma: ## Логи phpMyAdmin
-	docker compose -f $(COMPOSE_FILE) logs -f phpmyadmin-container
+	docker compose -f $(COMPOSE_FILE) logs -f phpmyadmin
+
+ui: ## Запустить локальный web-интерфейс управления
+	@docker build -t infrastructure-ui -f web-ui/Dockerfile .
+	@docker run --rm \
+		--entrypoint node \
+		-p 127.0.0.1:8088:8088 \
+		-v "$(PWD):$(PWD)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v /etc/hosts:/host/etc/hosts \
+		-w "$(PWD)" \
+		-e HOSTS_FILE=/host/etc/hosts \
+		-e NPM_URL \
+		-e NPM_EMAIL \
+		-e NPM_PASSWORD \
+		infrastructure-ui ./web-ui/server.mjs
 
 ##@ Локальные домены и Nginx Proxy Manager
 host-add: ## Добавить локальный домен в /etc/hosts, передать DOMAIN=site.local
@@ -171,7 +186,7 @@ push: ## Auto save
 	git push
 
 .PHONY: init up down start stop clean
-.PHONY: logs-nginx logs-db logs-pma go-db
+.PHONY: logs-nginx logs-db logs-pma ui go-db
 .PHONY: host-add host-remove app-proxy
 .PHONY: import-db-h import-db-gz upload-dump
 .PHONY: generate-user ansible-build ansible-setup ansible-clean

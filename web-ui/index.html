@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Infrastructure</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-view="proxy">
+    <main class="app-shell">
+      <nav class="rail" aria-label="Primary">
+        <button
+          class="rail-logo"
+          data-toggle-sidebar
+          type="button"
+          aria-label="Toggle sidebar"
+          aria-expanded="true"
+          onclick="event.stopPropagation(); document.body.classList.toggle('sidebar-collapsed'); this.setAttribute('aria-expanded', String(!document.body.classList.contains('sidebar-collapsed')));"
+        >INF</button>
+        <button class="rail-item active" data-view="proxy" type="button" aria-label="Proxy">
+          <span>P</span>
+        </button>
+        <button class="rail-item" data-view="docker" type="button" aria-label="Docker">
+          <span>D</span>
+        </button>
+        <button class="rail-item" data-view="nginx" type="button" aria-label="Nginx">
+          <span>N</span>
+        </button>
+        <button class="rail-item" data-view="mariadb" type="button" aria-label="MariaDB">
+          <span>M</span>
+        </button>
+        <button class="rail-item" data-view="postgres" type="button" aria-label="Postgres">
+          <span>PG</span>
+        </button>
+        <button class="rail-item" data-view="redis" type="button" aria-label="Redis">
+          <span>R</span>
+        </button>
+        <button class="rail-item" data-view="minio" type="button" aria-label="MinIO">
+          <span>S3</span>
+        </button>
+        <div class="rail-spacer"></div>
+        <div class="rail-user">V</div>
+      </nav>
+
+      <aside class="sidebar" id="sidebar">
+        <header class="sidebar-head">
+          <div class="brand">
+            <span>Local stack</span>
+            <strong id="panelTitle">Proxy</strong>
+          </div>
+          <span class="status" id="status">Ready</span>
+        </header>
+
+        <div class="sidebar-scroll">
+          <section class="panel proxy-panel" data-panel="proxy">
+            <div class="panel-head">
+              <div>
+                <p>Proxy host</p>
+                <h2>Domain routing</h2>
+              </div>
+              <span class="panel-badge">NPM</span>
+            </div>
+
+            <form id="proxyForm" class="proxy-form">
+              <label class="field wide">
+                <span>Domain</span>
+                <input name="domain" value="pma.local" autocomplete="off" spellcheck="false">
+              </label>
+
+              <label class="field wide">
+                <span>Target container</span>
+                <input name="target" value="phpmyadmin-container" autocomplete="off" spellcheck="false">
+              </label>
+
+              <div class="field-row">
+                <label class="field">
+                  <span>Port</span>
+                  <input name="port" value="80" inputmode="numeric">
+                </label>
+
+                <label class="switch">
+                  <input name="ssl" type="checkbox">
+                  <span></span>
+                  <strong>SSL</strong>
+                </label>
+              </div>
+            </form>
+
+            <div class="action-stack">
+              <button data-action="proxy" class="primary action-button" type="button">
+                <span>Create proxy</span>
+                <small>make app-proxy</small>
+              </button>
+              <div class="split-actions">
+                <button data-action="host-add" class="action-button" type="button">
+                  <span>Add host</span>
+                  <small>/etc/hosts</small>
+                </button>
+                <button data-action="host-remove" class="danger action-button" type="button">
+                  <span>Remove</span>
+                  <small>/etc/hosts</small>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="docker">
+            <div class="panel-head compact">
+              <div>
+                <p>Containers</p>
+                <h2>Main stack</h2>
+              </div>
+            </div>
+            <div class="command-grid">
+              <button data-command="compose:init" class="danger" type="button">Init</button>
+              <button data-command="compose:up" type="button">Up</button>
+              <button data-command="compose:down" class="danger" type="button">Down</button>
+              <button data-command="compose:start" type="button">Start</button>
+              <button data-command="compose:stop" class="danger" type="button">Stop</button>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="nginx">
+            <div class="panel-head compact">
+              <div>
+                <p>Nginx Proxy Manager</p>
+                <h2>Nginx panel</h2>
+              </div>
+            </div>
+            <div class="command-grid">
+              <button data-command="logs:nginx" type="button">Logs</button>
+              <button data-command="compose:start" type="button">Start stack</button>
+              <button data-command="compose:stop" class="danger" type="button">Stop stack</button>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="mariadb">
+            <div class="panel-head compact">
+              <div>
+                <p>Database</p>
+                <h2>MariaDB panel</h2>
+              </div>
+            </div>
+            <div class="command-grid">
+              <button data-command="logs:db" type="button">Logs</button>
+              <button data-command="logs:pma" type="button">phpMyAdmin logs</button>
+              <button data-command="compose:start" type="button">Start stack</button>
+              <button data-command="compose:stop" class="danger" type="button">Stop stack</button>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="postgres">
+            <div class="panel-head compact">
+              <div>
+                <p>Database</p>
+                <h2>Postgres panel</h2>
+              </div>
+            </div>
+            <div class="service-grid">
+              <button data-command="postgres:up" type="button">Postgres up</button>
+              <button data-command="postgres:stop" class="danger" type="button">Postgres stop</button>
+              <button data-command="postgres:clean" class="danger" type="button">Postgres clean</button>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="redis">
+            <div class="panel-head compact">
+              <div>
+                <p>Cache</p>
+                <h2>Redis panel</h2>
+              </div>
+            </div>
+            <div class="service-grid">
+              <button data-command="redis:up" type="button">Redis up</button>
+              <button data-command="redis:stop" class="danger" type="button">Redis stop</button>
+              <button data-command="redis:clean" class="danger" type="button">Redis clean</button>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="minio">
+            <div class="panel-head compact">
+              <div>
+                <p>Storage</p>
+                <h2>MinIO panel</h2>
+              </div>
+            </div>
+            <div class="service-grid">
+              <button data-command="minio:up" type="button">MinIO up</button>
+              <button data-command="minio:stop" class="danger" type="button">MinIO stop</button>
+              <button data-command="minio:clean" class="danger" type="button">MinIO clean</button>
+            </div>
+          </section>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div class="breadcrumb">
+            <span>viktor</span>
+            <strong>/ Infrastructure Console</strong>
+          </div>
+          <div class="top-pills">
+            <span>Docker</span>
+            <span>NPM :81</span>
+            <span>Localhost</span>
+          </div>
+        </header>
+
+        <div class="workspace-grid">
+          <section class="terminal-card">
+            <header class="terminal-bar">
+              <div class="traffic" aria-hidden="true">
+                <span class="red"></span>
+                <span class="yellow"></span>
+                <span class="green"></span>
+              </div>
+              <div class="terminal-title">
+                <strong>infrastructure</strong>
+                <span>~/Projects/myProjects/infrastructure</span>
+              </div>
+              <div class="terminal-actions">
+                <button id="stopOutput" class="danger" type="button" disabled>Stop</button>
+                <button id="clearOutput" type="button">Clear</button>
+              </div>
+            </header>
+            <pre id="output">Waiting for action...</pre>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js?v=3"></script>
+  </body>
+</html>

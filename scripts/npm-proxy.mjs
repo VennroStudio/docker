@@ -22,6 +22,8 @@ const config = {
   forceCert: bool(args["force-cert"] ?? process.env.FORCE_CERT),
 };
 
+let token;
+
 validate(config);
 await main();
 
@@ -167,8 +169,6 @@ async function exists(filePath) {
     return false;
   }
 }
-
-let token;
 
 async function getToken() {
   if (token) return token;
