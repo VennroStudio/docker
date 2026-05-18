@@ -5,9 +5,21 @@ COMPOSE_FILE := docker-compose-$(ENV).yml
 DATE := $(shell date +%d-%m-%Y)
 
 help: ## Показать список команд
-	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@awk 'BEGIN {FS = ":.*?## "} \
+		/^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } \
+		/^[a-zA-Z_-]+:.*?## / { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 }' \
+		$(MAKEFILE_LIST)
+	@echo ""
 
+##@ Контейнеры
 init: down delete-proxy add-proxy up ## Запустить инициализацию проекта
+
+add-proxy: ## Создать общую сеть
+	docker network create proxy
+
+delete-proxy: ## Удалить общую сеть
+	docker network rm proxy
 
 up: ## Запуск с пересборкой образов
 	docker compose -f $(COMPOSE_FILE) pull && \
@@ -34,11 +46,9 @@ logs-db: ## Логи MariaDB
 logs-pma: ## Логи phpMyAdmin
 	docker compose -f $(COMPOSE_FILE) logs -f phpmyadmin-container
 
+##@ Для работы с Mysql
 go-db: ## Вход в shell MariaDB
 	docker exec -it mariadb-container sh
-
-import-env: ## Импорт .env.server на сервер
-	scp -P $(SERVER_PORT) docker/ansible/.env.server $(SSH):$(SERVER_DUMP_PATH).env
 
 import-db-h: ## Импорт SQL дампа (.sql)
 	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${HOME_DUMP_PATH}${DUMP_NAME}
@@ -49,10 +59,12 @@ import-db-gz: ## Импорт сжатого дампа (.sql.gz)
 upload-dump: ## Загрузка дампа на сервер
 	scp ${HOME_DUMP_PATH}${DUMP_NAME} ${SSH}:${SERVER_DUMP_PATH}
 
+##@ Registry
 generate-user: ## Создание пользователя Registry
 	mkdir -p ./docker/server/registry/auth
 	htpasswd -Bbc ./docker/server/registry/auth/htpasswd ${REGISTRY_USER} ${REGISTRY_PASSWORD}
 
+##@ Ansible и сервер
 ansible-build: ## Собрать контейнер Ansible
 	docker compose -f docker-compose-ansible.yml build
 
@@ -63,6 +75,10 @@ ansible-clean: ## Удалить контейнер Ansible
 	docker compose -f docker-compose-ansible.yml down
 	docker rmi vennro-ansible 2>/dev/null || true
 
+import-env: ## Импорт .env.server на сервер
+	scp -P $(SERVER_PORT) docker/ansible/.env.server $(SSH):$(SERVER_DUMP_PATH).env
+
+##@ S3 Minio
 minio-up: ## Запустить контейнер MinIO
 	docker compose -f docker-compose-minio.yml up -d
 
@@ -76,6 +92,7 @@ minio-clean: ## Удалить контейнер и образ MinIO
 	docker compose -f docker-compose-minio.yml down
 	docker rmi minio/minio 2>/dev/null || true
 
+##@ Redis
 redis-up: ## Запустить контейнер Redis
 	docker compose -f docker-compose-redis.yml up -d
 
@@ -89,6 +106,7 @@ redis-clean: ## Удалить контейнер и образ Redis
 	docker compose -f docker-compose-redis.yml down
 	docker rmi redis:7-alpine 2>/dev/null || true
 
+##@ Postgres
 postgres-up: ## Запустить контейнер PostgreSQL
 	docker compose -f docker-compose-postgres.yml up -d
 
@@ -102,6 +120,7 @@ postgres-clean: ## Удалить контейнеры и образы PostgreSQ
 	docker compose -f docker-compose-postgres.yml down
 	docker rmi postgres:16-alpine dpage/pgadmin4 2>/dev/null || true
 
+##@ Rclone
 rclone-install: ## Установить rclone на сервер
 	sudo -v ; curl https://rclone.org/install.sh | sudo bash
 
@@ -114,12 +133,7 @@ rclone-test: ## Проверить подключение к Яндекс Дис
 rclone-backup-s3: ## Создать бекап MinIO на Яндекс Диск
 	rclone copy /home/vennro/infrastructure/storage yadisk:backup/storage
 
-add-proxy: ## Создать общую сеть
-	docker network create proxy
-
-delete-proxy: ## Удалить общую сеть
-	docker network rm proxy
-
+##@ Архиватор
 archive: ## Архивирование в формате data-DD-MM-YYYY, передать FOLDER=folderName
 	tar -czvf "data-$(DATE).tar.gz" "$(FOLDER)/"
 
@@ -129,6 +143,7 @@ unarchive: ## Разархивирование для формата data-DD-MM-
 clear-mac-copy: ## Очистка файлов MAC в архиве
 	find . -type f -name '._*' -delete
 
+##@ Git
 push: ## Auto save
 	git add .
 	git commit -m "update"
