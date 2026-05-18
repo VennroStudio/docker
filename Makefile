@@ -46,6 +46,27 @@ logs-db: ## Логи MariaDB
 logs-pma: ## Логи phpMyAdmin
 	docker compose -f $(COMPOSE_FILE) logs -f phpmyadmin-container
 
+##@ Локальные домены и Nginx Proxy Manager
+host-add: ## Добавить локальный домен в /etc/hosts, передать DOMAIN=site.local
+	@./scripts/hosts.sh add "$(DOMAIN)"
+
+host-remove: ## Удалить локальный домен из /etc/hosts, передать DOMAIN=site.local
+	@./scripts/hosts.sh remove "$(DOMAIN)"
+
+NODE = docker run --rm -it -v "$(PWD):/app" -w /app
+NODE_IMAGE = node:24-bookworm
+app-proxy: ## Создать/обновить Proxy Host в NPM, передать DOMAIN=site.local TARGET=container PORT=80, опционально SSL=1
+	@$(NODE) \
+		-e NPM_URL \
+		-e NPM_EMAIL \
+		-e NPM_PASSWORD \
+		-e SSL \
+		$(NODE_IMAGE) node ./scripts/npm-proxy.mjs \
+			--domain "$(DOMAIN)" \
+			--target "$(TARGET)" \
+			--port "$(PORT)" \
+			--scheme "http"
+
 ##@ Для работы с Mysql
 go-db: ## Вход в shell MariaDB
 	docker exec -it mariadb-container sh
@@ -151,6 +172,7 @@ push: ## Auto save
 
 .PHONY: init up down start stop clean
 .PHONY: logs-nginx logs-db logs-pma go-db
+.PHONY: host-add host-remove app-proxy
 .PHONY: import-db-h import-db-gz upload-dump
 .PHONY: generate-user ansible-build ansible-setup ansible-clean
 .PHONY: minio-up minio-pull minio-stop minio-clean

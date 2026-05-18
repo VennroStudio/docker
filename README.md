@@ -1,4 +1,36 @@
-# Руководство по добавлению локального домена
+# Автоматическое добавление локального домена
+
+## Добавить домен в hosts
+
+```bash
+make host-add DOMAIN=pma.local
+```
+
+## Создать Proxy Host в Nginx Proxy Manager
+
+Команда запускается через временный Docker-контейнер `node`, поэтому Node.js на Mac не нужен.
+
+Без SSL:
+
+```bash
+make app-proxy DOMAIN=pma.local TARGET=phpmyadmin-container PORT=80
+```
+
+С SSL:
+
+```bash
+make app-proxy DOMAIN=pma.local TARGET=phpmyadmin-container PORT=80 SSL=1
+```
+
+## Удалить домен из hosts
+
+```bash
+make host-remove DOMAIN=pma.local
+```
+
+---
+
+# Руководство по добавлению локального домена вручную
 
 ## Шаг 1: Настройка файла hosts
 
