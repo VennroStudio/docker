@@ -89,6 +89,19 @@ redis-clean: ## Удалить контейнер и образ Redis
 	docker compose -f docker-compose-redis.yml down
 	docker rmi redis:7-alpine 2>/dev/null || true
 
+postgres-up: ## Запустить контейнер PostgreSQL
+	docker compose -f docker-compose-postgres.yml up -d
+
+postgres-pull: ## Скачать/обновить образ PostgreSQL
+	docker compose -f docker-compose-postgres.yml pull
+
+postgres-stop: ## Остановить контейнер PostgreSQL
+	docker compose -f docker-compose-postgres.yml stop
+
+postgres-clean: ## Удалить контейнеры и образы PostgreSQL
+	docker compose -f docker-compose-postgres.yml down
+	docker rmi postgres:16-alpine dpage/pgadmin4 2>/dev/null || true
+
 rclone-install: ## Установить rclone на сервер
 	sudo -v ; curl https://rclone.org/install.sh | sudo bash
 
