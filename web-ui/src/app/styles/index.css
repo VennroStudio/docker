@@ -1,0 +1,9 @@
+@import "./theme.css";
+@import "../../shared/ui/button.css";
+@import "../../shared/ui/panel.css";
+@import "../../shared/ui/terminal.css";
+@import "../../widgets/app-shell/app-shell.css";
+@import "../../widgets/workspace/workspace.css";
+@import "../../pages/home/home-page.css";
+@import "../../pages/npm/npm-page.css";
+@import "../../pages/service/service-page.css";

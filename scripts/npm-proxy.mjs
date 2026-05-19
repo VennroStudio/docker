@@ -8,10 +8,12 @@ process.on("uncaughtException", fail);
 process.on("unhandledRejection", fail);
 
 const args = parseArgs(process.argv.slice(2));
+const deleting = bool(args.delete ?? args.remove ?? process.env.DELETE_PROXY);
 const config = {
+  delete: deleting,
   domain: need(args.domain || process.env.DOMAIN, "DOMAIN"),
-  target: need(args.target || process.env.TARGET, "TARGET"),
-  port: Number(need(args.port || process.env.PORT, "PORT")),
+  target: deleting ? "" : need(args.target || process.env.TARGET, "TARGET"),
+  port: deleting ? 0 : Number(need(args.port || process.env.PORT, "PORT")),
   scheme: args.scheme || process.env.SCHEME || "http",
   ssl: bool(args.ssl ?? process.env.SSL),
   npmUrl: trimSlash(need(process.env.NPM_URL, "NPM_URL")),
@@ -29,6 +31,11 @@ await main();
 
 async function main() {
   await getToken();
+
+  if (config.delete) {
+    await deleteProxyHostAndCertificate();
+    return;
+  }
 
   const certificateId = config.ssl
     ? await uploadCertificate(await ensureCertificateFiles())
@@ -54,8 +61,10 @@ function parseArgs(values) {
   return result;
 }
 
-function validate({ domain, target, port }) {
+function validate({ delete: deleting, domain, target, port }) {
   assert(/^[a-zA-Z0-9.-]+$/.test(domain), `Invalid DOMAIN: ${domain}`);
+  if (deleting) return;
+
   assert(/^[a-zA-Z0-9._-]+$/.test(target), `Invalid TARGET: ${target}`);
   assert(Number.isInteger(port) && port > 0 && port <= 65535, `Invalid PORT: ${port}`);
 }
@@ -200,12 +209,16 @@ async function uploadCertificate(files) {
   return certificate.id;
 }
 
-async function findOrCreateCertificate() {
+async function findCertificate({ provider } = {}) {
   const certificates = await api("/nginx/certificates");
-  const certificate = certificates.find((item) => (
-    item.provider === "other"
+  return certificates.find((item) => (
+    (!provider || item.provider === provider)
     && (item.nice_name === config.domain || item.domain_names?.includes(config.domain))
   ));
+}
+
+async function findOrCreateCertificate() {
+  const certificate = await findCertificate({ provider: "other" });
 
   if (certificate) {
     console.log(`Using NPM certificate #${certificate.id} for ${config.domain}`);
@@ -222,6 +235,31 @@ async function findOrCreateCertificate() {
 
   console.log(`Created NPM certificate #${created.id} for ${config.domain}`);
   return created;
+}
+
+async function deleteProxyHostAndCertificate() {
+  const proxyHosts = await api("/nginx/proxy-hosts");
+  const host = proxyHosts.find((item) => item.domain_names?.includes(config.domain));
+  let certificateId = host?.certificate_id || 0;
+
+  if (host) {
+    await api(`/nginx/proxy-hosts/${host.id}`, { method: "DELETE" });
+    console.log(`Deleted NPM Proxy Host #${host.id} for ${config.domain}`);
+  } else {
+    console.log(`NPM Proxy Host for ${config.domain} was not found`);
+  }
+
+  if (!certificateId) {
+    const certificate = await findCertificate();
+    certificateId = certificate?.id || 0;
+  }
+
+  if (certificateId) {
+    await api(`/nginx/certificates/${certificateId}`, { method: "DELETE" });
+    console.log(`Deleted NPM certificate #${certificateId} for ${config.domain}`);
+  } else {
+    console.log(`NPM certificate for ${config.domain} was not found`);
+  }
 }
 
 async function upsertProxyHost(certificateId) {

@@ -17,17 +17,6 @@ services:
     networks:
       - proxy
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin-container
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    networks:
-      - proxy
-
 volumes:
   postgres_data:
 

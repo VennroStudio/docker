@@ -1,0 +1,121 @@
+.workspace {
+  min-width: 0;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 82px minmax(0, 1fr);
+  padding: 0 16px 16px;
+}
+
+.topbar {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgba(139, 151, 174, 0.12);
+}
+
+.workspace-body {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+}
+
+.workspace-body.terminal-hidden:not(.with-page) {
+  place-items: center;
+}
+
+.workspace-body.with-page {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.workspace-body.with-page.terminal-hidden {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace-body.terminal-hidden:not(.with-page)::before {
+  content: "Terminal is hidden";
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: var(--muted-2);
+  font-size: 12px;
+  font-weight: 850;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.workspace-page {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 0 2px;
+}
+
+.breadcrumb {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-2);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.breadcrumb strong {
+  color: var(--ink);
+}
+
+.top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.terminal-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(79, 131, 255, 0.32);
+  border-radius: 999px;
+  padding: 8px 11px;
+  border-color: rgba(79, 131, 255, 0.32);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 850;
+  background: rgba(79, 131, 255, 0.08);
+  cursor: pointer;
+}
+
+.terminal-toggle.active {
+  border-color: rgba(53, 214, 206, 0.46);
+  background: rgba(53, 214, 206, 0.12);
+}
+
+@media (max-width: 920px) {
+  .workspace {
+    height: auto;
+    min-height: 640px;
+    grid-template-rows: auto minmax(600px, 1fr);
+    padding: 0 16px 16px;
+  }
+
+  .workspace-body,
+  .workspace-body.with-page {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .workspace-page {
+    overflow: visible;
+    padding-top: 10px;
+  }
+
+  .topbar {
+    padding: 16px 0;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

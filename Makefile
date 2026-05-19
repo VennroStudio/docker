@@ -1,7 +1,14 @@
 include .env
 export
 
-COMPOSE_FILE := docker-compose-$(ENV).yml
+NPM_COMPOSE := docker compose -f docker-compose-npm.yml
+MARIADB_COMPOSE := docker compose -f docker-compose-mariadb.yml
+PHPMYADMIN_COMPOSE := docker compose -f docker-compose-phpmyadmin.yml
+POSTGRES_COMPOSE := docker compose -f docker-compose-postgres.yml
+PGADMIN_COMPOSE := docker compose -f docker-compose-pgadmin.yml
+REDIS_COMPOSE := docker compose -f docker-compose-redis.yml
+REDISINSIGHT_COMPOSE := docker compose -f docker-compose-redisinsight.yml
+REGISTRY_COMPOSE := docker compose -f docker-compose-registry.yml
 DATE := $(shell date +%d-%m-%Y)
 
 help: ## Показать список команд
@@ -13,38 +20,11 @@ help: ## Показать список команд
 	@echo ""
 
 ##@ Контейнеры
-init: down delete-proxy add-proxy up ## Запустить инициализацию проекта
-
 add-proxy: ## Создать общую сеть
 	docker network create proxy
 
 delete-proxy: ## Удалить общую сеть
 	docker network rm proxy
-
-up: ## Запуск с пересборкой образов
-	docker compose -f $(COMPOSE_FILE) pull && \
-	docker compose -f $(COMPOSE_FILE) up -d --build --pull always --force-recreate
-
-down: ## Остановка контейнеров
-	docker compose -f $(COMPOSE_FILE) down
-
-start: ## Запуск существующих контейнеров
-	docker compose -f $(COMPOSE_FILE) start
-
-stop: ## Остановка контейнеров
-	docker compose -f $(COMPOSE_FILE) stop
-
-clean: ## Очистка (удаление volumes)
-	docker compose -f $(COMPOSE_FILE) down -v
-
-logs-nginx: ## Логи Nginx
-	docker compose -f $(COMPOSE_FILE) logs -f nginx-proxy-manager
-
-logs-db: ## Логи MariaDB
-	docker compose -f $(COMPOSE_FILE) logs -f db
-
-logs-pma: ## Логи phpMyAdmin
-	docker compose -f $(COMPOSE_FILE) logs -f phpmyadmin
 
 ui: ## Запустить локальный web-интерфейс управления
 	@docker build -t infrastructure-ui -f web-ui/Dockerfile .
@@ -55,6 +35,7 @@ ui: ## Запустить локальный web-интерфейс управл
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v /etc/hosts:/host/etc/hosts \
 		-w "$(PWD)" \
+		-e UI_STATIC_DIR=/opt/infrastructure-ui/dist \
 		-e HOSTS_FILE=/host/etc/hosts \
 		-e NPM_URL \
 		-e NPM_EMAIL \
@@ -82,6 +63,15 @@ app-proxy: ## Создать/обновить Proxy Host в NPM, передат�
 			--port "$(PORT)" \
 			--scheme "http"
 
+app-proxy-remove: ## Удалить Proxy Host и SSL из NPM, передать DOMAIN=site.local
+	@$(NODE) \
+		-e NPM_URL \
+		-e NPM_EMAIL \
+		-e NPM_PASSWORD \
+		$(NODE_IMAGE) node ./scripts/npm-proxy.mjs \
+			--delete \
+			--domain "$(DOMAIN)"
+
 ##@ Для работы с Mysql
 go-db: ## Вход в shell MariaDB
 	docker exec -it mariadb-container sh
@@ -95,10 +85,101 @@ import-db-gz: ## Импорт сжатого дампа (.sql.gz)
 upload-dump: ## Загрузка дампа на сервер
 	scp ${HOME_DUMP_PATH}${DUMP_NAME} ${SSH}:${SERVER_DUMP_PATH}
 
+##@ Nginx Proxy Manager
+npm-up: ## Запустить контейнер NPM
+	$(NPM_COMPOSE) up -d
+
+npm-pull: ## Скачать/обновить образ NPM
+	$(NPM_COMPOSE) pull
+
+npm-start: ## Запустить существующий контейнер NPM
+	$(NPM_COMPOSE) start
+
+npm-stop: ## Остановить контейнер NPM
+	$(NPM_COMPOSE) stop
+
+npm-down: ## Удалить контейнер NPM
+	$(NPM_COMPOSE) down
+
+npm-clean: ## Удалить контейнер и образ NPM
+	$(NPM_COMPOSE) down
+	docker rmi jc21/nginx-proxy-manager:latest 2>/dev/null || true
+
+npm-logs: ## Логи NPM
+	$(NPM_COMPOSE) logs -f nginx-proxy-manager
+
+##@ MariaDB
+mariadb-up: ## Запустить контейнер MariaDB
+	$(MARIADB_COMPOSE) up -d
+
+mariadb-pull: ## Скачать/обновить образ MariaDB
+	$(MARIADB_COMPOSE) pull
+
+mariadb-start: ## Запустить существующий контейнер MariaDB
+	$(MARIADB_COMPOSE) start
+
+mariadb-stop: ## Остановить контейнер MariaDB
+	$(MARIADB_COMPOSE) stop
+
+mariadb-down: ## Удалить контейнер MariaDB
+	$(MARIADB_COMPOSE) down
+
+mariadb-clean: ## Удалить контейнер и образ MariaDB
+	$(MARIADB_COMPOSE) down
+	docker rmi mariadb:${MARIADB_VERSION} 2>/dev/null || true
+
+mariadb-logs: ## Логи MariaDB
+	$(MARIADB_COMPOSE) logs -f db
+
+##@ phpMyAdmin
+phpmyadmin-up: ## Запустить контейнер phpMyAdmin
+	$(PHPMYADMIN_COMPOSE) up -d
+
+phpmyadmin-pull: ## Скачать/обновить образ phpMyAdmin
+	$(PHPMYADMIN_COMPOSE) pull
+
+phpmyadmin-start: ## Запустить существующий контейнер phpMyAdmin
+	$(PHPMYADMIN_COMPOSE) start
+
+phpmyadmin-stop: ## Остановить контейнер phpMyAdmin
+	$(PHPMYADMIN_COMPOSE) stop
+
+phpmyadmin-down: ## Удалить контейнер phpMyAdmin
+	$(PHPMYADMIN_COMPOSE) down
+
+phpmyadmin-clean: ## Удалить контейнер и образ phpMyAdmin
+	$(PHPMYADMIN_COMPOSE) down
+	docker rmi phpmyadmin/phpmyadmin 2>/dev/null || true
+
+phpmyadmin-logs: ## Логи phpMyAdmin
+	$(PHPMYADMIN_COMPOSE) logs -f phpmyadmin
+
 ##@ Registry
 generate-user: ## Создание пользователя Registry
 	mkdir -p ./docker/server/registry/auth
 	htpasswd -Bbc ./docker/server/registry/auth/htpasswd ${REGISTRY_USER} ${REGISTRY_PASSWORD}
+
+registry-up: ## Запустить контейнеры Registry
+	$(REGISTRY_COMPOSE) up -d
+
+registry-pull: ## Скачать/обновить образы Registry
+	$(REGISTRY_COMPOSE) pull
+
+registry-start: ## Запустить существующие контейнеры Registry
+	$(REGISTRY_COMPOSE) start
+
+registry-stop: ## Остановить контейнеры Registry
+	$(REGISTRY_COMPOSE) stop
+
+registry-down: ## Удалить контейнеры Registry
+	$(REGISTRY_COMPOSE) down
+
+registry-clean: ## Удалить контейнеры и образы Registry
+	$(REGISTRY_COMPOSE) down
+	docker rmi registry:2 joxit/docker-registry-ui:latest 2>/dev/null || true
+
+registry-logs: ## Логи Registry
+	$(REGISTRY_COMPOSE) logs -f
 
 ##@ Ansible и сервер
 ansible-build: ## Собрать контейнер Ansible
@@ -121,40 +202,113 @@ minio-up: ## Запустить контейнер MinIO
 minio-pull: ## Скачать/обновить образ MinIO
 	docker compose -f docker-compose-minio.yml pull
 
+minio-start: ## Запустить существующий контейнер MinIO
+	docker compose -f docker-compose-minio.yml start
+
 minio-stop: ## Остановить контейнер MinIO
 	docker compose -f docker-compose-minio.yml stop
+
+minio-down: ## Удалить контейнер MinIO
+	docker compose -f docker-compose-minio.yml down
 
 minio-clean: ## Удалить контейнер и образ MinIO
 	docker compose -f docker-compose-minio.yml down
 	docker rmi minio/minio 2>/dev/null || true
 
+minio-logs: ## Логи MinIO
+	docker compose -f docker-compose-minio.yml logs -f
+
 ##@ Redis
 redis-up: ## Запустить контейнер Redis
-	docker compose -f docker-compose-redis.yml up -d
+	$(REDIS_COMPOSE) up -d
 
 redis-pull: ## Скачать/обновить образ Redis
-	docker compose -f docker-compose-redis.yml pull
+	$(REDIS_COMPOSE) pull
+
+redis-start: ## Запустить существующие контейнеры Redis
+	$(REDIS_COMPOSE) start
 
 redis-stop: ## Остановить контейнер Redis
-	docker compose -f docker-compose-redis.yml stop
+	$(REDIS_COMPOSE) stop
+
+redis-down: ## Удалить контейнер Redis
+	$(REDIS_COMPOSE) down
 
 redis-clean: ## Удалить контейнер и образ Redis
-	docker compose -f docker-compose-redis.yml down
+	$(REDIS_COMPOSE) down
 	docker rmi redis:7-alpine 2>/dev/null || true
+
+redis-logs: ## Логи Redis
+	$(REDIS_COMPOSE) logs -f
+
+##@ RedisInsight
+redisinsight-up: ## Запустить контейнер RedisInsight
+	$(REDISINSIGHT_COMPOSE) up -d
+
+redisinsight-pull: ## Скачать/обновить образ RedisInsight
+	$(REDISINSIGHT_COMPOSE) pull
+
+redisinsight-start: ## Запустить существующий контейнер RedisInsight
+	$(REDISINSIGHT_COMPOSE) start
+
+redisinsight-stop: ## Остановить контейнер RedisInsight
+	$(REDISINSIGHT_COMPOSE) stop
+
+redisinsight-down: ## Удалить контейнер RedisInsight
+	$(REDISINSIGHT_COMPOSE) down
+
+redisinsight-clean: ## Удалить контейнер и образ RedisInsight
+	$(REDISINSIGHT_COMPOSE) down
+	docker rmi redis/redisinsight:latest 2>/dev/null || true
+
+redisinsight-logs: ## Логи RedisInsight
+	$(REDISINSIGHT_COMPOSE) logs -f
 
 ##@ Postgres
 postgres-up: ## Запустить контейнер PostgreSQL
-	docker compose -f docker-compose-postgres.yml up -d
+	$(POSTGRES_COMPOSE) up -d
 
 postgres-pull: ## Скачать/обновить образ PostgreSQL
-	docker compose -f docker-compose-postgres.yml pull
+	$(POSTGRES_COMPOSE) pull
+
+postgres-start: ## Запустить существующие контейнеры PostgreSQL
+	$(POSTGRES_COMPOSE) start
 
 postgres-stop: ## Остановить контейнер PostgreSQL
-	docker compose -f docker-compose-postgres.yml stop
+	$(POSTGRES_COMPOSE) stop
+
+postgres-down: ## Удалить контейнеры PostgreSQL
+	$(POSTGRES_COMPOSE) down
 
 postgres-clean: ## Удалить контейнеры и образы PostgreSQL
-	docker compose -f docker-compose-postgres.yml down
-	docker rmi postgres:16-alpine dpage/pgadmin4 2>/dev/null || true
+	$(POSTGRES_COMPOSE) down
+	docker rmi postgres:16-alpine 2>/dev/null || true
+
+postgres-logs: ## Логи PostgreSQL
+	$(POSTGRES_COMPOSE) logs -f
+
+##@ pgAdmin
+pgadmin-up: ## Запустить контейнер pgAdmin
+	$(PGADMIN_COMPOSE) up -d
+
+pgadmin-pull: ## Скачать/обновить образ pgAdmin
+	$(PGADMIN_COMPOSE) pull
+
+pgadmin-start: ## Запустить существующий контейнер pgAdmin
+	$(PGADMIN_COMPOSE) start
+
+pgadmin-stop: ## Остановить контейнер pgAdmin
+	$(PGADMIN_COMPOSE) stop
+
+pgadmin-down: ## Удалить контейнер pgAdmin
+	$(PGADMIN_COMPOSE) down
+
+pgadmin-clean: ## Удалить контейнер и образ pgAdmin
+	$(PGADMIN_COMPOSE) down
+	docker rmi dpage/pgadmin4:latest 2>/dev/null || true
+
+pgadmin-logs: ## Логи pgAdmin
+	$(PGADMIN_COMPOSE) logs -f
 
 ##@ Rclone
 rclone-install: ## Установить rclone на сервер
@@ -185,13 +339,19 @@ push: ## Auto save
 	git commit -m "update"
 	git push
 
-.PHONY: init up down start stop clean
-.PHONY: logs-nginx logs-db logs-pma ui go-db
-.PHONY: host-add host-remove app-proxy
+.PHONY: ui go-db
+.PHONY: host-add host-remove app-proxy app-proxy-remove
 .PHONY: import-db-h import-db-gz upload-dump
 .PHONY: generate-user ansible-build ansible-setup ansible-clean
-.PHONY: minio-up minio-pull minio-stop minio-clean
-.PHONY: redis-up redis-pull redis-stop redis-clean
+.PHONY: npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
+.PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs
+.PHONY: phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs
+.PHONY: registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs
+.PHONY: minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs
+.PHONY: redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs
+.PHONY: redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs
+.PHONY: postgres-up postgres-pull postgres-start postgres-stop postgres-down postgres-clean postgres-logs
+.PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs
 .PHONY: rclone-install rclone-config rclone-test rclone-backup-s3
 .PHONY: add-proxy delete-proxy
 .PHONY: archive unarchive
