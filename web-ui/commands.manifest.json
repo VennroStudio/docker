@@ -349,6 +349,90 @@
       "make": ["minio-logs"],
       "preview": "make minio-logs",
       "tone": "primary"
+    },
+    "registry:up": {
+      "confirm": false,
+      "group": "registry",
+      "make": ["registry-up"],
+      "preview": "make registry-up",
+      "tone": "primary"
+    },
+    "registry:start": {
+      "confirm": false,
+      "group": "registry",
+      "make": ["registry-start"],
+      "preview": "make registry-start",
+      "tone": "default"
+    },
+    "registry:stop": {
+      "confirm": true,
+      "group": "registry",
+      "make": ["registry-stop"],
+      "preview": "make registry-stop",
+      "tone": "danger"
+    },
+    "registry:down": {
+      "confirm": true,
+      "group": "registry",
+      "make": ["registry-down"],
+      "preview": "make registry-down",
+      "tone": "danger"
+    },
+    "registry:clean": {
+      "confirm": true,
+      "group": "registry",
+      "make": ["registry-clean"],
+      "preview": "make registry-clean",
+      "tone": "danger"
+    },
+    "registry:logs": {
+      "confirm": false,
+      "group": "registry",
+      "make": ["registry-logs"],
+      "preview": "make registry-logs",
+      "tone": "primary"
+    },
+    "registry-ui:up": {
+      "confirm": false,
+      "group": "registry-ui",
+      "make": ["registry-ui-up"],
+      "preview": "make registry-ui-up",
+      "tone": "primary"
+    },
+    "registry-ui:start": {
+      "confirm": false,
+      "group": "registry-ui",
+      "make": ["registry-ui-start"],
+      "preview": "make registry-ui-start",
+      "tone": "default"
+    },
+    "registry-ui:stop": {
+      "confirm": true,
+      "group": "registry-ui",
+      "make": ["registry-ui-stop"],
+      "preview": "make registry-ui-stop",
+      "tone": "danger"
+    },
+    "registry-ui:down": {
+      "confirm": true,
+      "group": "registry-ui",
+      "make": ["registry-ui-down"],
+      "preview": "make registry-ui-down",
+      "tone": "danger"
+    },
+    "registry-ui:clean": {
+      "confirm": true,
+      "group": "registry-ui",
+      "make": ["registry-ui-clean"],
+      "preview": "make registry-ui-clean",
+      "tone": "danger"
+    },
+    "registry-ui:logs": {
+      "confirm": false,
+      "group": "registry-ui",
+      "make": ["registry-ui-logs"],
+      "preview": "make registry-ui-logs",
+      "tone": "primary"
     }
   },
   "groups": {
@@ -374,6 +458,15 @@
       "redisinsight:stop",
       "redisinsight:logs",
       "redisinsight:clean"
+    ],
+    "registry": ["registry:up", "registry:down", "registry:start", "registry:stop", "registry:logs", "registry:clean"],
+    "registry-ui": [
+      "registry-ui:up",
+      "registry-ui:down",
+      "registry-ui:start",
+      "registry-ui:stop",
+      "registry-ui:logs",
+      "registry-ui:clean"
     ]
   },
   "shells": {
@@ -424,6 +517,16 @@
         "container": "redisinsight-container",
         "label": "RedisInsight"
       }
+    ],
+    "registry": [
+      {
+        "container": "registry-container",
+        "label": "Registry"
+      },
+      {
+        "container": "registry-ui-container",
+        "label": "Registry UI"
+      }
     ]
   },
   "services": {
@@ -432,6 +535,7 @@
     "nginx": ["nginx-container"],
     "postgres": ["postgres-container", "pgadmin-container"],
     "proxy": ["nginx-container"],
-    "redis": ["redis-container", "redisinsight-container"]
+    "redis": ["redis-container", "redisinsight-container"],
+    "registry": ["registry-container", "registry-ui-container"]
   }
 }

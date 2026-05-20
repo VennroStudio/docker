@@ -10,4 +10,5 @@ export const homeServices: HomeService[] = [
   { id: "postgres" },
   { id: "redis" },
   { id: "minio" },
+  { id: "registry" },
 ];

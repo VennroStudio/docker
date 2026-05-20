@@ -52,10 +52,23 @@ export const en: AppText = {
     "redisinsight:start": { label: "RedisInsight start", detail: "start existing container" },
     "redisinsight:stop": { label: "RedisInsight stop", detail: "stop service" },
     "redisinsight:up": { label: "RedisInsight up", detail: "docker compose up" },
+    "registry:clean": { label: "Registry clean", detail: "remove images" },
+    "registry:down": { label: "Registry down", detail: "remove containers" },
+    "registry:logs": { label: "Registry logs", detail: "live stream" },
+    "registry:start": { label: "Registry start", detail: "start existing containers" },
+    "registry:stop": { label: "Registry stop", detail: "stop services" },
+    "registry:up": { label: "Registry up", detail: "docker compose up" },
+    "registry-ui:clean": { label: "Registry UI clean", detail: "remove image" },
+    "registry-ui:down": { label: "Registry UI down", detail: "remove container" },
+    "registry-ui:logs": { label: "Registry UI logs", detail: "admin panel stream" },
+    "registry-ui:start": { label: "Registry UI start", detail: "start existing container" },
+    "registry-ui:stop": { label: "Registry UI stop", detail: "stop service" },
+    "registry-ui:up": { label: "Registry UI up", detail: "docker compose up" },
   },
   common: {
     clear: "Clear",
     hide: "Hide",
+    link: "Link",
     panels: "panels",
     statusLabels: {
       missing: "missing",
@@ -128,6 +141,11 @@ export const en: AppText = {
         description: "Cache service, RedisInsight and live logs.",
         meta: "Cache",
         title: "Redis",
+      },
+      registry: {
+        description: "Private Docker Registry, UI and image logs.",
+        meta: "Images",
+        title: "Registry",
       },
     },
     services: {
@@ -257,6 +275,12 @@ export const en: AppText = {
       panelEyebrow: "Cache",
       panelTitle: "Redis commands",
     },
+    registry: {
+      description: "Manage the private registry, UI and live logs.",
+      eyebrow: "Docker registry",
+      panelEyebrow: "Registry",
+      panelTitle: "Registry commands",
+    },
   },
   views: {
     home: "Home",
@@ -267,5 +291,6 @@ export const en: AppText = {
     postgres: "Postgres",
     proxy: "Nginx Proxy Manager",
     redis: "Redis",
+    registry: "Registry",
   },
 };

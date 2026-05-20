@@ -3,6 +3,7 @@ import {
   ArrowUp,
   ChevronDown,
   Database,
+  ExternalLink,
   ListTree,
   Play,
   Square,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+import type { ServiceLink } from "../../shared/api/links";
 import type { AppText } from "../../shared/i18n";
 import type {
   CommandAction,
@@ -31,6 +33,7 @@ type MariaDbInstancesPanelProps = {
   loading: boolean;
   phpmyadmin: PhpMyAdminOverview;
   phpmyadminActions: CommandAction[];
+  phpmyadminLink?: ServiceLink;
   phpmyadminShell?: ShellAction;
   text: AppText;
   onCreate: (form: MariaDbInstanceForm) => void;
@@ -82,6 +85,7 @@ export function MariaDbInstancesPanel({
   onShellOpen,
   phpmyadmin,
   phpmyadminActions,
+  phpmyadminLink,
   phpmyadminShell,
   text,
 }: MariaDbInstancesPanelProps) {
@@ -231,6 +235,18 @@ export function MariaDbInstancesPanel({
           </span>
           <span className="accordion-head-actions" onClick={(event) => event.stopPropagation()}>
             <StatusDot state={phpmyadmin.state} />
+            {phpmyadminLink ? (
+              <a
+                aria-label={phpmyadminLink.label}
+                className="icon-action icon-action-primary"
+                href={phpmyadminLink.url}
+                rel="noreferrer"
+                target="_blank"
+                title={phpmyadminLink.url}
+              >
+                <ExternalLink size={16} strokeWidth={2.5} />
+              </a>
+            ) : null}
             {(["up", "down", "start", "stop", "logs", "clean"] as const).map((action) => {
               const phpAction = phpActions[action];
               return phpAction ? (
@@ -261,6 +277,9 @@ export function MariaDbInstancesPanel({
           <div className="infra-accordion-body phpmyadmin-details">
             <InfoLine label={copy.containerLabel} value={phpmyadmin.container} />
             <InfoLine label={copy.domainLabel} value={phpmyadmin.domain || copy.domainUnknown} />
+            {phpmyadminLink ? (
+              <InfoLine href={phpmyadminLink.url} label={text.common.link} value={phpmyadminLink.url} />
+            ) : null}
             {phpmyadmin.status ? <InfoLine label={copy.statusLabel} value={phpmyadmin.status} /> : null}
           </div>
         ) : null}
@@ -291,11 +310,17 @@ function StatusDot({ state }: { state: ContainerRuntimeState }) {
   return <span className={`status-dot status-dot-${state}`} title={state} />;
 }
 
-function InfoLine({ label, value }: { label: string; value: string }) {
+function InfoLine({ href, label, value }: { href?: string; label: string; value: string }) {
   return (
     <div className="info-line">
       <span>{label}</span>
-      <strong>{value}</strong>
+      {href ? (
+        <a href={href} rel="noreferrer" target="_blank">
+          {value}
+        </a>
+      ) : (
+        <strong>{value}</strong>
+      )}
     </div>
   );
 }

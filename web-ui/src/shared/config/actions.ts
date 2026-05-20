@@ -28,3 +28,5 @@ export const phpmyadminActions = actionsFor("phpmyadmin");
 export const postgresActions = actionsFor("postgres");
 export const redisActions = actionsFor("redis");
 export const redisinsightActions = actionsFor("redisinsight");
+export const registryActions = actionsFor("registry");
+export const registryUiActions = actionsFor("registry-ui");

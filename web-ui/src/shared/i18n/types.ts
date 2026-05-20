@@ -7,6 +7,7 @@ export type AppText = {
   common: {
     clear: string;
     hide: string;
+    link: string;
     panels: string;
     statusLabels: Record<ServiceRuntimeState, string>;
     stop: string;

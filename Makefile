@@ -9,6 +9,7 @@ PGADMIN_COMPOSE := docker compose -f docker-compose-pgadmin.yml
 REDIS_COMPOSE := docker compose -f docker-compose-redis.yml
 REDISINSIGHT_COMPOSE := docker compose -f docker-compose-redisinsight.yml
 REGISTRY_COMPOSE := docker compose -f docker-compose-registry.yml
+REGISTRY_UI_COMPOSE := docker compose -f docker-compose-registry-ui.yml
 DATE := $(shell date +%d-%m-%Y)
 
 help: ## Показать список команд
@@ -22,7 +23,7 @@ help: ## Показать список команд
 ##@ Контейнеры
 init: ## Первый запуск: создать локальные env/config файлы без перезаписи существующих
 	@cp -n .env.example .env 2>/dev/null || true
-	@mkdir -p docker/mariadb docker/phpmyadmin
+	@mkdir -p docker/mariadb docker/phpmyadmin docker/services
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
 	@echo "Init complete. Check .env and run make ui"
@@ -210,27 +211,50 @@ generate-user: ## Создание пользователя Registry
 	mkdir -p ./docker/server/registry/auth
 	htpasswd -Bbc ./docker/server/registry/auth/htpasswd ${REGISTRY_USER} ${REGISTRY_PASSWORD}
 
-registry-up: ## Запустить контейнеры Registry
+registry-up: ## Запустить контейнер Registry
 	$(REGISTRY_COMPOSE) up -d
 
-registry-pull: ## Скачать/обновить образы Registry
+registry-pull: ## Скачать/обновить образ Registry
 	$(REGISTRY_COMPOSE) pull
 
-registry-start: ## Запустить существующие контейнеры Registry
+registry-start: ## Запустить существующий контейнер Registry
 	$(REGISTRY_COMPOSE) start
 
-registry-stop: ## Остановить контейнеры Registry
+registry-stop: ## Остановить контейнер Registry
 	$(REGISTRY_COMPOSE) stop
 
-registry-down: ## Удалить контейнеры Registry
+registry-down: ## Удалить контейнер Registry
 	$(REGISTRY_COMPOSE) down
 
-registry-clean: ## Удалить контейнеры и образы Registry
+registry-clean: ## Удалить контейнер и образ Registry
 	$(REGISTRY_COMPOSE) down
-	docker rmi registry:2 joxit/docker-registry-ui:latest 2>/dev/null || true
+	docker rmi registry:2 2>/dev/null || true
 
 registry-logs: ## Логи Registry
 	$(REGISTRY_COMPOSE) logs -f
+
+##@ Registry UI
+registry-ui-up: ## Запустить контейнер Registry UI
+	$(REGISTRY_UI_COMPOSE) up -d
+
+registry-ui-pull: ## Скачать/обновить образ Registry UI
+	$(REGISTRY_UI_COMPOSE) pull
+
+registry-ui-start: ## Запустить существующий контейнер Registry UI
+	$(REGISTRY_UI_COMPOSE) start
+
+registry-ui-stop: ## Остановить контейнер Registry UI
+	$(REGISTRY_UI_COMPOSE) stop
+
+registry-ui-down: ## Удалить контейнер Registry UI
+	$(REGISTRY_UI_COMPOSE) down
+
+registry-ui-clean: ## Удалить контейнер и образ Registry UI
+	$(REGISTRY_UI_COMPOSE) down
+	docker rmi joxit/docker-registry-ui:latest 2>/dev/null || true
+
+registry-ui-logs: ## Логи Registry UI
+	$(REGISTRY_UI_COMPOSE) logs -f
 
 ##@ Ansible и сервер
 ansible-build: ## Собрать контейнер Ansible
@@ -400,6 +424,7 @@ push: ## Auto save
 .PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
 .PHONY: phpmyadmin-config-generate phpmyadmin-reload
 .PHONY: registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs
+.PHONY: registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs
 .PHONY: minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs
 .PHONY: redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs
 .PHONY: redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs

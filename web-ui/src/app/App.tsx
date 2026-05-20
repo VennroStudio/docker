@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useServiceLinks } from "../features/links/model/useServiceLinks";
 import { MariaDbInstancesPanel } from "../features/mariadb/MariaDbInstancesPanel";
 import { useMariaDbInstances } from "../features/mariadb/model/useMariaDbInstances";
 import { ModuleAccordion } from "../features/modules/ModuleAccordion";
@@ -27,6 +28,8 @@ import {
   postgresActions,
   redisActions,
   redisinsightActions,
+  registryActions,
+  registryUiActions,
 } from "../shared/config/actions";
 import { getViewById, getViewByPath } from "../shared/config/views";
 import { dictionaries } from "../shared/i18n";
@@ -70,6 +73,7 @@ export function App() {
     enabled: activeView !== "home" && activeView !== "mariadb",
     names: activeShells.map((shell) => shell.container),
   });
+  const serviceLinks = useServiceLinks();
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const text = dictionaries[language];
@@ -93,6 +97,7 @@ export function App() {
       onSettled: () => {
         serviceStatuses.refresh();
         void containerStates.refresh();
+        void serviceLinks.refresh();
         onSettled?.();
       },
     });
@@ -232,6 +237,7 @@ export function App() {
           nginxActions={translateActions(nginxActions)}
           shellActions={translateShells(proxyShells)}
           statusByContainer={containerStates.states}
+          serviceLinks={serviceLinks.links}
           text={text}
           value={proxyForm}
           view={activeConfig}
@@ -258,6 +264,7 @@ export function App() {
             loading={mariaDbInstances.loading}
             phpmyadmin={mariaDbInstances.phpmyadmin}
             phpmyadminActions={translateActions(phpmyadminActions)}
+            phpmyadminLink={serviceLinks.links["phpmyadmin-container"]}
             phpmyadminShell={shells.find((shell) => shell.container === "phpmyadmin-container")}
             text={text}
             onCreate={runMariaDbInstanceCreate}
@@ -278,7 +285,7 @@ export function App() {
 
       return (
         <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="module-split-grid">
+          <div className="module-stack">
             <ModuleAccordion
               actions={translateActions(postgresActions)}
               eyebrow={text.panels.serviceControl.database}
@@ -293,11 +300,12 @@ export function App() {
             <ModuleAccordion
               actions={translateActions(pgadminActions)}
               eyebrow={text.panels.serviceControl.adminPanel}
+              link={serviceLinks.links["pgadmin-container"]}
               shell={pgAdminShell}
               status={containerStates.states["pgadmin-container"]}
               statusLabel={text.mariadbInstances.statusLabel}
               title="pgAdmin"
-              details={[{ label: text.mariadbInstances.containerLabel, value: pgAdminShell?.container }]}
+              details={moduleDetails(pgAdminShell?.container)}
               onRun={runCommand}
               onShellOpen={runShell}
             />
@@ -314,7 +322,7 @@ export function App() {
 
       return (
         <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="module-split-grid">
+          <div className="module-stack">
             <ModuleAccordion
               actions={translateActions(redisActions)}
               eyebrow={text.panels.serviceControl.cache}
@@ -329,11 +337,49 @@ export function App() {
             <ModuleAccordion
               actions={translateActions(redisinsightActions)}
               eyebrow={text.panels.serviceControl.interface}
+              link={serviceLinks.links["redisinsight-container"]}
               shell={redisInsightShell}
               status={containerStates.states["redisinsight-container"]}
               statusLabel={text.mariadbInstances.statusLabel}
               title="RedisInsight"
-              details={[{ label: text.mariadbInstances.containerLabel, value: redisInsightShell?.container }]}
+              details={moduleDetails(redisInsightShell?.container)}
+              onRun={runCommand}
+              onShellOpen={runShell}
+            />
+          </div>
+        </ServicePage>
+      );
+    }
+
+    if (activeView === "registry") {
+      const page = text.servicePages.registry;
+      const shells = translateShells(commandPageRegistry.registry.shells || []);
+      const registryShell = shells.find((shell) => shell.container === "registry-container");
+      const registryUiShell = shells.find((shell) => shell.container === "registry-ui-container");
+
+      return (
+        <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
+          <div className="module-stack">
+            <ModuleAccordion
+              actions={translateActions(registryActions)}
+              eyebrow={page.panelEyebrow}
+              shell={registryShell}
+              status={containerStates.states["registry-container"]}
+              statusLabel={text.mariadbInstances.statusLabel}
+              title="Registry"
+              details={moduleDetails(registryShell?.container)}
+              onRun={runCommand}
+              onShellOpen={runShell}
+            />
+            <ModuleAccordion
+              actions={translateActions(registryUiActions)}
+              eyebrow="Registry UI"
+              link={serviceLinks.links["registry-ui-container"]}
+              shell={registryUiShell}
+              status={containerStates.states["registry-ui-container"]}
+              statusLabel={text.mariadbInstances.statusLabel}
+              title="Registry UI"
+              details={moduleDetails(registryUiShell?.container)}
               onRun={runCommand}
               onShellOpen={runShell}
             />
@@ -348,6 +394,7 @@ export function App() {
     if (commandPage && page) {
       const shells = translateShells(commandPage.shells || []);
       const shell = shells[0];
+      const moduleLink = shell ? serviceLinks.links[shell.container] : undefined;
 
       return (
         <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
@@ -356,10 +403,11 @@ export function App() {
               title={page.panelTitle}
               eyebrow={page.panelEyebrow}
               actions={translateActions(commandPage.actions)}
+              link={moduleLink}
               shell={shell}
               status={shell ? containerStates.states[shell.container] : undefined}
               statusLabel={text.mariadbInstances.statusLabel}
-              details={[{ label: text.mariadbInstances.containerLabel, value: shell?.container }]}
+              details={moduleDetails(shell?.container)}
               onRun={runCommand}
               onShellOpen={runShell}
             />
@@ -369,5 +417,20 @@ export function App() {
     }
 
     return null;
+  }
+
+  function linkDetail(container: string) {
+    const link = serviceLinks.links[container];
+    return link ? { href: link.url, label: text.common.link, value: link.url } : undefined;
+  }
+
+  function moduleDetails(container: string | undefined) {
+    const details: Array<{ href?: string; label: string; value?: string }> = [
+      { label: text.mariadbInstances.containerLabel, value: container },
+    ];
+    const link = container ? linkDetail(container) : undefined;
+
+    if (link) details.push(link);
+    return details;
   }
 }

@@ -17,21 +17,6 @@ services:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
     networks:
       - proxy
-
-  registry-ui:
-    image: joxit/docker-registry-ui:latest
-    container_name: registry-ui-container
-    restart: unless-stopped
-    environment:
-      - NGINX_PROXY_PASS_URL=http://registry:5000
-      - REGISTRY_AUTH=true
-      - REGISTRY_TITLE=Vennro Private Registry
-      - DELETE_IMAGES=true
-    depends_on:
-      - registry
-    networks:
-      - proxy
-
 networks:
   proxy:
     external: true

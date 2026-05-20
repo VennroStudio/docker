@@ -1,14 +1,27 @@
-import { ArrowDown, ArrowUp, ChevronDown, ListTree, Play, Plus, Square, TerminalSquare, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  ExternalLink,
+  ListTree,
+  Play,
+  Plus,
+  Square,
+  TerminalSquare,
+  Trash2,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import type { ContainerStateInfo } from "../../shared/api/containers";
+import type { ServiceLink } from "../../shared/api/links";
 import type { CommandAction, ContainerRuntimeState, ShellAction } from "../../shared/types/commands";
 
 type ModuleAccordionProps = {
   actions: CommandAction[];
   defaultOpen?: boolean;
-  details?: Array<{ label: string; value?: string }>;
+  details?: Array<{ href?: string; label: string; value?: string }>;
   eyebrow: string;
+  link?: ServiceLink;
   shell?: ShellAction;
   status?: ContainerStateInfo;
   statusLabel?: string;
@@ -49,6 +62,7 @@ export function ModuleAccordion({
   defaultOpen = false,
   details = [],
   eyebrow,
+  link,
   onRun,
   onShellOpen,
   shell,
@@ -72,6 +86,18 @@ export function ModuleAccordion({
 
         <span className="accordion-head-actions" onClick={(event) => event.stopPropagation()}>
           {status ? <StatusDot state={status.state} /> : null}
+          {link ? (
+            <a
+              aria-label={link.label}
+              className="icon-action icon-action-primary"
+              href={link.url}
+              rel="noreferrer"
+              target="_blank"
+              title={link.url}
+            >
+              <ExternalLink size={16} strokeWidth={2.5} />
+            </a>
+          ) : null}
           {orderedActions.map(({ action, suffix }) => (
             <IconAction key={action.id} label={action.label} tone={actionTone[suffix]} onClick={() => onRun(action)}>
               {actionIcon[suffix]}
@@ -92,7 +118,7 @@ export function ModuleAccordion({
           {visibleDetails.length > 0 || status?.status || status?.error ? (
             <div className="module-detail-grid">
               {visibleDetails.map((detail) => (
-                <InfoLine key={detail.label} label={detail.label} value={detail.value || ""} />
+                <InfoLine key={detail.label} href={detail.href} label={detail.label} value={detail.value || ""} />
               ))}
               {status?.status ? <InfoLine label={statusLabel} value={status.status} /> : null}
               {status?.error ? <InfoLine label="Docker" value={status.error} /> : null}
@@ -132,11 +158,17 @@ function StatusDot({ state }: { state: ContainerRuntimeState }) {
   return <span className={`status-dot status-dot-${state}`} title={state} />;
 }
 
-function InfoLine({ label, value }: { label: string; value: string }) {
+function InfoLine({ href, label, value }: { href?: string; label: string; value: string }) {
   return (
     <div className="info-line">
       <span>{label}</span>
-      <strong>{value}</strong>
+      {href ? (
+        <a href={href} rel="noreferrer" target="_blank">
+          {value}
+        </a>
+      ) : (
+        <strong>{value}</strong>
+      )}
     </div>
   );
 }

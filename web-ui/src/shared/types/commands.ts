@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import commandManifest from "../../../commands.manifest.json";
 
-export type ViewId = "home" | "proxy" | "network" | "nginx" | "mariadb" | "postgres" | "redis" | "minio";
+export type ViewId = "home" | "proxy" | "network" | "nginx" | "mariadb" | "postgres" | "redis" | "minio" | "registry";
 export type ServiceViewId = Exclude<ViewId, "home" | "network">;
 export type CommandId = keyof typeof commandManifest.commands;
 export type CommandGroupId = keyof typeof commandManifest.groups;

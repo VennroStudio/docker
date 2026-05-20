@@ -4,6 +4,7 @@ import { port } from "./server/config.mjs";
 import { getErrorMessage, sendJson } from "./server/http.mjs";
 import { host, proxy, runCommand } from "./server/routes/actions.mjs";
 import { containers } from "./server/routes/containers.mjs";
+import { links } from "./server/routes/links.mjs";
 import { mariadbInstances } from "./server/routes/mariadb.mjs";
 import { meta } from "./server/routes/meta.mjs";
 import { shellInput, shellStop } from "./server/routes/shell.mjs";
@@ -16,6 +17,7 @@ createServer(async (req, res) => {
     if (req.method === "GET" && req.url.startsWith("/api/stream/")) return await streamRoute(req, res);
     if (req.method === "GET" && req.url === "/api/status") return await status(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/containers")) return await containers(req, res);
+    if (req.method === "GET" && req.url === "/api/links") return await links(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);
     if (req.method === "GET" || req.method === "HEAD") return await serveStatic(req, res);

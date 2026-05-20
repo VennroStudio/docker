@@ -1,6 +1,7 @@
 import { ModuleAccordion } from "../../features/modules/ModuleAccordion";
 import { ProxyPanel } from "../../features/proxy/ProxyPanel";
 import type { ContainerStateInfo } from "../../shared/api/containers";
+import type { ServiceLink } from "../../shared/api/links";
 import type { AppText } from "../../shared/i18n";
 import type { CommandAction, ProxyFormState, ShellAction, ViewConfig } from "../../shared/types/commands";
 import { ServicePage } from "../service/ServicePage";
@@ -9,6 +10,7 @@ type NpmPageProps = {
   networkActions: CommandAction[];
   nginxActions: CommandAction[];
   shellActions: ShellAction[];
+  serviceLinks: Record<string, ServiceLink>;
   statusByContainer: Record<string, ContainerStateInfo>;
   text: AppText;
   value: ProxyFormState;
@@ -32,6 +34,7 @@ export function NpmPage({
   onProxyDelete,
   onRunCommand,
   onShellOpen,
+  serviceLinks,
   shellActions,
   statusByContainer,
   text,
@@ -58,11 +61,12 @@ export function NpmPage({
           <ModuleAccordion
             actions={nginxActions}
             eyebrow={text.panels.npm.nginxEyebrow}
+            link={shellAction ? serviceLinks[shellAction.container] : undefined}
             shell={shellAction}
             status={shellAction ? statusByContainer[shellAction.container] : undefined}
             statusLabel={text.mariadbInstances.statusLabel}
             title={text.panels.npm.nginxTitle}
-            details={[{ label: text.mariadbInstances.containerLabel, value: shellAction?.container }]}
+            details={moduleDetails(serviceLinks, shellAction?.container, text)}
             onRun={onRunCommand}
             onShellOpen={onShellOpen}
           />
@@ -79,4 +83,21 @@ export function NpmPage({
       </div>
     </ServicePage>
   );
+}
+
+function linkDetail(links: Record<string, ServiceLink>, container: string | undefined, label: string) {
+  if (!container) return undefined;
+
+  const link = links[container];
+  return link ? { href: link.url, label, value: link.url } : undefined;
+}
+
+function moduleDetails(links: Record<string, ServiceLink>, container: string | undefined, text: AppText) {
+  const details: Array<{ href?: string; label: string; value?: string }> = [
+    { label: text.mariadbInstances.containerLabel, value: container },
+  ];
+  const link = linkDetail(links, container, text.common.link);
+
+  if (link) details.push(link);
+  return details;
 }

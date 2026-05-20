@@ -1,4 +1,10 @@
-import { mariadbActions, minioActions, postgresActions, redisActions } from "../../../shared/config/actions";
+import {
+  mariadbActions,
+  minioActions,
+  postgresActions,
+  redisActions,
+  registryActions,
+} from "../../../shared/config/actions";
 import { serviceShells } from "../../../shared/config/shells";
 import type { CommandAction, ShellAction, ViewId } from "../../../shared/types/commands";
 
@@ -11,6 +17,7 @@ export const commandPageRegistry: Record<CommandPageId, { actions: CommandAction
   nginx: { actions: [], shells: serviceShells.nginx },
   postgres: { actions: postgresActions, shells: serviceShells.postgres },
   redis: { actions: redisActions, shells: serviceShells.redis },
+  registry: { actions: registryActions, shells: serviceShells.registry },
 };
 
 export const proxyShells = serviceShells.proxy;

@@ -22,6 +22,7 @@ const config = {
   certDir: process.env.CERT_DIR || "certs",
   certDays: Number(process.env.CERT_DAYS || "825"),
   forceCert: bool(args["force-cert"] ?? process.env.FORCE_CERT),
+  linksFile: process.env.SERVICE_LINKS_FILE || "docker/services/links.json",
 };
 
 let token;
@@ -34,6 +35,7 @@ async function main() {
 
   if (config.delete) {
     await deleteProxyHostAndCertificate();
+    await removeServiceLink();
     return;
   }
 
@@ -42,6 +44,7 @@ async function main() {
     : 0;
 
   const host = await upsertProxyHost(certificateId);
+  await saveServiceLink();
   console.log(`Proxy Host #${host.id}: ${config.domain} -> ${config.target}:${config.port}`);
   console.log(`Open: ${config.ssl ? "https" : "http"}://${config.domain}`);
 }
@@ -260,6 +263,50 @@ async function deleteProxyHostAndCertificate() {
   } else {
     console.log(`NPM certificate for ${config.domain} was not found`);
   }
+}
+
+async function saveServiceLink() {
+  const registry = await readServiceLinks();
+  const bindings = registry.bindings.filter((binding) => binding.domain !== config.domain);
+
+  bindings.push({
+    container: config.target,
+    domain: config.domain,
+    port: config.port,
+    scheme: config.ssl ? "https" : config.scheme,
+    ssl: config.ssl,
+    updatedAt: new Date().toISOString(),
+  });
+
+  await writeServiceLinks({ ...registry, bindings });
+  console.log(`Saved local link: ${config.target} -> ${config.ssl ? "https" : config.scheme}://${config.domain}`);
+}
+
+async function removeServiceLink() {
+  const registry = await readServiceLinks();
+  const bindings = registry.bindings.filter((binding) => binding.domain !== config.domain);
+
+  if (bindings.length === registry.bindings.length) return;
+
+  await writeServiceLinks({ ...registry, bindings });
+  console.log(`Removed local link binding for ${config.domain}`);
+}
+
+async function readServiceLinks() {
+  try {
+    const payload = JSON.parse(await readFile(config.linksFile, "utf8"));
+    return {
+      bindings: Array.isArray(payload.bindings) ? payload.bindings : [],
+      version: 1,
+    };
+  } catch {
+    return { bindings: [], version: 1 };
+  }
+}
+
+async function writeServiceLinks(payload) {
+  await mkdir(path.dirname(config.linksFile), { recursive: true });
+  await writeFile(config.linksFile, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
 async function upsertProxyHost(certificateId) {
