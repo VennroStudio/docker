@@ -23,7 +23,7 @@ help: ## Показать список команд
 init: ## Первый запуск: создать локальные env/config файлы без перезаписи существующих
 	@cp -n .env.example .env 2>/dev/null || true
 	@mkdir -p docker/mariadb docker/phpmyadmin
-	@cp -n docker/mariadb/instances.example.json docker/mariadb/instances.json 2>/dev/null || true
+	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
 	@echo "Init complete. Check .env and run make ui"
 

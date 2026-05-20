@@ -1,11 +1,10 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
-const instancesExamplePath = path.join(cwd, "docker/mariadb/instances.example.json");
 const phpmyadminPath = "docker/phpmyadmin";
 const phpmyadminCompatibilityPath = "docker/local/phpmyadmin";
 const defaultStartPort = 3307;
@@ -85,17 +84,19 @@ function list() {
 }
 
 function readInstances() {
-  if (!existsSync(instancesPath) && existsSync(instancesExamplePath)) {
-    const example = readFileSync(instancesExamplePath, "utf8");
-    writeFileSync(instancesPath, example.endsWith("\n") ? example : `${example}\n`);
-  }
-
+  ensureInstancesFile();
   if (!existsSync(instancesPath)) return [];
   return JSON.parse(readFileSync(instancesPath, "utf8"));
 }
 
 function writeInstances(instances) {
+  ensureInstancesFile();
   writeFileSync(instancesPath, `${JSON.stringify(instances, null, 2)}\n`);
+}
+
+function ensureInstancesFile() {
+  mkdirSync(path.dirname(instancesPath), { recursive: true });
+  if (!existsSync(instancesPath)) writeFileSync(instancesPath, "[]\n");
 }
 
 function composeFor(instance) {

@@ -1,6 +1,6 @@
-import { CommandPanel } from "../../features/commands/CommandPanel";
-import { ServiceControlPanel } from "../../features/commands/ServiceControlPanel";
+import { ModuleAccordion } from "../../features/modules/ModuleAccordion";
 import { ProxyPanel } from "../../features/proxy/ProxyPanel";
+import type { ContainerStateInfo } from "../../shared/api/containers";
 import type { AppText } from "../../shared/i18n";
 import type { CommandAction, ProxyFormState, ShellAction, ViewConfig } from "../../shared/types/commands";
 import { ServicePage } from "../service/ServicePage";
@@ -9,6 +9,7 @@ type NpmPageProps = {
   networkActions: CommandAction[];
   nginxActions: CommandAction[];
   shellActions: ShellAction[];
+  statusByContainer: Record<string, ContainerStateInfo>;
   text: AppText;
   value: ProxyFormState;
   view: ViewConfig;
@@ -32,6 +33,7 @@ export function NpmPage({
   onRunCommand,
   onShellOpen,
   shellActions,
+  statusByContainer,
   text,
   value,
   view,
@@ -53,20 +55,25 @@ export function NpmPage({
             onProxyDelete={onProxyDelete}
           />
 
-          <ServiceControlPanel
+          <ModuleAccordion
             actions={nginxActions}
             eyebrow={text.panels.npm.nginxEyebrow}
             shell={shellAction}
+            status={shellAction ? statusByContainer[shellAction.container] : undefined}
+            statusLabel={text.mariadbInstances.statusLabel}
             title={text.panels.npm.nginxTitle}
+            details={[{ label: text.mariadbInstances.containerLabel, value: shellAction?.container }]}
             onRun={onRunCommand}
             onShellOpen={onShellOpen}
           />
         </section>
 
-        <CommandPanel
+        <ModuleAccordion
           actions={networkActions}
           eyebrow={text.panels.npm.networkEyebrow}
+          defaultOpen
           title={text.panels.npm.networkTitle}
+          details={[{ label: "Network", value: "proxy" }]}
           onRun={onRunCommand}
         />
       </div>

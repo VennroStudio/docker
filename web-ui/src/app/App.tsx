@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CommandPanel } from "../features/commands/CommandPanel";
-import { ServiceControlPanel } from "../features/commands/ServiceControlPanel";
 import { MariaDbInstancesPanel } from "../features/mariadb/MariaDbInstancesPanel";
 import { useMariaDbInstances } from "../features/mariadb/model/useMariaDbInstances";
-import { ShellPanel } from "../features/shell/ShellPanel";
+import { ModuleAccordion } from "../features/modules/ModuleAccordion";
+import { useContainerStates } from "../features/status/model/useContainerStates";
 import { useServiceStatuses } from "../features/status/model/useServiceStatuses";
 import { useCommandStream } from "../features/terminal/model/useCommandStream";
 import { HomePage } from "../pages/home/HomePage";
@@ -65,6 +64,12 @@ export function App() {
   const navigate = useNavigate();
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
+  const activeShells =
+    activeView === "proxy" ? proxyShells : commandPageRegistry[activeView as CommandPageId]?.shells || [];
+  const containerStates = useContainerStates({
+    enabled: activeView !== "home" && activeView !== "mariadb",
+    names: activeShells.map((shell) => shell.container),
+  });
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const text = dictionaries[language];
@@ -87,6 +92,7 @@ export function App() {
     commandStream.run(preview, open, {
       onSettled: () => {
         serviceStatuses.refresh();
+        void containerStates.refresh();
         onSettled?.();
       },
     });
@@ -225,6 +231,7 @@ export function App() {
           networkActions={translateActions(networkActions)}
           nginxActions={translateActions(nginxActions)}
           shellActions={translateShells(proxyShells)}
+          statusByContainer={containerStates.states}
           text={text}
           value={proxyForm}
           view={activeConfig}
@@ -266,23 +273,31 @@ export function App() {
     if (activeView === "postgres") {
       const page = text.servicePages.postgres;
       const shells = translateShells(commandPageRegistry.postgres.shells || []);
+      const postgresShell = shells.find((shell) => shell.container === "postgres-container");
+      const pgAdminShell = shells.find((shell) => shell.container === "pgadmin-container");
 
       return (
         <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="service-split-grid">
-            <ServiceControlPanel
+          <div className="module-split-grid">
+            <ModuleAccordion
               actions={translateActions(postgresActions)}
               eyebrow={text.panels.serviceControl.database}
-              shell={shells.find((shell) => shell.container === "postgres-container")}
+              shell={postgresShell}
+              status={containerStates.states["postgres-container"]}
+              statusLabel={text.mariadbInstances.statusLabel}
               title="Postgres"
+              details={[{ label: text.mariadbInstances.containerLabel, value: postgresShell?.container }]}
               onRun={runCommand}
               onShellOpen={runShell}
             />
-            <ServiceControlPanel
+            <ModuleAccordion
               actions={translateActions(pgadminActions)}
               eyebrow={text.panels.serviceControl.adminPanel}
-              shell={shells.find((shell) => shell.container === "pgadmin-container")}
+              shell={pgAdminShell}
+              status={containerStates.states["pgadmin-container"]}
+              statusLabel={text.mariadbInstances.statusLabel}
               title="pgAdmin"
+              details={[{ label: text.mariadbInstances.containerLabel, value: pgAdminShell?.container }]}
               onRun={runCommand}
               onShellOpen={runShell}
             />
@@ -294,23 +309,31 @@ export function App() {
     if (activeView === "redis") {
       const page = text.servicePages.redis;
       const shells = translateShells(commandPageRegistry.redis.shells || []);
+      const redisShell = shells.find((shell) => shell.container === "redis-container");
+      const redisInsightShell = shells.find((shell) => shell.container === "redisinsight-container");
 
       return (
         <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="service-split-grid">
-            <ServiceControlPanel
+          <div className="module-split-grid">
+            <ModuleAccordion
               actions={translateActions(redisActions)}
               eyebrow={text.panels.serviceControl.cache}
-              shell={shells.find((shell) => shell.container === "redis-container")}
+              shell={redisShell}
+              status={containerStates.states["redis-container"]}
+              statusLabel={text.mariadbInstances.statusLabel}
               title="Redis"
+              details={[{ label: text.mariadbInstances.containerLabel, value: redisShell?.container }]}
               onRun={runCommand}
               onShellOpen={runShell}
             />
-            <ServiceControlPanel
+            <ModuleAccordion
               actions={translateActions(redisinsightActions)}
               eyebrow={text.panels.serviceControl.interface}
-              shell={shells.find((shell) => shell.container === "redisinsight-container")}
+              shell={redisInsightShell}
+              status={containerStates.states["redisinsight-container"]}
+              statusLabel={text.mariadbInstances.statusLabel}
               title="RedisInsight"
+              details={[{ label: text.mariadbInstances.containerLabel, value: redisInsightShell?.container }]}
               onRun={runCommand}
               onShellOpen={runShell}
             />
@@ -323,22 +346,24 @@ export function App() {
     const page = text.servicePages[activeView as CommandPageId];
 
     if (commandPage && page) {
+      const shells = translateShells(commandPage.shells || []);
+      const shell = shells[0];
+
       return (
         <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <>
-            <CommandPanel
+          <div className="module-stack">
+            <ModuleAccordion
               title={page.panelTitle}
               eyebrow={page.panelEyebrow}
               actions={translateActions(commandPage.actions)}
+              shell={shell}
+              status={shell ? containerStates.states[shell.container] : undefined}
+              statusLabel={text.mariadbInstances.statusLabel}
+              details={[{ label: text.mariadbInstances.containerLabel, value: shell?.container }]}
               onRun={runCommand}
+              onShellOpen={runShell}
             />
-            <ShellPanel
-              actions={translateShells(commandPage.shells || [])}
-              eyebrow={text.shell.panelEyebrow}
-              title={text.shell.panelTitle}
-              onOpen={runShell}
-            />
-          </>
+          </div>
         </ServicePage>
       );
     }
