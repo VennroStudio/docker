@@ -1,4 +1,4 @@
-import type { CommandId, ProxyFormState } from "../types/commands";
+import type { CommandId, MariaDbInstanceAction, MariaDbInstanceForm, ProxyFormState } from "../types/commands";
 
 type StreamHandlers = {
   onOpen?: () => void;
@@ -37,6 +37,28 @@ export function streamProxyDelete(domain: string, handlers: StreamHandlers): () 
 
 export function streamShell(container: string, handlers: StreamHandlers): () => void {
   const url = streamUrl("/api/stream/shell", { container });
+  return openStream(url, handlers);
+}
+
+export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers: StreamHandlers): () => void {
+  const url = streamUrl("/api/stream/mariadb-instance-add", {
+    authMode: form.authMode,
+    password: form.password,
+    port: form.port,
+    rootPassword: form.rootPassword,
+    user: form.user,
+    version: form.version,
+  });
+
+  return openStream(url, handlers);
+}
+
+export function streamMariaDbInstanceAction(
+  name: string,
+  action: MariaDbInstanceAction,
+  handlers: StreamHandlers,
+): () => void {
+  const url = streamUrl("/api/stream/mariadb-instance", { action, name });
   return openStream(url, handlers);
 }
 

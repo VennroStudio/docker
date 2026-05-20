@@ -12,7 +12,7 @@ services:
       - "3306:3306"
     volumes:
       - mariadb-public:/var/lib/mysql
-      - ./docker/${ENV}/mariadb/config.cnf:/etc/mysql/conf.d/config.cnf
+      - ./docker/mariadb/config.cnf:/etc/mysql/conf.d/config.cnf
     networks:
       - proxy
 

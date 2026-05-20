@@ -1,7 +1,26 @@
+.env
+
+# Runtime data
 /docker/local/nginx/data
 /docker/local/nginx/letsencrypt
+/docker/server/nginx/data
+/docker/server/nginx/letsencrypt
 /certs
+
+# Generated MariaDB/phpMyAdmin local state
+/docker/mariadb/instances.json
+/docker-compose-mariadb-*.yml
+/docker/phpmyadmin/config.inc.php
+
+# Legacy compatibility mounts for already-created old containers
+/docker/local/mariadb/
+/docker/local/phpmyadmin/
+/docker/server/mariadb/
+/docker/server/phpmyadmin/
+
+# Server-only secrets
+docker/ansible/.env.server
+
+# System / IDE
 .DS_Store
 .idea/
-.env
-docker/ansible/.env.server

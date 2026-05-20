@@ -53,6 +53,44 @@ export type AppText = {
       title: string;
     };
   };
+  mariadbInstances: {
+    actions: Record<
+      "clean" | "down" | "logs" | "shell" | "start" | "stop" | "up",
+      {
+        detail: string;
+        label: string;
+      }
+    >;
+    authModes: {
+      config: string;
+      cookie: string;
+    };
+    containerLabel: string;
+    create: string;
+    createTitle: string;
+    domainLabel: string;
+    domainUnknown: string;
+    empty: string;
+    error: string;
+    fields: {
+      authMode: string;
+      password: string;
+      port: string;
+      rootPassword: string;
+      user: string;
+      version: string;
+    };
+    instanceTitle: (version: string) => string;
+    legacy: string;
+    loading: string;
+    phpmyadminEyebrow: string;
+    portAuto: string;
+    portLabel: string;
+    serversTitle: string;
+    statusLabel: string;
+    title: string;
+    titleEyebrow: string;
+  };
   panels: {
     npm: {
       networkEyebrow: string;

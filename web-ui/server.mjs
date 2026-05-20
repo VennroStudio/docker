@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { port } from "./server/config.mjs";
 import { getErrorMessage, sendJson } from "./server/http.mjs";
 import { host, proxy, runCommand } from "./server/routes/actions.mjs";
+import { mariadbInstances } from "./server/routes/mariadb.mjs";
 import { meta } from "./server/routes/meta.mjs";
 import { shellInput, shellStop } from "./server/routes/shell.mjs";
 import { status } from "./server/routes/status.mjs";
@@ -14,6 +15,7 @@ createServer(async (req, res) => {
     if (req.method === "GET" && req.url.startsWith("/api/stream/")) return await streamRoute(req, res);
     if (req.method === "GET" && req.url === "/api/status") return await status(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
+    if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);
     if (req.method === "GET" || req.method === "HEAD") return await serveStatic(req, res);
     if (req.method === "POST" && req.url === "/api/host/add") return await host(req, res, "add");
     if (req.method === "POST" && req.url === "/api/host/remove") return await host(req, res, "remove");

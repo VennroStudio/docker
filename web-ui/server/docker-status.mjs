@@ -30,6 +30,22 @@ export async function getDockerStatuses() {
   };
 }
 
+export async function getContainerStates(names) {
+  const result = await listDockerContainers();
+
+  if (result.error) {
+    return new Map(names.map((name) => [name, { error: result.error, state: "unknown" }]));
+  }
+
+  return new Map(
+    names.map((name) => {
+      const container = result.containers.get(name);
+      if (!container) return [name, { state: "missing" }];
+      return [name, { state: container.state === "running" ? "running" : "stopped", status: container.status }];
+    }),
+  );
+}
+
 async function listDockerContainers() {
   try {
     const output = await execFileText("docker", ["ps", "-a", "--format", "{{json .}}"]);

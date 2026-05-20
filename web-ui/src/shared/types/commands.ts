@@ -38,6 +38,39 @@ export type ProxyFormState = {
   ssl: boolean;
 };
 
+export type MariaDbAuthMode = "config" | "cookie";
+export type MariaDbInstanceAction = "clean" | "down" | "logs" | "start" | "stop" | "up";
+export type ContainerRuntimeState = "missing" | "running" | "stopped" | "unknown";
+
+export type MariaDbInstance = {
+  authMode: MariaDbAuthMode;
+  composeFile: string;
+  container: string;
+  existing: boolean;
+  hostPort: number;
+  name: string;
+  state: ContainerRuntimeState;
+  status?: string;
+  version: string;
+  volume: string;
+};
+
+export type PhpMyAdminOverview = {
+  container: string;
+  domain?: string;
+  state: ContainerRuntimeState;
+  status?: string;
+};
+
+export type MariaDbInstanceForm = {
+  authMode: MariaDbAuthMode;
+  password: string;
+  port: string;
+  rootPassword: string;
+  user: string;
+  version: string;
+};
+
 export type StreamState = "ready" | "running" | "done" | "error" | "stopped";
 export type ServiceRuntimeState = "missing" | "partial" | "running" | "stopped" | "unknown";
 

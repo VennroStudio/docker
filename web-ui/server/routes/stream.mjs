@@ -1,6 +1,7 @@
 import { commandMap } from "../config.mjs";
 import { sendSseError, streamSse } from "../command-runner.mjs";
 import { assert, validateDomain, validatePort, validateTarget } from "../http.mjs";
+import { mariaDbInstanceCommand } from "../mariadb-instances.mjs";
 import { streamShell } from "../shell-sessions.mjs";
 
 export async function streamRoute(req, res) {
@@ -63,6 +64,44 @@ export async function streamRoute(req, res) {
     const container = url.searchParams.get("container");
     assert(container, "Container is required");
     return streamShell(req, res, container);
+  }
+
+  if (url.pathname === "/api/stream/mariadb-instance-add") {
+    const version = url.searchParams.get("version");
+    const user = url.searchParams.get("user");
+    const password = url.searchParams.get("password");
+    const rootPassword = url.searchParams.get("rootPassword");
+    const authMode = url.searchParams.get("authMode") || "config";
+    const port = url.searchParams.get("port");
+
+    assert(/^\d+(\.\d+){1,2}$/.test(version || ""), "Invalid MariaDB version");
+    assert(user, "MariaDB user is required");
+    assert(password, "MariaDB password is required");
+    assert(rootPassword, "MariaDB root password is required");
+    assert(authMode === "config" || authMode === "cookie", "Invalid phpMyAdmin auth mode");
+    if (port) validatePort(port);
+
+    const args = [
+      "./scripts/mariadb-instances.mjs",
+      "add",
+      "--version",
+      version,
+      "--user",
+      user,
+      "--password",
+      password,
+      "--root-password",
+      rootPassword,
+      "--auth-mode",
+      authMode,
+    ];
+    if (port) args.push("--port", port);
+    return streamSse(req, res, "node", args);
+  }
+
+  if (url.pathname === "/api/stream/mariadb-instance") {
+    const [command, args] = mariaDbInstanceCommand(url.searchParams.get("name"), url.searchParams.get("action"));
+    return streamSse(req, res, command, args);
   }
 
   sendSseError(res, "Not found");

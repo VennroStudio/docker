@@ -1,3 +1,34 @@
+# Первый запуск и обновления
+
+## Инициализация проекта
+
+```bash
+make init
+```
+
+Команда создает локальные файлы без перезаписи существующих:
+
+- `.env` из `.env.example`
+- `docker/mariadb/instances.json` из `docker/mariadb/instances.example.json`
+- `docker/phpmyadmin/config.inc.php`
+
+Эти файлы являются локальным состоянием пользователя и не должны коммититься. После этого можно запускать UI:
+
+```bash
+make ui
+```
+
+## Обновление проекта
+
+```bash
+git pull
+make init
+```
+
+`make init` безопасен для повторного запуска: существующие `.env` и `instances.json` не перетираются, а phpMyAdmin config пересобирается из локального списка MariaDB instances.
+
+---
+
 # Автоматическое добавление локального домена
 
 ## Добавить домен в hosts

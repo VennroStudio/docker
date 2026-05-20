@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CommandPanel } from "../features/commands/CommandPanel";
 import { ServiceControlPanel } from "../features/commands/ServiceControlPanel";
+import { MariaDbInstancesPanel } from "../features/mariadb/MariaDbInstancesPanel";
+import { useMariaDbInstances } from "../features/mariadb/model/useMariaDbInstances";
 import { ShellPanel } from "../features/shell/ShellPanel";
 import { useServiceStatuses } from "../features/status/model/useServiceStatuses";
 import { useCommandStream } from "../features/terminal/model/useCommandStream";
@@ -9,9 +11,16 @@ import { HomePage } from "../pages/home/HomePage";
 import { NpmPage } from "../pages/npm/NpmPage";
 import { commandPageRegistry, proxyShells, type CommandPageId } from "../pages/service/model/pageRegistry";
 import { ServicePage } from "../pages/service/ServicePage";
-import { streamCommand, streamHost, streamProxy, streamProxyDelete, streamShell } from "../shared/api/stream";
 import {
-  mariadbActions,
+  streamCommand,
+  streamHost,
+  streamMariaDbInstanceAction,
+  streamMariaDbInstanceCreate,
+  streamProxy,
+  streamProxyDelete,
+  streamShell,
+} from "../shared/api/stream";
+import {
   networkActions,
   nginxActions,
   pgadminActions,
@@ -25,7 +34,15 @@ import { dictionaries } from "../shared/i18n";
 import { useConfirmDialog } from "../shared/model/useConfirmDialog";
 import { useAppMeta } from "../shared/model/useAppMeta";
 import { useLanguage } from "../shared/model/useLanguage";
-import type { CommandAction, ProxyFormState, ShellAction, ViewId } from "../shared/types/commands";
+import type {
+  CommandAction,
+  MariaDbInstance,
+  MariaDbInstanceAction,
+  MariaDbInstanceForm,
+  ProxyFormState,
+  ShellAction,
+  ViewId,
+} from "../shared/types/commands";
 import { commandPreview, hostPreview, proxyDeletePreview, proxyPreview } from "../shared/utils/commandPreview";
 import { AppShell } from "../widgets/app-shell/AppShell";
 import { Workspace } from "../widgets/workspace/Workspace";
@@ -49,6 +66,7 @@ export function App() {
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
+  const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const text = dictionaries[language];
 
   const toggleTerminal = () => setTerminalOpen((value) => !value);
@@ -64,9 +82,14 @@ export function App() {
       label: text.shell.openLabel(action.label),
     }));
 
-  const runWithTerminal = (preview: string, open: Parameters<typeof commandStream.run>[1]) => {
+  const runWithTerminal = (preview: string, open: Parameters<typeof commandStream.run>[1], onSettled?: () => void) => {
     setTerminalOpen(true);
-    commandStream.run(preview, open, { onSettled: serviceStatuses.refresh });
+    commandStream.run(preview, open, {
+      onSettled: () => {
+        serviceStatuses.refresh();
+        onSettled?.();
+      },
+    });
   };
 
   const selectView = (view: ViewId) => {
@@ -121,6 +144,36 @@ export function App() {
 
   const runShell = (action: ShellAction) => {
     runWithTerminal(`docker exec -i ${action.container} sh`, (handlers) => streamShell(action.container, handlers));
+  };
+
+  const runMariaDbInstanceCreate = (form: MariaDbInstanceForm) => {
+    runWithTerminal(
+      `node ./scripts/mariadb-instances.mjs add --version ${form.version}`,
+      (handlers) => streamMariaDbInstanceCreate(form, handlers),
+      mariaDbInstances.refresh,
+    );
+  };
+
+  const runMariaDbInstanceAction = async (instance: MariaDbInstance, action: MariaDbInstanceAction) => {
+    if (action === "clean" || action === "down" || action === "stop") {
+      const confirmed = await confirmDialog.confirm({
+        body: text.confirm.runCommand.body(`mariadb instance ${action}: ${instance.name}`),
+        confirmLabel: text.confirm.runCommand.confirmLabel,
+        title: text.mariadbInstances.actions[action].label,
+        tone: "danger",
+      });
+      if (!confirmed) return;
+    }
+
+    runWithTerminal(
+      `docker compose -f ${instance.composeFile} ${action}`,
+      (handlers) => streamMariaDbInstanceAction(instance.name, action, handlers),
+      mariaDbInstances.refresh,
+    );
+  };
+
+  const runMariaDbInstanceShell = (instance: MariaDbInstance) => {
+    runWithTerminal(`docker exec -i ${instance.container} sh`, (handlers) => streamShell(instance.container, handlers));
   };
 
   return (
@@ -192,24 +245,20 @@ export function App() {
 
       return (
         <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="service-split-grid">
-            <ServiceControlPanel
-              actions={translateActions(mariadbActions)}
-              eyebrow={text.panels.serviceControl.database}
-              shell={shells.find((shell) => shell.container === "mariadb-container")}
-              title="MariaDB"
-              onRun={runCommand}
-              onShellOpen={runShell}
-            />
-            <ServiceControlPanel
-              actions={translateActions(phpmyadminActions)}
-              eyebrow={text.panels.serviceControl.adminPanel}
-              shell={shells.find((shell) => shell.container === "phpmyadmin-container")}
-              title="phpMyAdmin"
-              onRun={runCommand}
-              onShellOpen={runShell}
-            />
-          </div>
+          <MariaDbInstancesPanel
+            error={mariaDbInstances.error}
+            instances={mariaDbInstances.instances}
+            loading={mariaDbInstances.loading}
+            phpmyadmin={mariaDbInstances.phpmyadmin}
+            phpmyadminActions={translateActions(phpmyadminActions)}
+            phpmyadminShell={shells.find((shell) => shell.container === "phpmyadmin-container")}
+            text={text}
+            onCreate={runMariaDbInstanceCreate}
+            onPhpMyAdminRun={runCommand}
+            onPhpMyAdminShellOpen={runShell}
+            onRun={runMariaDbInstanceAction}
+            onShellOpen={runMariaDbInstanceShell}
+          />
         </ServicePage>
       );
     }

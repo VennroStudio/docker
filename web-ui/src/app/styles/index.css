@@ -2,6 +2,7 @@
 @import "../../shared/ui/button.css";
 @import "../../shared/ui/panel.css";
 @import "../../shared/ui/terminal.css";
+@import "../../features/mariadb/mariadb-instances.css";
 @import "../../widgets/app-shell/app-shell.css";
 @import "../../widgets/workspace/workspace.css";
 @import "../../pages/home/home-page.css";

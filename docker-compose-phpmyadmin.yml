@@ -9,7 +9,7 @@ services:
     environment:
       - PMA_HOST=mariadb-container
     volumes:
-      - ./docker/${ENV}/phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+      - ./docker/phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
     networks:
       - proxy
 

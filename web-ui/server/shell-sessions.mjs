@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { sse } from "./command-runner.mjs";
 import { shellContainers } from "./config.mjs";
 import { assert } from "./http.mjs";
+import { readMariaDbInstances } from "./mariadb-instances.mjs";
 
 const sessions = new Map();
 const promptMarker = "__INFRA_PROMPT__";
@@ -10,7 +11,7 @@ const startMarker = "__INFRA_COMMAND_START__";
 const endMarker = "__INFRA_COMMAND_END__";
 
 export function streamShell(req, res, container) {
-  assert(shellContainers.has(container), "Unknown shell container");
+  assert(isAllowedShellContainer(container), "Unknown shell container");
 
   const sessionId = randomUUID();
   const child = spawn("docker", ["exec", "-i", container, "sh"], { env: process.env });
@@ -41,6 +42,10 @@ export function streamShell(req, res, container) {
 
   req.on("close", () => stopShell(sessionId));
   writePromptCommand(child);
+}
+
+function isAllowedShellContainer(container) {
+  return shellContainers.has(container) || readMariaDbInstances().some((instance) => instance.container === container);
 }
 
 export function writeShellInput(sessionId, input) {

@@ -1,4 +1,4 @@
-include .env
+-include .env
 export
 
 NPM_COMPOSE := docker compose -f docker-compose-npm.yml
@@ -20,6 +20,13 @@ help: ## Показать список команд
 	@echo ""
 
 ##@ Контейнеры
+init: ## Первый запуск: создать локальные env/config файлы без перезаписи существующих
+	@cp -n .env.example .env 2>/dev/null || true
+	@mkdir -p docker/mariadb docker/phpmyadmin
+	@cp -n docker/mariadb/instances.example.json docker/mariadb/instances.json 2>/dev/null || true
+	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
+	@echo "Init complete. Check .env and run make ui"
+
 add-proxy: ## Создать общую сеть
 	docker network create proxy
 
@@ -49,7 +56,7 @@ host-add: ## Добавить локальный домен в /etc/hosts, пе�
 host-remove: ## Удалить локальный домен из /etc/hosts, передать DOMAIN=site.local
 	@./scripts/hosts.sh remove "$(DOMAIN)"
 
-NODE = docker run --rm -it -v "$(PWD):/app" -w /app
+NODE = docker run --rm -v "$(PWD):/app" -w /app
 NODE_IMAGE = node:24-bookworm
 app-proxy: ## Создать/обновить Proxy Host в NPM, передать DOMAIN=site.local TARGET=container PORT=80, опционально SSL=1
 	@$(NODE) \
@@ -153,6 +160,50 @@ phpmyadmin-clean: ## Удалить контейнер и образ phpMyAdmin
 
 phpmyadmin-logs: ## Логи phpMyAdmin
 	$(PHPMYADMIN_COMPOSE) logs -f phpmyadmin
+
+##@ MariaDB instances
+mariadb-instance-add: ## Создать MariaDB instance, передать VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWORD=root-secret, опционально PORT=3307 AUTH_MODE=config|cookie
+	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs add \
+		--version "$(VERSION)" \
+		--user "$(DB_USER)" \
+		--password "$(PASSWORD)" \
+		--root-password "$(ROOT_PASSWORD)" \
+		$(if $(PORT),--port "$(PORT)",) \
+		$(if $(AUTH_MODE),--auth-mode "$(AUTH_MODE)",)
+
+mariadb-instance-list: ## Показать MariaDB instances
+	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs list
+
+mariadb-instance-generate: ## Перегенерировать phpMyAdmin servers config
+	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
+
+mariadb-instance-up: ## Запустить MariaDB instance, передать NAME=11-4
+	docker compose -f docker-compose-mariadb-$(NAME).yml up -d
+
+mariadb-instance-start: ## Запустить существующий MariaDB instance, передать NAME=11-4
+	docker compose -f docker-compose-mariadb-$(NAME).yml start
+
+mariadb-instance-stop: ## Остановить MariaDB instance, передать NAME=11-4
+	docker compose -f docker-compose-mariadb-$(NAME).yml stop
+
+mariadb-instance-down: ## Удалить контейнер MariaDB instance, передать NAME=11-4
+	docker compose -f docker-compose-mariadb-$(NAME).yml down
+
+mariadb-instance-clean: ## Удалить контейнер и образ MariaDB instance, передать NAME=11-4 VERSION=11.4
+	docker compose -f docker-compose-mariadb-$(NAME).yml down
+	docker rmi mariadb:$(VERSION) 2>/dev/null || true
+
+mariadb-instance-logs: ## Логи MariaDB instance, передать NAME=11-4
+	docker compose -f docker-compose-mariadb-$(NAME).yml logs -f
+
+mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4
+	docker exec -it mariadb-$(NAME)-container sh
+
+phpmyadmin-config-generate: ## Перегенерировать список серверов phpMyAdmin
+	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
+
+phpmyadmin-reload: ## Перезапустить phpMyAdmin после изменения списка серверов
+	$(PHPMYADMIN_COMPOSE) restart
 
 ##@ Registry
 generate-user: ## Создание пользователя Registry
@@ -346,6 +397,8 @@ push: ## Auto save
 .PHONY: npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
 .PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs
 .PHONY: phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs
+.PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
+.PHONY: phpmyadmin-config-generate phpmyadmin-reload
 .PHONY: registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs
 .PHONY: minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs
 .PHONY: redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs
@@ -353,6 +406,6 @@ push: ## Auto save
 .PHONY: postgres-up postgres-pull postgres-start postgres-stop postgres-down postgres-clean postgres-logs
 .PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs
 .PHONY: rclone-install rclone-config rclone-test rclone-backup-s3
-.PHONY: add-proxy delete-proxy
+.PHONY: init add-proxy delete-proxy
 .PHONY: archive unarchive
 .PHONY: push help
