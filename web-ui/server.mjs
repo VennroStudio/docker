@@ -7,6 +7,7 @@ import { containers } from "./server/routes/containers.mjs";
 import { links } from "./server/routes/links.mjs";
 import { mariadbInstances } from "./server/routes/mariadb.mjs";
 import { meta } from "./server/routes/meta.mjs";
+import { postgresInstances } from "./server/routes/postgres.mjs";
 import { shellInput, shellStop } from "./server/routes/shell.mjs";
 import { status } from "./server/routes/status.mjs";
 import { streamRoute } from "./server/routes/stream.mjs";
@@ -20,6 +21,7 @@ createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/api/links") return await links(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);
+    if (req.method === "GET" && req.url === "/api/postgres/instances") return await postgresInstances(req, res);
     if (req.method === "GET" || req.method === "HEAD") return await serveStatic(req, res);
     if (req.method === "POST" && req.url === "/api/host/add") return await host(req, res, "add");
     if (req.method === "POST" && req.url === "/api/host/remove") return await host(req, res, "remove");

@@ -2,6 +2,7 @@ import { commandMap } from "../config.mjs";
 import { sendSseError, streamSse } from "../command-runner.mjs";
 import { assert, validateDomain, validatePort, validateTarget } from "../http.mjs";
 import { mariaDbInstanceCommand } from "../mariadb-instances.mjs";
+import { postgresInstanceCommand } from "../postgres-instances.mjs";
 import { streamShell } from "../shell-sessions.mjs";
 
 export async function streamRoute(req, res) {
@@ -101,6 +102,36 @@ export async function streamRoute(req, res) {
 
   if (url.pathname === "/api/stream/mariadb-instance") {
     const [command, args] = mariaDbInstanceCommand(url.searchParams.get("name"), url.searchParams.get("action"));
+    return streamSse(req, res, command, args);
+  }
+
+  if (url.pathname === "/api/stream/postgres-instance-add") {
+    const version = url.searchParams.get("version");
+    const user = url.searchParams.get("user");
+    const password = url.searchParams.get("password");
+    const database = url.searchParams.get("database");
+
+    assert(/^\d+(\.\d+)?$/.test(version || ""), "Invalid Postgres version");
+    assert(user, "Postgres user is required");
+    assert(password, "Postgres password is required");
+    assert(database, "Postgres database is required");
+
+    return streamSse(req, res, "node", [
+      "./scripts/postgres-instances.mjs",
+      "add",
+      "--version",
+      version,
+      "--user",
+      user,
+      "--password",
+      password,
+      "--database",
+      database,
+    ]);
+  }
+
+  if (url.pathname === "/api/stream/postgres-instance") {
+    const [command, args] = postgresInstanceCommand(url.searchParams.get("name"), url.searchParams.get("action"));
     return streamSse(req, res, command, args);
   }
 

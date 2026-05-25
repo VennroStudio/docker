@@ -1,53 +1,62 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useServiceLinks } from "../features/links/model/useServiceLinks";
-import { MariaDbInstancesPanel } from "../features/mariadb/MariaDbInstancesPanel";
-import { useMariaDbInstances } from "../features/mariadb/model/useMariaDbInstances";
-import { ModuleAccordion } from "../features/modules/ModuleAccordion";
-import { useContainerStates } from "../features/status/model/useContainerStates";
-import { useServiceStatuses } from "../features/status/model/useServiceStatuses";
-import { useCommandStream } from "../features/terminal/model/useCommandStream";
-import { HomePage } from "../pages/home/HomePage";
-import { NpmPage } from "../pages/npm/NpmPage";
-import { commandPageRegistry, proxyShells, type CommandPageId } from "../pages/service/model/pageRegistry";
-import { ServicePage } from "../pages/service/ServicePage";
 import {
-  streamCommand,
-  streamHost,
-  streamMariaDbInstanceAction,
-  streamMariaDbInstanceCreate,
-  streamProxy,
-  streamProxyDelete,
-  streamShell,
-} from "../shared/api/stream";
-import {
+  commandPageRegistry,
+  dictionaries,
+  getViewById,
+  getViewByPath,
   networkActions,
   nginxActions,
   pgadminActions,
   phpmyadminActions,
   postgresActions,
+  proxyShells,
   redisActions,
   redisinsightActions,
   registryActions,
   registryUiActions,
-} from "../shared/config/actions";
-import { getViewById, getViewByPath } from "../shared/config/views";
-import { dictionaries } from "../shared/i18n";
-import { useConfirmDialog } from "../shared/model/useConfirmDialog";
-import { useAppMeta } from "../shared/model/useAppMeta";
-import { useLanguage } from "../shared/model/useLanguage";
-import type {
-  CommandAction,
-  MariaDbInstance,
-  MariaDbInstanceAction,
-  MariaDbInstanceForm,
-  ProxyFormState,
-  ShellAction,
-  ViewId,
-} from "../shared/types/commands";
-import { commandPreview, hostPreview, proxyDeletePreview, proxyPreview } from "../shared/utils/commandPreview";
-import { AppShell } from "../widgets/app-shell/AppShell";
-import { Workspace } from "../widgets/workspace/Workspace";
+  useContainerStates,
+  useAppMeta,
+  useServiceLinks,
+  useServiceStatuses,
+  type CommandAction,
+  type CommandPageId,
+  type MariaDbInstance,
+  type MariaDbInstanceAction,
+  type MariaDbInstanceForm,
+  type PostgresInstance,
+  type PostgresInstanceAction,
+  type PostgresInstanceForm,
+  type ProxyFormState,
+  type ShellAction,
+  type ViewId,
+} from "@/entities/infrastructure";
+import {
+  commandPreview,
+  hostPreview,
+  proxyDeletePreview,
+  proxyPreview,
+  streamCommand,
+  streamHost,
+  streamMariaDbInstanceAction,
+  streamMariaDbInstanceCreate,
+  streamPostgresInstanceAction,
+  streamPostgresInstanceCreate,
+  streamProxy,
+  streamProxyDelete,
+  streamShell,
+  useCommandStream,
+} from "@/features/command-terminal";
+import { MariaDbInstancesPanel, useMariaDbInstances } from "@/features/manage-mariadb";
+import { PostgresInstancesPanel, usePostgresInstances } from "@/features/manage-postgres";
+import { HomePage } from "@/pages/home";
+import { ProxyPage } from "@/pages/proxy";
+import { useConfirmDialog } from "@/shared/lib/hooks";
+import { AppShell } from "@/widgets/app-shell";
+import { ServiceModuleAccordion } from "@/widgets/service-module";
+import { ServicePageLayout } from "@/widgets/service-page-layout";
+import { Workspace } from "@/widgets/workspace";
+import { useLanguage } from "./model/useLanguage";
 
 const initialProxyForm: ProxyFormState = {
   domain: "pma.local",
@@ -68,7 +77,11 @@ export function App() {
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
   const activeShells =
-    activeView === "proxy" ? proxyShells : commandPageRegistry[activeView as CommandPageId]?.shells || [];
+    activeView === "proxy"
+      ? proxyShells
+      : activeView === "mariadb"
+        ? [...(commandPageRegistry.mariadb.shells || []), ...(commandPageRegistry.postgres.shells || [])]
+        : commandPageRegistry[activeView as CommandPageId]?.shells || [];
   const containerStates = useContainerStates({
     enabled: activeView !== "home" && activeView !== "mariadb",
     names: activeShells.map((shell) => shell.container),
@@ -76,6 +89,7 @@ export function App() {
   const serviceLinks = useServiceLinks();
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
+  const postgresInstances = usePostgresInstances(activeView === "mariadb");
   const text = dictionaries[language];
 
   const toggleTerminal = () => setTerminalOpen((value) => !value);
@@ -111,6 +125,7 @@ export function App() {
     if (action.confirm) {
       const confirmed = await confirmDialog.confirm({
         body: text.confirm.runCommand.body(commandPreview(action.id)),
+        cancelLabel: text.common.cancel,
         confirmLabel: text.confirm.runCommand.confirmLabel,
         title: action.label,
         tone: "danger",
@@ -128,6 +143,7 @@ export function App() {
   const runProxyDelete = async () => {
     const confirmed = await confirmDialog.confirm({
       body: text.confirm.deleteProxy.body(proxyForm.domain),
+      cancelLabel: text.common.cancel,
       confirmLabel: text.confirm.deleteProxy.confirmLabel,
       title: text.confirm.deleteProxy.title,
       tone: "danger",
@@ -141,6 +157,7 @@ export function App() {
     if (action === "remove") {
       const confirmed = await confirmDialog.confirm({
         body: text.confirm.deleteHost.body(proxyForm.domain),
+        cancelLabel: text.common.cancel,
         confirmLabel: text.confirm.deleteHost.confirmLabel,
         title: text.confirm.deleteHost.title,
         tone: "danger",
@@ -169,6 +186,7 @@ export function App() {
     if (action === "clean" || action === "down" || action === "stop") {
       const confirmed = await confirmDialog.confirm({
         body: text.confirm.runCommand.body(`mariadb instance ${action}: ${instance.name}`),
+        cancelLabel: text.common.cancel,
         confirmLabel: text.confirm.runCommand.confirmLabel,
         title: text.mariadbInstances.actions[action].label,
         tone: "danger",
@@ -184,6 +202,37 @@ export function App() {
   };
 
   const runMariaDbInstanceShell = (instance: MariaDbInstance) => {
+    runWithTerminal(`docker exec -i ${instance.container} sh`, (handlers) => streamShell(instance.container, handlers));
+  };
+
+  const runPostgresInstanceCreate = (form: PostgresInstanceForm) => {
+    runWithTerminal(
+      `node ./scripts/postgres-instances.mjs add --version ${form.version}`,
+      (handlers) => streamPostgresInstanceCreate(form, handlers),
+      postgresInstances.refresh,
+    );
+  };
+
+  const runPostgresInstanceAction = async (instance: PostgresInstance, action: PostgresInstanceAction) => {
+    if (action === "clean" || action === "down" || action === "stop") {
+      const confirmed = await confirmDialog.confirm({
+        body: text.confirm.runCommand.body(`postgres instance ${action}: ${instance.name}`),
+        cancelLabel: text.common.cancel,
+        confirmLabel: text.confirm.runCommand.confirmLabel,
+        title: text.mariadbInstances.actions[action].label,
+        tone: "danger",
+      });
+      if (!confirmed) return;
+    }
+
+    runWithTerminal(
+      `docker compose -f ${instance.composeFile} ${action}`,
+      (handlers) => streamPostgresInstanceAction(instance.name, action, handlers),
+      postgresInstances.refresh,
+    );
+  };
+
+  const runPostgresInstanceShell = (instance: PostgresInstance) => {
     runWithTerminal(`docker exec -i ${instance.container} sh`, (handlers) => streamShell(instance.container, handlers));
   };
 
@@ -232,7 +281,7 @@ export function App() {
 
     if (activeView === "proxy") {
       return (
-        <NpmPage
+        <ProxyPage
           networkActions={translateActions(networkActions)}
           nginxActions={translateActions(nginxActions)}
           shellActions={translateShells(proxyShells)}
@@ -254,26 +303,49 @@ export function App() {
 
     if (activeView === "mariadb") {
       const page = text.servicePages.mariadb;
-      const shells = translateShells(commandPageRegistry.mariadb.shells || []);
+      const mariaShells = translateShells(commandPageRegistry.mariadb.shells || []);
+      const postgresShells = translateShells(commandPageRegistry.postgres.shells || []);
 
       return (
-        <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <MariaDbInstancesPanel
-            error={mariaDbInstances.error}
-            instances={mariaDbInstances.instances}
-            loading={mariaDbInstances.loading}
-            phpmyadmin={mariaDbInstances.phpmyadmin}
-            phpmyadminActions={translateActions(phpmyadminActions)}
-            phpmyadminLink={serviceLinks.links["phpmyadmin-container"]}
-            phpmyadminShell={shells.find((shell) => shell.container === "phpmyadmin-container")}
-            text={text}
-            onCreate={runMariaDbInstanceCreate}
-            onPhpMyAdminRun={runCommand}
-            onPhpMyAdminShellOpen={runShell}
-            onRun={runMariaDbInstanceAction}
-            onShellOpen={runMariaDbInstanceShell}
-          />
-        </ServicePage>
+        <ServicePageLayout
+          view={activeConfig}
+          eyebrow={page.eyebrow}
+          description={page.description}
+          title={text.views.mariadb}
+        >
+          <div className="grid gap-4 min-[1500px]:grid-cols-2">
+            <MariaDbInstancesPanel
+              error={mariaDbInstances.error}
+              instances={mariaDbInstances.instances}
+              loading={mariaDbInstances.loading}
+              phpmyadmin={mariaDbInstances.phpmyadmin}
+              phpmyadminActions={translateActions(phpmyadminActions)}
+              phpmyadminLink={serviceLinks.links["phpmyadmin-container"]}
+              phpmyadminShell={mariaShells.find((shell) => shell.container === "phpmyadmin-container")}
+              text={text}
+              onCreate={runMariaDbInstanceCreate}
+              onPhpMyAdminRun={runCommand}
+              onPhpMyAdminShellOpen={runShell}
+              onRun={runMariaDbInstanceAction}
+              onShellOpen={runMariaDbInstanceShell}
+            />
+            <PostgresInstancesPanel
+              error={postgresInstances.error}
+              instances={postgresInstances.instances}
+              loading={postgresInstances.loading}
+              pgadmin={postgresInstances.pgadmin}
+              pgadminActions={translateActions(pgadminActions)}
+              pgadminLink={serviceLinks.links["pgadmin-container"]}
+              pgadminShell={postgresShells.find((shell) => shell.container === "pgadmin-container")}
+              text={text}
+              onCreate={runPostgresInstanceCreate}
+              onPgAdminRun={runCommand}
+              onPgAdminShellOpen={runShell}
+              onRun={runPostgresInstanceAction}
+              onShellOpen={runPostgresInstanceShell}
+            />
+          </div>
+        </ServicePageLayout>
       );
     }
 
@@ -284,9 +356,9 @@ export function App() {
       const pgAdminShell = shells.find((shell) => shell.container === "pgadmin-container");
 
       return (
-        <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="module-stack">
-            <ModuleAccordion
+        <ServicePageLayout view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
+          <div className="space-y-4">
+            <ServiceModuleAccordion
               actions={translateActions(postgresActions)}
               eyebrow={text.panels.serviceControl.database}
               shell={postgresShell}
@@ -297,7 +369,7 @@ export function App() {
               onRun={runCommand}
               onShellOpen={runShell}
             />
-            <ModuleAccordion
+            <ServiceModuleAccordion
               actions={translateActions(pgadminActions)}
               eyebrow={text.panels.serviceControl.adminPanel}
               link={serviceLinks.links["pgadmin-container"]}
@@ -310,7 +382,7 @@ export function App() {
               onShellOpen={runShell}
             />
           </div>
-        </ServicePage>
+        </ServicePageLayout>
       );
     }
 
@@ -321,9 +393,9 @@ export function App() {
       const redisInsightShell = shells.find((shell) => shell.container === "redisinsight-container");
 
       return (
-        <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="module-stack">
-            <ModuleAccordion
+        <ServicePageLayout view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
+          <div className="space-y-4">
+            <ServiceModuleAccordion
               actions={translateActions(redisActions)}
               eyebrow={text.panels.serviceControl.cache}
               shell={redisShell}
@@ -334,7 +406,7 @@ export function App() {
               onRun={runCommand}
               onShellOpen={runShell}
             />
-            <ModuleAccordion
+            <ServiceModuleAccordion
               actions={translateActions(redisinsightActions)}
               eyebrow={text.panels.serviceControl.interface}
               link={serviceLinks.links["redisinsight-container"]}
@@ -347,7 +419,7 @@ export function App() {
               onShellOpen={runShell}
             />
           </div>
-        </ServicePage>
+        </ServicePageLayout>
       );
     }
 
@@ -358,9 +430,9 @@ export function App() {
       const registryUiShell = shells.find((shell) => shell.container === "registry-ui-container");
 
       return (
-        <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="module-stack">
-            <ModuleAccordion
+        <ServicePageLayout view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
+          <div className="space-y-4">
+            <ServiceModuleAccordion
               actions={translateActions(registryActions)}
               eyebrow={page.panelEyebrow}
               shell={registryShell}
@@ -371,7 +443,7 @@ export function App() {
               onRun={runCommand}
               onShellOpen={runShell}
             />
-            <ModuleAccordion
+            <ServiceModuleAccordion
               actions={translateActions(registryUiActions)}
               eyebrow="Registry UI"
               link={serviceLinks.links["registry-ui-container"]}
@@ -384,7 +456,7 @@ export function App() {
               onShellOpen={runShell}
             />
           </div>
-        </ServicePage>
+        </ServicePageLayout>
       );
     }
 
@@ -397,9 +469,9 @@ export function App() {
       const moduleLink = shell ? serviceLinks.links[shell.container] : undefined;
 
       return (
-        <ServicePage view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
-          <div className="module-stack">
-            <ModuleAccordion
+        <ServicePageLayout view={activeConfig} eyebrow={page.eyebrow} description={page.description}>
+          <div className="space-y-4">
+            <ServiceModuleAccordion
               title={page.panelTitle}
               eyebrow={page.panelEyebrow}
               actions={translateActions(commandPage.actions)}
@@ -412,7 +484,7 @@ export function App() {
               onShellOpen={runShell}
             />
           </div>
-        </ServicePage>
+        </ServicePageLayout>
       );
     }
 

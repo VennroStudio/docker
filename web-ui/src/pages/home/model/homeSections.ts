@@ -1,4 +1,4 @@
-import type { ServiceViewId } from "../../../shared/types/commands";
+import type { ServiceViewId } from "@/entities/infrastructure";
 
 export type HomeService = {
   id: ServiceViewId;
@@ -7,7 +7,6 @@ export type HomeService = {
 export const homeServices: HomeService[] = [
   { id: "proxy" },
   { id: "mariadb" },
-  { id: "postgres" },
   { id: "redis" },
   { id: "minio" },
   { id: "registry" },

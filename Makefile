@@ -23,8 +23,9 @@ help: ## Показать список команд
 ##@ Контейнеры
 init: ## Первый запуск: создать локальные env/config файлы без перезаписи существующих
 	@cp -n .env.example .env 2>/dev/null || true
-	@mkdir -p docker/mariadb docker/phpmyadmin docker/services
+	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres docker/services
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
+	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
 	@echo "Init complete. Check .env and run make ui"
 
@@ -362,6 +363,39 @@ postgres-clean: ## Удалить контейнеры и образы PostgreSQ
 postgres-logs: ## Логи PostgreSQL
 	$(POSTGRES_COMPOSE) logs -f
 
+##@ Postgres instances
+postgres-instance-add: ## Создать Postgres instance, передать VERSION=17 DB_USER=admin PASSWORD=secret DB_NAME=app
+	@$(NODE) $(NODE_IMAGE) node ./scripts/postgres-instances.mjs add \
+		--version "$(VERSION)" \
+		--user "$(DB_USER)" \
+		--password "$(PASSWORD)" \
+		--database "$(DB_NAME)"
+
+postgres-instance-list: ## Показать Postgres instances
+	@$(NODE) $(NODE_IMAGE) node ./scripts/postgres-instances.mjs list
+
+postgres-instance-up: ## Запустить Postgres instance, передать NAME=17
+	docker compose -f docker-compose-postgres-$(NAME).yml up -d
+
+postgres-instance-start: ## Запустить существующий Postgres instance, передать NAME=17
+	docker compose -f docker-compose-postgres-$(NAME).yml start
+
+postgres-instance-stop: ## Остановить Postgres instance, передать NAME=17
+	docker compose -f docker-compose-postgres-$(NAME).yml stop
+
+postgres-instance-down: ## Удалить контейнер Postgres instance, передать NAME=17
+	docker compose -f docker-compose-postgres-$(NAME).yml down
+
+postgres-instance-clean: ## Удалить контейнер и образ Postgres instance, передать NAME=17 VERSION=17
+	docker compose -f docker-compose-postgres-$(NAME).yml down
+	docker rmi postgres:$(VERSION)-alpine 2>/dev/null || true
+
+postgres-instance-logs: ## Логи Postgres instance, передать NAME=17
+	docker compose -f docker-compose-postgres-$(NAME).yml logs -f
+
+postgres-instance-shell: ## Shell Postgres instance, передать NAME=17
+	docker exec -it postgres-$(NAME)-container sh
+
 ##@ pgAdmin
 pgadmin-up: ## Запустить контейнер pgAdmin
 	$(PGADMIN_COMPOSE) up -d
@@ -429,6 +463,7 @@ push: ## Auto save
 .PHONY: redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs
 .PHONY: redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs
 .PHONY: postgres-up postgres-pull postgres-start postgres-stop postgres-down postgres-clean postgres-logs
+.PHONY: postgres-instance-add postgres-instance-list postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
 .PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs
 .PHONY: rclone-install rclone-config rclone-test rclone-backup-s3
 .PHONY: init add-proxy delete-proxy

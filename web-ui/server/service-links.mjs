@@ -17,6 +17,12 @@ const defaultLinks = {
     source: "local",
     url: "http://localhost:81",
   },
+  "phpmyadmin-container": {
+    domain: "pma.local",
+    label: "pma.local",
+    source: "domain",
+    url: "http://pma.local",
+  },
   "pgadmin-container": {
     label: "pgAdmin",
     port: 5050,
