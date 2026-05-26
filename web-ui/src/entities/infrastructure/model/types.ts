@@ -1,8 +1,18 @@
 import type { LucideIcon } from "lucide-react";
 import commandManifest from "../../../../commands.manifest.json";
 
-export type ViewId = "home" | "proxy" | "network" | "nginx" | "mariadb" | "postgres" | "redis" | "minio" | "registry";
-export type ServiceViewId = Exclude<ViewId, "home" | "network">;
+export type ViewId =
+  | "home"
+  | "proxy"
+  | "network"
+  | "nginx"
+  | "mariadb"
+  | "postgres"
+  | "redis"
+  | "minio"
+  | "registry"
+  | "settings";
+export type ServiceViewId = Exclude<ViewId, "home" | "network" | "settings">;
 export type CommandId = keyof typeof commandManifest.commands;
 export type CommandGroupId = keyof typeof commandManifest.groups;
 
@@ -73,11 +83,13 @@ export type MariaDbInstanceForm = {
 };
 
 export type MariaDbImportForm = {
+  container: string;
   database: string;
   filePath: string;
 };
 
 export type MariaDbExportForm = {
+  container: string;
   database: string;
   filePath: string;
 };

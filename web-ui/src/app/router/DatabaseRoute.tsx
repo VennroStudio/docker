@@ -27,6 +27,7 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
     runPostgresInstanceShell,
     runShell,
     serviceLinks,
+    settings,
     text,
     translateActions,
     translateShells,
@@ -34,6 +35,24 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
   const page = text.servicePages.mariadb;
   const mariaShells = translateShells(commandPageRegistry.mariadb.shells || []);
   const postgresShells = translateShells(commandPageRegistry.postgres.shells || []);
+  const mariaDbDefaults = settings.settings?.mariadb;
+  const postgresDefaults = settings.settings?.postgres;
+  const defaultDumpPath = mariaDbDefaults
+    ? joinPath(mariaDbDefaults.homeDumpPath, mariaDbDefaults.dumpName)
+    : undefined;
+  const defaultMariaDbCreateForm = mariaDbDefaults
+    ? {
+        rootPassword: mariaDbDefaults.rootPassword,
+        version: mariaDbDefaults.defaultVersion,
+      }
+    : undefined;
+  const defaultPostgresCreateForm = postgresDefaults
+    ? {
+        database: postgresDefaults.database,
+        password: postgresDefaults.password,
+        user: postgresDefaults.user,
+      }
+    : undefined;
 
   return (
     <ServicePageLayout
@@ -45,6 +64,9 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
       <div className="space-y-4">
         <MariaDbInstancesPanel
           activeOperationKey={activeOperationKey}
+          defaultCreateForm={defaultMariaDbCreateForm}
+          defaultDatabase={mariaDbDefaults?.defaultDatabase}
+          defaultDumpPath={defaultDumpPath}
           error={mariaDbInstances.error}
           instances={mariaDbInstances.instances}
           loading={mariaDbInstances.loading}
@@ -59,6 +81,7 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
         />
         <PostgresInstancesPanel
           activeOperationKey={activeOperationKey}
+          defaultCreateForm={defaultPostgresCreateForm}
           error={postgresInstances.error}
           instances={postgresInstances.instances}
           loading={postgresInstances.loading}
@@ -96,4 +119,10 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
       </div>
     </ServicePageLayout>
   );
+}
+
+function joinPath(base: string, name: string) {
+  if (!base) return name;
+  if (!name) return base;
+  return `${base.replace(/\/+$/, "")}/${name.replace(/^\/+/, "")}`;
 }

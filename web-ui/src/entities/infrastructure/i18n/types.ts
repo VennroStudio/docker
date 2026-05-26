@@ -55,7 +55,10 @@ export type AppText = {
       eyebrow: string;
       title: string;
     };
-    serviceCards: Record<Exclude<ViewId, "home" | "network">, { description: string; meta: string; title: string }>;
+    serviceCards: Record<
+      Exclude<ViewId, "home" | "network" | "settings">,
+      { description: string; meta: string; title: string }
+    >;
     workflow: {
       eyebrow: string;
       steps: Array<{ detail: string; title: string }>;
@@ -92,9 +95,12 @@ export type AppText = {
     };
     import: {
       action: string;
+      container: string;
+      containerPlaceholder: string;
       database: string;
       databasePlaceholder: string;
       emptyFiles: string;
+      emptyInstances: string;
       filePath: string;
       filePathPlaceholder: string;
       fileSelect: string;
@@ -103,6 +109,7 @@ export type AppText = {
       title: string;
       titleEyebrow: string;
       validation: {
+        container: string;
         database: string;
         disabled: string;
         filePath: string;
@@ -110,13 +117,17 @@ export type AppText = {
     };
     export: {
       action: string;
+      container: string;
+      containerPlaceholder: string;
       database: string;
       databasePlaceholder: string;
+      emptyInstances: string;
       filePath: string;
       filePathPlaceholder: string;
       title: string;
       titleEyebrow: string;
       validation: {
+        container: string;
         database: string;
         disabled: string;
         filePath: string;
@@ -195,7 +206,7 @@ export type AppText = {
     };
   };
   servicePages: Record<
-    Exclude<ViewId, "home">,
+    Exclude<ViewId, "home" | "settings">,
     {
       description: string;
       eyebrow: string;
@@ -203,5 +214,29 @@ export type AppText = {
       panelTitle: string;
     }
   >;
+  settings: {
+    clean: string;
+    description: string;
+    eyebrow: string;
+    loading: string;
+    reset: string;
+    save: string;
+    saved: string;
+    sectionEyebrow: string;
+    sections: {
+      deployment: string;
+      environment: string;
+      mariadb: string;
+      postgres: string;
+      proxy: string;
+      registry: string;
+      storage: string;
+    };
+    sourceLabel: string;
+    sourceMissing: string;
+    sourceReady: string;
+    title: string;
+    unsaved: string;
+  };
   views: Record<ViewId, string>;
 };

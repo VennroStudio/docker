@@ -77,6 +77,7 @@ export function streamMariaDbImport(form: MariaDbImportForm, handlers: StreamHan
   return openPostStream(
     "/api/stream/mariadb-import",
     {
+      container: form.container,
       database: form.database,
       filePath: form.filePath,
     },
@@ -88,6 +89,7 @@ export function streamMariaDbExport(form: MariaDbExportForm, handlers: StreamHan
   return openPostStream(
     "/api/stream/mariadb-export",
     {
+      container: form.container,
       database: form.database,
       filePath: form.filePath,
     },

@@ -14,6 +14,7 @@ import { PostgresCreateModal } from "./PostgresCreateModal";
 
 type PostgresInstancesPanelProps = {
   activeOperationKey?: null | string;
+  defaultCreateForm?: Partial<PostgresInstanceForm>;
   error: string | null;
   instances: PostgresInstance[];
   loading: boolean;
@@ -40,6 +41,7 @@ type PgAdminPanelProps = {
 
 export function PostgresInstancesPanel({
   activeOperationKey,
+  defaultCreateForm,
   error,
   instances,
   loading,
@@ -83,7 +85,14 @@ export function PostgresInstancesPanel({
         onShellOpen={onShellOpen}
       />
 
-      {createOpen ? <PostgresCreateModal copy={copy} onClose={() => setCreateOpen(false)} onCreate={onCreate} /> : null}
+      {createOpen ? (
+        <PostgresCreateModal
+          copy={copy}
+          defaults={defaultCreateForm}
+          onClose={() => setCreateOpen(false)}
+          onCreate={onCreate}
+        />
+      ) : null}
     </>
   );
 }

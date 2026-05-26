@@ -1,6 +1,7 @@
 import { networkActions, nginxActions, proxyShells } from "@/entities/infrastructure";
 import { HomePage } from "@/pages/home";
 import { ProxyPage } from "@/pages/proxy";
+import { SettingsPage } from "@/pages/settings";
 import type { InfrastructureController } from "../model/useInfrastructureController";
 import { DatabaseRoute } from "./DatabaseRoute";
 import { ServiceRoute } from "./ServiceRoute";
@@ -26,6 +27,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     selectView,
     serviceLinks,
     serviceStatuses,
+    settings,
     setProxyForm,
     text,
     translateActions,
@@ -63,6 +65,10 @@ export function AppRouter({ controller }: AppRouterProps) {
 
   if (activeView === "mariadb") {
     return <DatabaseRoute controller={controller} />;
+  }
+
+  if (activeView === "settings") {
+    return <SettingsPage settingsState={settings} text={text} view={activeConfig} />;
   }
 
   return <ServiceRoute controller={controller} />;

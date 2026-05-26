@@ -10,7 +10,10 @@ const args = parseArgs(process.argv.slice(2));
 const filePath = args.file;
 const database = args.database;
 const container = args.container || "mariadb-container";
-const password = process.env.MYSQL_ROOT_PASSWORD || (await readDotEnvValue("MYSQL_ROOT_PASSWORD"));
+const password =
+  args["root-password"] ||
+  process.env.MYSQL_ROOT_PASSWORD ||
+  (await readDotEnvValue("MYSQL_ROOT_PASSWORD"));
 
 try {
   await assertImportInput({ container, database, filePath, password });
@@ -47,7 +50,10 @@ async function readDotEnvValue(key) {
     const line = envFile
       .split(/\r?\n/)
       .map((entry) => entry.trim())
-      .find((entry) => entry && !entry.startsWith("#") && entry.startsWith(`${key}=`));
+      .find(
+        (entry) =>
+          entry && !entry.startsWith("#") && entry.startsWith(`${key}=`),
+      );
 
     if (!line) return undefined;
 
@@ -64,7 +70,10 @@ async function assertImportInput({ container, database, filePath, password }) {
   assert(password, "MYSQL_ROOT_PASSWORD is required");
   assert(/^[A-Za-z0-9_$.-]+$/.test(database), "Invalid database name");
   assert(/^[A-Za-z0-9_.-]+$/.test(container), "Invalid MariaDB container name");
-  assert(filePath.endsWith(".sql") || filePath.endsWith(".sql.gz"), "Only .sql and .sql.gz dumps are supported");
+  assert(
+    filePath.endsWith(".sql") || filePath.endsWith(".sql.gz"),
+    "Only .sql and .sql.gz dumps are supported",
+  );
 
   const file = await stat(filePath);
   assert(file.isFile(), "Dump path must point to a file");
@@ -73,14 +82,19 @@ async function assertImportInput({ container, database, filePath, password }) {
 async function importDump({ container, database, filePath, password }) {
   console.log(`Importing ${filePath} into ${database} on ${container}`);
 
-  const mysql = spawn("docker", ["exec", "-i", container, "mysql", "-u", "root", `-p${password}`, database], {
-    stdio: ["pipe", "inherit", "inherit"],
-  });
+  const mysql = spawn(
+    "docker",
+    ["exec", "-i", container, "mysql", "-u", "root", `-p${password}`, database],
+    {
+      stdio: ["pipe", "inherit", "inherit"],
+    },
+  );
   const exitPromise = waitForExit(mysql);
   const source = createReadStream(filePath);
 
   try {
-    if (filePath.endsWith(".sql.gz")) await pipeline(source, createGunzip(), mysql.stdin);
+    if (filePath.endsWith(".sql.gz"))
+      await pipeline(source, createGunzip(), mysql.stdin);
     else await pipeline(source, mysql.stdin);
   } catch (error) {
     mysql.kill("SIGTERM");

@@ -18,6 +18,9 @@ import { MariaDbImportBlock } from "./MariaDbImportBlock";
 
 type MariaDbInstancesPanelProps = {
   activeOperationKey?: null | string;
+  defaultCreateForm?: Partial<MariaDbInstanceForm>;
+  defaultDatabase?: string;
+  defaultDumpPath?: string;
   error: string | null;
   instances: MariaDbInstance[];
   loading: boolean;
@@ -46,6 +49,9 @@ type PhpMyAdminPanelProps = {
 
 export function MariaDbInstancesPanel({
   activeOperationKey,
+  defaultCreateForm,
+  defaultDatabase,
+  defaultDumpPath,
   error,
   instances,
   loading,
@@ -61,6 +67,7 @@ export function MariaDbInstancesPanel({
   const [createOpen, setCreateOpen] = useState(false);
   const [mariadbOpen, setMariaDbOpen] = useState(true);
   const copy = text.mariadbInstances;
+  const runningInstances = instances.filter((instance) => instance.state === "running");
 
   return (
     <>
@@ -92,22 +99,35 @@ export function MariaDbInstancesPanel({
         <div className="grid gap-3 min-[1280px]:grid-cols-2">
           <MariaDbImportBlock
             copy={copy.import}
+            defaultDatabase={defaultDatabase}
+            defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
             disabledTitle={operationDisabledTitle}
+            instances={runningInstances}
             loading={operationDisabled && activeOperationKey === "mariadb:import"}
             onImport={onImport}
           />
           <MariaDbExportBlock
             copy={copy.export}
+            defaultDatabase={defaultDatabase}
+            defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
             disabledTitle={operationDisabledTitle}
+            instances={runningInstances}
             loading={operationDisabled && activeOperationKey === "mariadb:export"}
             onExport={onExport}
           />
         </div>
       </DatabaseInstancesSection>
 
-      {createOpen ? <MariaDbCreateModal copy={copy} onClose={() => setCreateOpen(false)} onCreate={onCreate} /> : null}
+      {createOpen ? (
+        <MariaDbCreateModal
+          copy={copy}
+          defaults={defaultCreateForm}
+          onClose={() => setCreateOpen(false)}
+          onCreate={onCreate}
+        />
+      ) : null}
     </>
   );
 }

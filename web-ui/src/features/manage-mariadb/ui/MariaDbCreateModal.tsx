@@ -5,6 +5,7 @@ import { Button, Field, Modal, SelectField } from "@/shared/ui";
 
 type MariaDbCreateModalProps = {
   copy: AppText["mariadbInstances"];
+  defaults?: Partial<MariaDbInstanceForm>;
   onClose: () => void;
   onCreate: (form: MariaDbInstanceForm) => void;
 };
@@ -19,8 +20,8 @@ const initialForm: MariaDbInstanceForm = {
 
 const mariaDbVersions = ["10.6", "10.11", "11.4", "11.8", "12.1"];
 
-export function MariaDbCreateModal({ copy, onClose, onCreate }: MariaDbCreateModalProps) {
-  const [form, setForm] = useState(initialForm);
+export function MariaDbCreateModal({ copy, defaults, onClose, onCreate }: MariaDbCreateModalProps) {
+  const [form, setForm] = useState<MariaDbInstanceForm>({ ...initialForm, ...defaults });
   const createDisabled =
     !/^\d+(\.\d+){1,2}$/.test(form.version.trim()) ||
     !form.user.trim() ||

@@ -10,7 +10,10 @@ const args = parseArgs(process.argv.slice(2));
 const filePath = args.file;
 const database = args.database;
 const container = args.container || "mariadb-container";
-const password = process.env.MYSQL_ROOT_PASSWORD || (await readDotEnvValue("MYSQL_ROOT_PASSWORD"));
+const password =
+  args["root-password"] ||
+  process.env.MYSQL_ROOT_PASSWORD ||
+  (await readDotEnvValue("MYSQL_ROOT_PASSWORD"));
 
 try {
   await assertExportInput({ container, database, filePath, password });
@@ -47,7 +50,10 @@ async function readDotEnvValue(key) {
     const line = envFile
       .split(/\r?\n/)
       .map((entry) => entry.trim())
-      .find((entry) => entry && !entry.startsWith("#") && entry.startsWith(`${key}=`));
+      .find(
+        (entry) =>
+          entry && !entry.startsWith("#") && entry.startsWith(`${key}=`),
+      );
 
     if (!line) return undefined;
 
@@ -64,21 +70,29 @@ async function assertExportInput({ container, database, filePath, password }) {
   assert(password, "MYSQL_ROOT_PASSWORD is required");
   assert(/^[A-Za-z0-9_$.-]+$/.test(database), "Invalid database name");
   assert(/^[A-Za-z0-9_.-]+$/.test(container), "Invalid MariaDB container name");
-  assert(filePath.endsWith(".sql") || filePath.endsWith(".sql.gz"), "Only .sql and .sql.gz exports are supported");
+  assert(
+    filePath.endsWith(".sql") || filePath.endsWith(".sql.gz"),
+    "Only .sql and .sql.gz exports are supported",
+  );
 }
 
 async function exportDump({ container, database, filePath, password }) {
   await mkdir(path.dirname(filePath), { recursive: true });
   console.log(`Exporting ${database} from ${container} into ${filePath}`);
 
-  const mysqldump = spawn("docker", ["exec", container, "mysqldump", "-u", "root", `-p${password}`, database], {
-    stdio: ["ignore", "pipe", "inherit"],
-  });
+  const mysqldump = spawn(
+    "docker",
+    ["exec", container, "mysqldump", "-u", "root", `-p${password}`, database],
+    {
+      stdio: ["ignore", "pipe", "inherit"],
+    },
+  );
   const exitPromise = waitForExit(mysqldump);
   const output = createWriteStream(filePath, { flags: "w" });
 
   try {
-    if (filePath.endsWith(".sql.gz")) await pipeline(mysqldump.stdout, createGzip(), output);
+    if (filePath.endsWith(".sql.gz"))
+      await pipeline(mysqldump.stdout, createGzip(), output);
     else await pipeline(mysqldump.stdout, output);
   } catch (error) {
     mysqldump.kill("SIGTERM");

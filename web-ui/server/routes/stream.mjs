@@ -1,19 +1,22 @@
 import { commandMap } from "../config.mjs";
 import { sendSseError, streamSse } from "../command-runner.mjs";
+import { getContainerStates } from "../docker-status.mjs";
 import { assert, body, validateDomain, validatePort, validateTarget } from "../http.mjs";
-import { mariaDbInstanceCommand } from "../mariadb-instances.mjs";
+import { mariaDbInstanceCommand, readMariaDbInstances } from "../mariadb-instances.mjs";
 import { postgresInstanceCommand } from "../postgres-instances.mjs";
+import { getRuntimeEnv } from "../settings-store.mjs";
 import { streamShell } from "../shell-sessions.mjs";
 
 export async function streamRoute(req, res) {
   const url = new URL(req.url, "http://localhost");
   const payload = req.method === "POST" ? await body(req) : null;
   const param = (key) => payload?.[key] ?? url.searchParams.get(key);
+  const runtimeEnv = getRuntimeEnv();
 
   if (url.pathname === "/api/stream/run") {
     const entry = commandMap[param("command")];
     assert(entry, "Unknown command");
-    return streamSse(req, res, entry[0], entry.slice(1));
+    return streamSse(req, res, entry[0], entry.slice(1), runtimeEnv);
   }
 
   if (url.pathname === "/api/stream/host") {
@@ -34,7 +37,7 @@ export async function streamRoute(req, res) {
     validateTarget(target);
     validatePort(proxyPort);
 
-    const env = { ...process.env, DOMAIN: domain, TARGET: target, PORT: String(proxyPort) };
+    const env = { ...runtimeEnv, DOMAIN: domain, TARGET: target, PORT: String(proxyPort) };
     if (ssl) env.SSL = "1";
     else delete env.SSL;
 
@@ -60,7 +63,7 @@ export async function streamRoute(req, res) {
   if (url.pathname === "/api/stream/proxy-delete") {
     const domain = param("domain");
     validateDomain(domain);
-    return streamSse(req, res, "node", ["./scripts/npm-proxy.mjs", "--delete", "--domain", domain]);
+    return streamSse(req, res, "node", ["./scripts/npm-proxy.mjs", "--delete", "--domain", domain], runtimeEnv);
   }
 
   if (url.pathname === "/api/stream/shell") {
@@ -99,32 +102,72 @@ export async function streamRoute(req, res) {
       authMode,
     ];
     if (port) args.push("--port", String(port));
-    return streamSse(req, res, "node", args);
+    return streamSse(req, res, "node", args, runtimeEnv);
   }
 
   if (url.pathname === "/api/stream/mariadb-instance") {
     const [command, args] = mariaDbInstanceCommand(param("name"), param("action"));
-    return streamSse(req, res, command, args);
+    return streamSse(req, res, command, args, runtimeEnv);
   }
 
   if (url.pathname === "/api/stream/mariadb-import") {
+    const container = param("container") || "mariadb-container";
     const filePath = param("filePath");
     const database = param("database");
 
+    validateContainerName(container);
+    const instance = findMariaDbInstanceByContainer(container);
+    await validateRunningMariaDbContainer(container);
     validateDumpFilePath(filePath);
     validateDatabaseName(database);
 
-    return streamSse(req, res, "node", ["./scripts/mariadb-import.mjs", "--file", filePath, "--database", database]);
+    return streamSse(
+      req,
+      res,
+      "node",
+      [
+        "./scripts/mariadb-import.mjs",
+        "--container",
+        container,
+        "--root-password",
+        instance.rootPassword,
+        "--file",
+        filePath,
+        "--database",
+        database,
+      ],
+      runtimeEnv,
+    );
   }
 
   if (url.pathname === "/api/stream/mariadb-export") {
+    const container = param("container") || "mariadb-container";
     const filePath = param("filePath");
     const database = param("database");
 
+    validateContainerName(container);
+    const instance = findMariaDbInstanceByContainer(container);
+    await validateRunningMariaDbContainer(container);
     validateDumpFilePath(filePath);
     validateDatabaseName(database);
 
-    return streamSse(req, res, "node", ["./scripts/mariadb-export.mjs", "--file", filePath, "--database", database]);
+    return streamSse(
+      req,
+      res,
+      "node",
+      [
+        "./scripts/mariadb-export.mjs",
+        "--container",
+        container,
+        "--root-password",
+        instance.rootPassword,
+        "--file",
+        filePath,
+        "--database",
+        database,
+      ],
+      runtimeEnv,
+    );
   }
 
   if (url.pathname === "/api/stream/postgres-instance-add") {
@@ -138,23 +181,29 @@ export async function streamRoute(req, res) {
     assert(password, "Postgres password is required");
     assert(database, "Postgres database is required");
 
-    return streamSse(req, res, "node", [
-      "./scripts/postgres-instances.mjs",
-      "add",
-      "--version",
-      version,
-      "--user",
-      user,
-      "--password",
-      password,
-      "--database",
-      database,
-    ]);
+    return streamSse(
+      req,
+      res,
+      "node",
+      [
+        "./scripts/postgres-instances.mjs",
+        "add",
+        "--version",
+        version,
+        "--user",
+        user,
+        "--password",
+        password,
+        "--database",
+        database,
+      ],
+      runtimeEnv,
+    );
   }
 
   if (url.pathname === "/api/stream/postgres-instance") {
     const [command, args] = postgresInstanceCommand(param("name"), param("action"));
-    return streamSse(req, res, command, args);
+    return streamSse(req, res, command, args, runtimeEnv);
   }
 
   sendSseError(res, "Not found");
@@ -166,6 +215,22 @@ function isTruthy(value) {
 
 function validateDatabaseName(database) {
   assert(/^[A-Za-z0-9_$.-]+$/.test(database || ""), "Invalid database name");
+}
+
+function validateContainerName(container) {
+  assert(/^[A-Za-z0-9_.-]+$/.test(container || ""), "Invalid MariaDB container name");
+}
+
+function findMariaDbInstanceByContainer(container) {
+  const instance = readMariaDbInstances().find((item) => item.container === container);
+  assert(instance, "MariaDB container is not configured");
+  assert(instance.rootPassword, "MariaDB root password is not configured");
+  return instance;
+}
+
+async function validateRunningMariaDbContainer(container) {
+  const state = (await getContainerStates([container])).get(container);
+  assert(state?.state === "running", "MariaDB container must be running");
 }
 
 function validateDumpFilePath(filePath) {

@@ -44,6 +44,7 @@ import {
 } from "@/features/command-terminal";
 import { useMariaDbInstances } from "@/features/manage-mariadb";
 import { usePostgresInstances } from "@/features/manage-postgres";
+import { useSettings } from "@/entities/settings";
 import { useConfirmDialog } from "@/shared/lib/hooks";
 import { useToast } from "@/shared/lib/hooks";
 import { useLanguage } from "./useLanguage";
@@ -89,11 +90,12 @@ export function useInfrastructureController() {
         ? [...(commandPageRegistry.mariadb.shells || []), ...(commandPageRegistry.postgres.shells || [])]
         : commandPageRegistry[activeView as CommandPageId]?.shells || [];
   const containerStates = useContainerStates({
-    enabled: activeView !== "home" && activeView !== "mariadb",
+    enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings",
     names: activeShells.map((shell) => shell.container),
   });
   const serviceLinks = useServiceLinks();
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
+  const settings = useSettings();
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const postgresInstances = usePostgresInstances(activeView === "mariadb");
   const text = dictionaries[language];
@@ -255,7 +257,7 @@ export function useInfrastructureController() {
       label: text.mariadbInstances.import.action,
       onSettled: mariaDbInstances.refresh,
       open: (handlers) => streamMariaDbImport(form, handlers),
-      preview: `node ./scripts/mariadb-import.mjs --file ${form.filePath} --database ${form.database}`,
+      preview: `node ./scripts/mariadb-import.mjs --container ${form.container} --file ${form.filePath} --database ${form.database}`,
     });
   };
 
@@ -265,7 +267,7 @@ export function useInfrastructureController() {
       label: text.mariadbInstances.export.action,
       onSettled: mariaDbInstances.refresh,
       open: (handlers) => streamMariaDbExport(form, handlers),
-      preview: `node ./scripts/mariadb-export.mjs --file ${form.filePath} --database ${form.database}`,
+      preview: `node ./scripts/mariadb-export.mjs --container ${form.container} --file ${form.filePath} --database ${form.database}`,
     });
   };
 
@@ -385,6 +387,7 @@ export function useInfrastructureController() {
     selectView,
     serviceLinks,
     serviceStatuses,
+    settings,
     setProxyForm,
     stopCommand,
     terminalOpen,

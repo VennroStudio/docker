@@ -1,6 +1,7 @@
 import { commandMap } from "../config.mjs";
 import { stream } from "../command-runner.mjs";
 import { assert, body, validateDomain, validatePort, validateTarget } from "../http.mjs";
+import { getRuntimeEnv } from "../settings-store.mjs";
 
 export async function host(req, res, action) {
   const { domain } = await body(req);
@@ -14,7 +15,7 @@ export async function proxy(req, res) {
   validateTarget(target);
   validatePort(port);
 
-  const env = { ...process.env, DOMAIN: domain, TARGET: target, PORT: String(port) };
+  const env = getRuntimeEnv({ DOMAIN: domain, TARGET: target, PORT: String(port) });
   if (ssl) env.SSL = "1";
   else delete env.SSL;
 
@@ -30,5 +31,5 @@ export async function runCommand(req, res) {
   const { command } = await body(req);
   const entry = commandMap[command];
   assert(entry, "Unknown command");
-  stream(res, entry[0], entry.slice(1));
+  stream(res, entry[0], entry.slice(1), getRuntimeEnv());
 }

@@ -5,6 +5,7 @@ import { Button, Field, Modal, SelectField } from "@/shared/ui";
 
 type PostgresCreateModalProps = {
   copy: AppText["postgresInstances"];
+  defaults?: Partial<PostgresInstanceForm>;
   onClose: () => void;
   onCreate: (form: PostgresInstanceForm) => void;
 };
@@ -18,8 +19,8 @@ const initialForm: PostgresInstanceForm = {
 
 const postgresVersions = ["14", "15", "16", "17", "18"];
 
-export function PostgresCreateModal({ copy, onClose, onCreate }: PostgresCreateModalProps) {
-  const [form, setForm] = useState(initialForm);
+export function PostgresCreateModal({ copy, defaults, onClose, onCreate }: PostgresCreateModalProps) {
+  const [form, setForm] = useState<PostgresInstanceForm>({ ...initialForm, ...defaults });
   const createDisabled = !form.version.trim() || !form.user.trim() || !form.password.trim() || !form.database.trim();
 
   const updateField = <Key extends keyof PostgresInstanceForm>(key: Key, value: PostgresInstanceForm[Key]) => {
