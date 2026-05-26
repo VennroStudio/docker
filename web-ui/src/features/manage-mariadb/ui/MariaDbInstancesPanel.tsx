@@ -19,16 +19,23 @@ type MariaDbInstancesPanelProps = {
   loading: boolean;
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
-  phpmyadmin: PhpMyAdminOverview;
-  phpmyadminActions: CommandAction[];
-  phpmyadminLink?: ServiceLink;
-  phpmyadminShell?: ShellAction;
   text: AppText;
   onCreate: (form: MariaDbInstanceForm) => void;
-  onPhpMyAdminRun: (action: CommandAction) => void;
-  onPhpMyAdminShellOpen: (action: ShellAction) => void;
   onRun: (instance: MariaDbInstance, action: MariaDbInstanceAction) => void;
   onShellOpen: (instance: MariaDbInstance) => void;
+};
+
+type PhpMyAdminPanelProps = {
+  activeOperationKey?: null | string;
+  actions: CommandAction[];
+  link?: ServiceLink;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
+  overview: PhpMyAdminOverview;
+  shell?: ShellAction;
+  text: AppText;
+  onRun: (action: CommandAction) => void;
+  onShellOpen: (action: ShellAction) => void;
 };
 
 export function MariaDbInstancesPanel({
@@ -37,25 +44,18 @@ export function MariaDbInstancesPanel({
   instances,
   loading,
   onCreate,
-  onPhpMyAdminRun,
-  onPhpMyAdminShellOpen,
   onRun,
   onShellOpen,
   operationDisabled,
   operationDisabledTitle,
-  phpmyadmin,
-  phpmyadminActions,
-  phpmyadminLink,
-  phpmyadminShell,
   text,
 }: MariaDbInstancesPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [mariadbOpen, setMariaDbOpen] = useState(true);
-  const [phpMyAdminOpen, setPhpMyAdminOpen] = useState(false);
   const copy = text.mariadbInstances;
 
   return (
-    <div className="space-y-4">
+    <>
       <DatabaseInstancesSection
         actionLabels={{
           clean: copy.actions.clean.label,
@@ -83,30 +83,48 @@ export function MariaDbInstancesPanel({
       />
 
       {createOpen ? <MariaDbCreateModal copy={copy} onClose={() => setCreateOpen(false)} onCreate={onCreate} /> : null}
+    </>
+  );
+}
 
-      <DatabaseAdminSection
-        actions={phpmyadminActions}
-        activeOperationKey={activeOperationKey}
-        copy={{
-          containerLabel: copy.containerLabel,
-          domainLabel: copy.domainLabel,
-          domainUnknown: copy.domainUnknown,
-          linkLabel: text.common.link,
-          shellLabel: copy.actions.shell.label,
-          statusLabel: copy.statusLabel,
-        }}
-        eyebrow={copy.phpmyadminEyebrow}
-        link={phpmyadminLink}
-        open={phpMyAdminOpen}
-        operationDisabled={operationDisabled}
-        operationDisabledTitle={operationDisabledTitle}
-        overview={phpmyadmin}
-        shell={phpmyadminShell}
-        title="phpMyAdmin"
-        onOpenChange={setPhpMyAdminOpen}
-        onRun={onPhpMyAdminRun}
-        onShellOpen={onPhpMyAdminShellOpen}
-      />
-    </div>
+export function PhpMyAdminPanel({
+  actions,
+  activeOperationKey,
+  link,
+  onRun,
+  onShellOpen,
+  operationDisabled,
+  operationDisabledTitle,
+  overview,
+  shell,
+  text,
+}: PhpMyAdminPanelProps) {
+  const [open, setOpen] = useState(false);
+  const copy = text.mariadbInstances;
+
+  return (
+    <DatabaseAdminSection
+      actions={actions}
+      activeOperationKey={activeOperationKey}
+      copy={{
+        containerLabel: copy.containerLabel,
+        domainLabel: copy.domainLabel,
+        domainUnknown: copy.domainUnknown,
+        linkLabel: text.common.link,
+        shellLabel: copy.actions.shell.label,
+        statusLabel: copy.statusLabel,
+      }}
+      eyebrow={copy.phpmyadminEyebrow}
+      link={link}
+      open={open}
+      operationDisabled={operationDisabled}
+      operationDisabledTitle={operationDisabledTitle}
+      overview={overview}
+      shell={shell}
+      title="phpMyAdmin"
+      onOpenChange={setOpen}
+      onRun={onRun}
+      onShellOpen={onShellOpen}
+    />
   );
 }

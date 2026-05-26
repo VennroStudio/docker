@@ -1,6 +1,6 @@
 import { commandPageRegistry, pgadminActions, phpmyadminActions } from "@/entities/infrastructure";
-import { MariaDbInstancesPanel } from "@/features/manage-mariadb";
-import { PostgresInstancesPanel } from "@/features/manage-postgres";
+import { MariaDbInstancesPanel, PhpMyAdminPanel } from "@/features/manage-mariadb";
+import { PgAdminPanel, PostgresInstancesPanel } from "@/features/manage-postgres";
 import { ServicePageLayout } from "@/widgets/service-page-layout";
 import type { InfrastructureController } from "../model/useInfrastructureController";
 
@@ -40,7 +40,7 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
       description={page.description}
       title={text.views.mariadb}
     >
-      <div className="grid gap-4 min-[1500px]:grid-cols-2">
+      <div className="space-y-4">
         <MariaDbInstancesPanel
           activeOperationKey={activeOperationKey}
           error={mariaDbInstances.error}
@@ -48,14 +48,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
           loading={mariaDbInstances.loading}
           operationDisabled={operationRunning}
           operationDisabledTitle={operationBlockTitle}
-          phpmyadmin={mariaDbInstances.phpmyadmin}
-          phpmyadminActions={translateActions(phpmyadminActions)}
-          phpmyadminLink={serviceLinks.links["phpmyadmin-container"]}
-          phpmyadminShell={mariaShells.find((shell) => shell.container === "phpmyadmin-container")}
           text={text}
           onCreate={runMariaDbInstanceCreate}
-          onPhpMyAdminRun={runCommand}
-          onPhpMyAdminShellOpen={runShell}
           onRun={runMariaDbInstanceAction}
           onShellOpen={runMariaDbInstanceShell}
         />
@@ -66,16 +60,34 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
           loading={postgresInstances.loading}
           operationDisabled={operationRunning}
           operationDisabledTitle={operationBlockTitle}
-          pgadmin={postgresInstances.pgadmin}
-          pgadminActions={translateActions(pgadminActions)}
-          pgadminLink={serviceLinks.links["pgadmin-container"]}
-          pgadminShell={postgresShells.find((shell) => shell.container === "pgadmin-container")}
           text={text}
           onCreate={runPostgresInstanceCreate}
-          onPgAdminRun={runCommand}
-          onPgAdminShellOpen={runShell}
           onRun={runPostgresInstanceAction}
           onShellOpen={runPostgresInstanceShell}
+        />
+        <PhpMyAdminPanel
+          actions={translateActions(phpmyadminActions)}
+          activeOperationKey={activeOperationKey}
+          link={serviceLinks.links["phpmyadmin-container"]}
+          operationDisabled={operationRunning}
+          operationDisabledTitle={operationBlockTitle}
+          overview={mariaDbInstances.phpmyadmin}
+          shell={mariaShells.find((shell) => shell.container === "phpmyadmin-container")}
+          text={text}
+          onRun={runCommand}
+          onShellOpen={runShell}
+        />
+        <PgAdminPanel
+          actions={translateActions(pgadminActions)}
+          activeOperationKey={activeOperationKey}
+          link={serviceLinks.links["pgadmin-container"]}
+          operationDisabled={operationRunning}
+          operationDisabledTitle={operationBlockTitle}
+          overview={postgresInstances.pgadmin}
+          shell={postgresShells.find((shell) => shell.container === "pgadmin-container")}
+          text={text}
+          onRun={runCommand}
+          onShellOpen={runShell}
         />
       </div>
     </ServicePageLayout>

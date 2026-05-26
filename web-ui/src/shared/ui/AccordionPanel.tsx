@@ -11,6 +11,7 @@ type AccordionPanelProps = {
   eyebrow: string;
   open: boolean;
   title: string;
+  titlePrefix?: ReactNode;
   onOpenChange: (open: boolean) => void;
 };
 
@@ -24,6 +25,7 @@ export function AccordionPanel({
   onOpenChange,
   open,
   title,
+  titlePrefix,
 }: AccordionPanelProps) {
   const TitleElement = defaultTitleElement;
 
@@ -40,7 +42,10 @@ export function AccordionPanel({
       >
         <span className="min-w-0 flex-1">
           <span className="block text-xs font-semibold uppercase text-zinc-500">{eyebrow}</span>
-          <TitleElement className="mt-1 block truncate text-base font-bold text-zinc-50">{title}</TitleElement>
+          <span className="mt-1 flex min-w-0 items-center gap-2">
+            {titlePrefix ? <span className="flex shrink-0">{titlePrefix}</span> : null}
+            <TitleElement className="block min-w-0 truncate text-base font-bold text-zinc-50">{title}</TitleElement>
+          </span>
         </span>
         {actions ? (
           <span

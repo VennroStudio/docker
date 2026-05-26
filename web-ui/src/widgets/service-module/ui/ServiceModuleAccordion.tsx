@@ -53,9 +53,9 @@ export function ServiceModuleAccordion({
       eyebrow={eyebrow}
       open={open}
       title={title}
+      titlePrefix={status ? <StatusDot state={status.state} /> : undefined}
       actions={
         <>
-          {status ? <StatusDot state={status.state} /> : null}
           {link ? (
             <IconLink href={link.url} label={link.label} title={link.url}>
               <ExternalLink size={16} strokeWidth={2.5} />

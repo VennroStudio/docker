@@ -74,15 +74,15 @@ export function ShellIconButton({
 
 export function StatusDot({ state }: { state: ContainerRuntimeState }) {
   const stateClass = {
-    missing: "bg-zinc-500",
-    running: "bg-emerald-300",
-    stopped: "bg-amber-300",
-    unknown: "bg-zinc-400",
+    missing: "bg-zinc-500 text-zinc-500",
+    running: "bg-[#52ff8f] text-[#52ff8f]",
+    stopped: "bg-amber-300 text-amber-300",
+    unknown: "bg-zinc-400 text-zinc-400",
   }[state];
 
   return (
     <span
-      className={cn("h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_18px_currentColor]", stateClass)}
+      className={cn("h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_20px_currentColor]", stateClass)}
       title={state}
     />
   );

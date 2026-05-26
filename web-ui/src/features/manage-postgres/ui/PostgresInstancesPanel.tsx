@@ -19,16 +19,23 @@ type PostgresInstancesPanelProps = {
   loading: boolean;
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
-  pgadmin: PgAdminOverview;
-  pgadminActions: CommandAction[];
-  pgadminLink?: ServiceLink;
-  pgadminShell?: ShellAction;
   text: AppText;
   onCreate: (form: PostgresInstanceForm) => void;
-  onPgAdminRun: (action: CommandAction) => void;
-  onPgAdminShellOpen: (action: ShellAction) => void;
   onRun: (instance: PostgresInstance, action: PostgresInstanceAction) => void;
   onShellOpen: (instance: PostgresInstance) => void;
+};
+
+type PgAdminPanelProps = {
+  activeOperationKey?: null | string;
+  actions: CommandAction[];
+  link?: ServiceLink;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
+  overview: PgAdminOverview;
+  shell?: ShellAction;
+  text: AppText;
+  onRun: (action: CommandAction) => void;
+  onShellOpen: (action: ShellAction) => void;
 };
 
 export function PostgresInstancesPanel({
@@ -37,26 +44,19 @@ export function PostgresInstancesPanel({
   instances,
   loading,
   onCreate,
-  onPgAdminRun,
-  onPgAdminShellOpen,
   onRun,
   onShellOpen,
   operationDisabled,
   operationDisabledTitle,
-  pgadmin,
-  pgadminActions,
-  pgadminLink,
-  pgadminShell,
   text,
 }: PostgresInstancesPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
-  const [pgAdminOpen, setPgAdminOpen] = useState(false);
   const [postgresOpen, setPostgresOpen] = useState(true);
   const copy = text.postgresInstances;
   const actionLabels = text.mariadbInstances.actions;
 
   return (
-    <div className="space-y-4">
+    <>
       <DatabaseInstancesSection
         actionLabels={{
           clean: actionLabels.clean.label,
@@ -84,30 +84,49 @@ export function PostgresInstancesPanel({
       />
 
       {createOpen ? <PostgresCreateModal copy={copy} onClose={() => setCreateOpen(false)} onCreate={onCreate} /> : null}
+    </>
+  );
+}
 
-      <DatabaseAdminSection
-        actions={pgadminActions}
-        activeOperationKey={activeOperationKey}
-        copy={{
-          containerLabel: copy.containerLabel,
-          domainLabel: copy.domainLabel,
-          domainUnknown: copy.domainUnknown,
-          linkLabel: text.common.link,
-          shellLabel: actionLabels.shell.label,
-          statusLabel: copy.statusLabel,
-        }}
-        eyebrow={copy.pgadminEyebrow}
-        link={pgadminLink}
-        open={pgAdminOpen}
-        operationDisabled={operationDisabled}
-        operationDisabledTitle={operationDisabledTitle}
-        overview={pgadmin}
-        shell={pgadminShell}
-        title="pgAdmin"
-        onOpenChange={setPgAdminOpen}
-        onRun={onPgAdminRun}
-        onShellOpen={onPgAdminShellOpen}
-      />
-    </div>
+export function PgAdminPanel({
+  actions,
+  activeOperationKey,
+  link,
+  onRun,
+  onShellOpen,
+  operationDisabled,
+  operationDisabledTitle,
+  overview,
+  shell,
+  text,
+}: PgAdminPanelProps) {
+  const [open, setOpen] = useState(false);
+  const copy = text.postgresInstances;
+  const actionLabels = text.mariadbInstances.actions;
+
+  return (
+    <DatabaseAdminSection
+      actions={actions}
+      activeOperationKey={activeOperationKey}
+      copy={{
+        containerLabel: copy.containerLabel,
+        domainLabel: copy.domainLabel,
+        domainUnknown: copy.domainUnknown,
+        linkLabel: text.common.link,
+        shellLabel: actionLabels.shell.label,
+        statusLabel: copy.statusLabel,
+      }}
+      eyebrow={copy.pgadminEyebrow}
+      link={link}
+      open={open}
+      operationDisabled={operationDisabled}
+      operationDisabledTitle={operationDisabledTitle}
+      overview={overview}
+      shell={shell}
+      title="pgAdmin"
+      onOpenChange={setOpen}
+      onRun={onRun}
+      onShellOpen={onShellOpen}
+    />
   );
 }

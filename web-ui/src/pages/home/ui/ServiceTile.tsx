@@ -34,7 +34,7 @@ export function ServiceTile({ onOpen, service, status, text }: ServiceTileProps)
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
                   state === "running"
-                    ? "bg-emerald-300"
+                    ? "bg-[#52ff8f] shadow-[0_0_12px_rgba(82,255,143,0.75)]"
                     : state === "partial"
                       ? "bg-teal-300"
                       : state === "stopped"

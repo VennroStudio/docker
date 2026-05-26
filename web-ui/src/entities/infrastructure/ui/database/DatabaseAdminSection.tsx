@@ -31,9 +31,9 @@ export function DatabaseAdminSection({
       eyebrow={eyebrow}
       open={open}
       title={title}
+      titlePrefix={<StatusDot state={overview.state} />}
       actions={
         <>
-          <StatusDot state={overview.state} />
           {link ? (
             <IconLink href={link.url} label={link.label} title={link.url}>
               <ExternalLink size={16} strokeWidth={2.5} />
