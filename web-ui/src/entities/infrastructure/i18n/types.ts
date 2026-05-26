@@ -90,6 +90,38 @@ export type AppText = {
       user: string;
       version: string;
     };
+    import: {
+      action: string;
+      database: string;
+      databasePlaceholder: string;
+      emptyFiles: string;
+      filePath: string;
+      filePathPlaceholder: string;
+      fileSelect: string;
+      fileSelectPlaceholder: string;
+      refreshFiles: string;
+      title: string;
+      titleEyebrow: string;
+      validation: {
+        database: string;
+        disabled: string;
+        filePath: string;
+      };
+    };
+    export: {
+      action: string;
+      database: string;
+      databasePlaceholder: string;
+      filePath: string;
+      filePathPlaceholder: string;
+      title: string;
+      titleEyebrow: string;
+      validation: {
+        database: string;
+        disabled: string;
+        filePath: string;
+      };
+    };
     instanceTitle: (version: string) => string;
     legacy: string;
     loading: string;

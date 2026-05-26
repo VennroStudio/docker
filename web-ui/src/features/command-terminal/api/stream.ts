@@ -1,5 +1,7 @@
 import type {
   CommandId,
+  MariaDbExportForm,
+  MariaDbImportForm,
   MariaDbInstanceAction,
   MariaDbInstanceForm,
   PostgresInstanceAction,
@@ -69,6 +71,28 @@ export function streamMariaDbInstanceAction(
 ): () => void {
   const url = streamUrl("/api/stream/mariadb-instance", { action, name });
   return openStream(url, handlers);
+}
+
+export function streamMariaDbImport(form: MariaDbImportForm, handlers: StreamHandlers): () => void {
+  return openPostStream(
+    "/api/stream/mariadb-import",
+    {
+      database: form.database,
+      filePath: form.filePath,
+    },
+    handlers,
+  );
+}
+
+export function streamMariaDbExport(form: MariaDbExportForm, handlers: StreamHandlers): () => void {
+  return openPostStream(
+    "/api/stream/mariadb-export",
+    {
+      database: form.database,
+      filePath: form.filePath,
+    },
+    handlers,
+  );
 }
 
 export function streamPostgresInstanceCreate(form: PostgresInstanceForm, handlers: StreamHandlers): () => void {

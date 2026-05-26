@@ -17,6 +17,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
     operationRunning,
     postgresInstances,
     runCommand,
+    runMariaDbExport,
+    runMariaDbImport,
     runMariaDbInstanceAction,
     runMariaDbInstanceCreate,
     runMariaDbInstanceShell,
@@ -50,6 +52,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
           operationDisabledTitle={operationBlockTitle}
           text={text}
           onCreate={runMariaDbInstanceCreate}
+          onExport={runMariaDbExport}
+          onImport={runMariaDbImport}
           onRun={runMariaDbInstanceAction}
           onShellOpen={runMariaDbInstanceShell}
         />

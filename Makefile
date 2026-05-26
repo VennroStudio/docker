@@ -91,6 +91,12 @@ import-db-h: ## Импорт SQL дампа (.sql)
 import-db-gz: ## Импорт сжатого дампа (.sql.gz)
 	gunzip -c ${HOME_DUMP_PATH}${DUMP_NAME} | docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME}
 
+export-db-h: ## Экспорт SQL дампа (.sql)
+	docker exec mariadb-container mysqldump -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} > ${HOME_DUMP_PATH}${DUMP_NAME}
+
+export-db-gz: ## Экспорт сжатого дампа (.sql.gz)
+	docker exec mariadb-container mysqldump -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} | gzip > ${HOME_DUMP_PATH}${DUMP_NAME}
+
 upload-dump: ## Загрузка дампа на сервер
 	scp ${HOME_DUMP_PATH}${DUMP_NAME} ${SSH}:${SERVER_DUMP_PATH}
 
@@ -450,7 +456,7 @@ push: ## Auto save
 
 .PHONY: ui go-db
 .PHONY: host-add host-remove app-proxy app-proxy-remove
-.PHONY: import-db-h import-db-gz upload-dump
+.PHONY: import-db-h import-db-gz export-db-h export-db-gz upload-dump
 .PHONY: generate-user ansible-build ansible-setup ansible-clean
 .PHONY: npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
 .PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs

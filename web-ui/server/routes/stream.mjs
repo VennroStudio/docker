@@ -107,6 +107,26 @@ export async function streamRoute(req, res) {
     return streamSse(req, res, command, args);
   }
 
+  if (url.pathname === "/api/stream/mariadb-import") {
+    const filePath = param("filePath");
+    const database = param("database");
+
+    validateDumpFilePath(filePath);
+    validateDatabaseName(database);
+
+    return streamSse(req, res, "node", ["./scripts/mariadb-import.mjs", "--file", filePath, "--database", database]);
+  }
+
+  if (url.pathname === "/api/stream/mariadb-export") {
+    const filePath = param("filePath");
+    const database = param("database");
+
+    validateDumpFilePath(filePath);
+    validateDatabaseName(database);
+
+    return streamSse(req, res, "node", ["./scripts/mariadb-export.mjs", "--file", filePath, "--database", database]);
+  }
+
   if (url.pathname === "/api/stream/postgres-instance-add") {
     const version = param("version");
     const user = param("user");
@@ -142,4 +162,14 @@ export async function streamRoute(req, res) {
 
 function isTruthy(value) {
   return value === true || ["1", "true", "yes", "on"].includes(String(value || "").toLowerCase());
+}
+
+function validateDatabaseName(database) {
+  assert(/^[A-Za-z0-9_$.-]+$/.test(database || ""), "Invalid database name");
+}
+
+function validateDumpFilePath(filePath) {
+  assert(filePath, "Dump file path is required");
+  assert(!/[\0\r\n]/.test(filePath), "Invalid dump file path");
+  assert(String(filePath).endsWith(".sql") || String(filePath).endsWith(".sql.gz"), "Invalid dump file extension");
 }

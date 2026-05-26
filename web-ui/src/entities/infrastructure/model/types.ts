@@ -72,6 +72,16 @@ export type MariaDbInstanceForm = {
   version: string;
 };
 
+export type MariaDbImportForm = {
+  database: string;
+  filePath: string;
+};
+
+export type MariaDbExportForm = {
+  database: string;
+  filePath: string;
+};
+
 export type PostgresInstance = {
   composeFile: string;
   container: string;

@@ -3,6 +3,8 @@ import { DatabaseAdminSection, DatabaseInstancesSection } from "@/entities/infra
 import type { ServiceLink } from "@/entities/infrastructure";
 import type {
   AppText,
+  MariaDbExportForm,
+  MariaDbImportForm,
   CommandAction,
   MariaDbInstance,
   MariaDbInstanceAction,
@@ -11,6 +13,8 @@ import type {
   ShellAction,
 } from "@/entities/infrastructure";
 import { MariaDbCreateModal } from "./MariaDbCreateModal";
+import { MariaDbExportBlock } from "./MariaDbExportBlock";
+import { MariaDbImportBlock } from "./MariaDbImportBlock";
 
 type MariaDbInstancesPanelProps = {
   activeOperationKey?: null | string;
@@ -21,6 +25,8 @@ type MariaDbInstancesPanelProps = {
   operationDisabledTitle?: string;
   text: AppText;
   onCreate: (form: MariaDbInstanceForm) => void;
+  onExport: (form: MariaDbExportForm) => void;
+  onImport: (form: MariaDbImportForm) => void;
   onRun: (instance: MariaDbInstance, action: MariaDbInstanceAction) => void;
   onShellOpen: (instance: MariaDbInstance) => void;
 };
@@ -44,6 +50,8 @@ export function MariaDbInstancesPanel({
   instances,
   loading,
   onCreate,
+  onExport,
+  onImport,
   onRun,
   onShellOpen,
   operationDisabled,
@@ -80,7 +88,24 @@ export function MariaDbInstancesPanel({
         onOpenChange={setMariaDbOpen}
         onRun={onRun}
         onShellOpen={onShellOpen}
-      />
+      >
+        <div className="grid gap-3 min-[1280px]:grid-cols-2">
+          <MariaDbImportBlock
+            copy={copy.import}
+            disabled={operationDisabled}
+            disabledTitle={operationDisabledTitle}
+            loading={operationDisabled && activeOperationKey === "mariadb:import"}
+            onImport={onImport}
+          />
+          <MariaDbExportBlock
+            copy={copy.export}
+            disabled={operationDisabled}
+            disabledTitle={operationDisabledTitle}
+            loading={operationDisabled && activeOperationKey === "mariadb:export"}
+            onExport={onExport}
+          />
+        </div>
+      </DatabaseInstancesSection>
 
       {createOpen ? <MariaDbCreateModal copy={copy} onClose={() => setCreateOpen(false)} onCreate={onCreate} /> : null}
     </>

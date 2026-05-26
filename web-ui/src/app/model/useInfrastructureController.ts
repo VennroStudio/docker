@@ -12,6 +12,8 @@ import {
   useServiceStatuses,
   type CommandAction,
   type CommandPageId,
+  type MariaDbExportForm,
+  type MariaDbImportForm,
   type MariaDbInstance,
   type MariaDbInstanceAction,
   type MariaDbInstanceForm,
@@ -29,6 +31,8 @@ import {
   proxyPreview,
   streamCommand,
   streamHost,
+  streamMariaDbExport,
+  streamMariaDbImport,
   streamMariaDbInstanceAction,
   streamMariaDbInstanceCreate,
   streamPostgresInstanceAction,
@@ -245,6 +249,26 @@ export function useInfrastructureController() {
     });
   };
 
+  const runMariaDbImport = (form: MariaDbImportForm) => {
+    runWithTerminal({
+      key: "mariadb:import",
+      label: text.mariadbInstances.import.action,
+      onSettled: mariaDbInstances.refresh,
+      open: (handlers) => streamMariaDbImport(form, handlers),
+      preview: `node ./scripts/mariadb-import.mjs --file ${form.filePath} --database ${form.database}`,
+    });
+  };
+
+  const runMariaDbExport = (form: MariaDbExportForm) => {
+    runWithTerminal({
+      key: "mariadb:export",
+      label: text.mariadbInstances.export.action,
+      onSettled: mariaDbInstances.refresh,
+      open: (handlers) => streamMariaDbExport(form, handlers),
+      preview: `node ./scripts/mariadb-export.mjs --file ${form.filePath} --database ${form.database}`,
+    });
+  };
+
   const runMariaDbInstanceAction = async (instance: MariaDbInstance, action: MariaDbInstanceAction) => {
     if (action === "clean" || action === "down" || action === "stop") {
       const confirmed = await confirmDialog.confirm({
@@ -347,8 +371,10 @@ export function useInfrastructureController() {
     proxyForm,
     runCommand,
     runHost,
+    runMariaDbExport,
     runMariaDbInstanceAction,
     runMariaDbInstanceCreate,
+    runMariaDbImport,
     runMariaDbInstanceShell,
     runPostgresInstanceAction,
     runPostgresInstanceCreate,

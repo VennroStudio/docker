@@ -7,6 +7,7 @@ import type { DatabaseInstanceRuntime, DatabaseInstancesSectionProps } from "./t
 export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntime>({
   activeOperationKey,
   actionLabels,
+  children,
   copy,
   error,
   instances,
@@ -65,6 +66,7 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
             onShellOpen={onShellOpen}
           />
         ))}
+        {children}
       </div>
     </AccordionPanel>
   );

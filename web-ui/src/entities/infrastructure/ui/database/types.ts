@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { ServiceLink } from "../../api/links";
 import type { CommandAction, ContainerRuntimeState, MariaDbInstanceAction, ShellAction } from "../../model/types";
 
@@ -59,6 +60,7 @@ export type DatabaseAdminSectionProps = {
 export type DatabaseInstancesSectionProps<Instance extends DatabaseInstanceRuntime> = {
   activeOperationKey?: null | string;
   actionLabels: Record<DatabaseRuntimeAction | "shell", string>;
+  children?: ReactNode;
   copy: DatabaseInstancesCopy;
   error: string | null;
   instances: Instance[];
