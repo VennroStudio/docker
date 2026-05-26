@@ -257,7 +257,7 @@ export function useInfrastructureController() {
       label: text.mariadbInstances.import.action,
       onSettled: mariaDbInstances.refresh,
       open: (handlers) => streamMariaDbImport(form, handlers),
-      preview: `node ./scripts/mariadb-import.mjs --container ${form.container} --file ${form.filePath} --database ${form.database}`,
+      preview: `make -e mariadb-import CONTAINER=${form.container} DB_NAME=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 
@@ -267,7 +267,7 @@ export function useInfrastructureController() {
       label: text.mariadbInstances.export.action,
       onSettled: mariaDbInstances.refresh,
       open: (handlers) => streamMariaDbExport(form, handlers),
-      preview: `node ./scripts/mariadb-export.mjs --container ${form.container} --file ${form.filePath} --database ${form.database}`,
+      preview: `make -e mariadb-export CONTAINER=${form.container} DB_NAME=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 

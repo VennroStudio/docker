@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
@@ -8,6 +9,15 @@ const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
 const phpmyadminPath = "docker/phpmyadmin";
 const phpmyadminCompatibilityPath = "docker/local/phpmyadmin";
 const defaultStartPort = 3307;
+const runActions = new Set([
+  "clean",
+  "down",
+  "logs",
+  "shell",
+  "start",
+  "stop",
+  "up",
+]);
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : String(error));
@@ -21,8 +31,12 @@ async function main() {
   if (command === "add") return await addInstance(options);
   if (command === "generate") return await generate();
   if (command === "list") return list();
+  if (command === "resolve") return resolveInstance(options);
+  if (command === "run") return await runInstance(options);
 
-  throw new Error("Usage: node scripts/mariadb-instances.mjs add|generate|list");
+  throw new Error(
+    "Usage: node scripts/mariadb-instances.mjs add|generate|list|resolve|run",
+  );
 }
 
 async function addInstance(options) {
@@ -30,19 +44,34 @@ async function addInstance(options) {
   const authMode = options["auth-mode"] || "config";
   const user = required(options.user, "USER is required");
   const password = required(options.password, "PASSWORD is required");
-  const rootPassword = required(options["root-password"], "ROOT_PASSWORD is required");
+  const rootPassword = required(
+    options["root-password"],
+    "ROOT_PASSWORD is required",
+  );
 
   assert(/^\d+(\.\d+){1,2}$/.test(version), "Invalid VERSION");
-  assert(authMode === "config" || authMode === "cookie", "AUTH_MODE must be config or cookie");
+  assert(
+    authMode === "config" || authMode === "cookie",
+    "AUTH_MODE must be config or cookie",
+  );
 
   const instances = readInstances();
   const name = options.name || versionName(version);
   const hostPort = Number(options.port || findFreePort(instances));
 
   assert(/^[a-z0-9][a-z0-9-]*$/.test(name), "Invalid NAME");
-  assert(Number.isInteger(hostPort) && hostPort > 0 && hostPort <= 65535, "Invalid PORT");
-  assert(!instances.some((instance) => instance.name === name), `Instance ${name} already exists`);
-  assert(!instances.some((instance) => Number(instance.hostPort) === hostPort), `Port ${hostPort} is already used`);
+  assert(
+    Number.isInteger(hostPort) && hostPort > 0 && hostPort <= 65535,
+    "Invalid PORT",
+  );
+  assert(
+    !instances.some((instance) => instance.name === name),
+    `Instance ${name} already exists`,
+  );
+  assert(
+    !instances.some((instance) => Number(instance.hostPort) === hostPort),
+    `Port ${hostPort} is already used`,
+  );
 
   const instance = {
     name,
@@ -62,7 +91,9 @@ async function addInstance(options) {
   writeInstances(instances);
   writeFileSync(path.join(cwd, instance.composeFile), composeFor(instance));
   await generate();
-  console.log(`Added MariaDB ${version}: ${instance.composeFile} on port ${hostPort}`);
+  console.log(
+    `Added MariaDB ${version}: ${instance.composeFile} on port ${hostPort}`,
+  );
 }
 
 async function generate() {
@@ -73,14 +104,91 @@ async function generate() {
   writeFileSync(path.join(cwd, phpmyadminPath, "config.inc.php"), config);
 
   if (existsSync(path.join(cwd, phpmyadminCompatibilityPath))) {
-    writeFileSync(path.join(cwd, phpmyadminCompatibilityPath, "config.inc.php"), config);
+    writeFileSync(
+      path.join(cwd, phpmyadminCompatibilityPath, "config.inc.php"),
+      config,
+    );
   }
 
-  console.log(`Generated phpMyAdmin config for ${instances.length} MariaDB instance(s)`);
+  console.log(
+    `Generated phpMyAdmin config for ${instances.length} MariaDB instance(s)`,
+  );
 }
 
 function list() {
   console.log(JSON.stringify(readInstances(), null, 2));
+}
+
+function resolveInstance(options) {
+  const instance = findTargetInstance(options);
+  const field = options.field || "json";
+
+  if (field === "json") {
+    console.log(JSON.stringify(instance, null, 2));
+    return;
+  }
+
+  assert(
+    Object.hasOwn(instance, field),
+    `Unknown MariaDB instance field: ${field}`,
+  );
+  console.log(instance[field]);
+}
+
+async function runInstance(options) {
+  const action = required(options.action, "ACTION is required");
+  assert(
+    runActions.has(action),
+    "ACTION must be clean, down, logs, shell, start, stop or up",
+  );
+
+  const instance = findTargetInstance(options);
+
+  if (action === "shell") {
+    return await run("docker", ["exec", "-it", instance.container, "sh"]);
+  }
+
+  if (action === "clean") {
+    return await run("sh", [
+      "-lc",
+      `docker compose -f ${quoteShell(instance.composeFile)} down && docker rmi mariadb:${quoteShell(
+        instance.version,
+      )} 2>/dev/null || true`,
+    ]);
+  }
+
+  const args = ["compose", "-f", instance.composeFile];
+  if (action === "up") args.push("up", "-d");
+  else if (action === "logs") args.push("logs", "-f");
+  else args.push(action);
+
+  await run("docker", args);
+}
+
+function findTargetInstance(options) {
+  const instances = readInstances();
+  const name = options.name || process.env.MARIADB_NAME || process.env.NAME;
+  const container =
+    options.container || process.env.MARIADB_CONTAINER || process.env.CONTAINER;
+
+  if (name) {
+    const instance = instances.find((item) => item.name === name);
+    assert(instance, `MariaDB instance ${name} is not configured`);
+    return instance;
+  }
+
+  if (container) {
+    const instance = instances.find((item) => item.container === container);
+    assert(instance, `MariaDB container ${container} is not configured`);
+    return instance;
+  }
+
+  assert(
+    instances.length === 1,
+    "MariaDB instance is required. Pass NAME=instance-name or CONTAINER=container-name",
+  );
+
+  return instances[0];
 }
 
 function readInstances() {
@@ -148,7 +256,9 @@ function phpmyadminServerFor(instance) {
 
   if (authMode === "config") {
     rows.push(`$cfg['Servers'][$i]['user'] = ${quotePhp(instance.user)};`);
-    rows.push(`$cfg['Servers'][$i]['password'] = ${quotePhp(instance.password)};`);
+    rows.push(
+      `$cfg['Servers'][$i]['password'] = ${quotePhp(instance.password)};`,
+    );
   }
 
   return `${rows.join("\n")}\n`;
@@ -184,8 +294,29 @@ function parseArgs(args) {
   return options;
 }
 
+function run(command, args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { stdio: "inherit" });
+
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve();
+      else
+        reject(
+          new Error(
+            `${command} ${args.join(" ")} failed with exit code ${code}`,
+          ),
+        );
+    });
+  });
+}
+
 function quotePhp(value) {
   return `'${String(value).replaceAll("\\", "\\\\").replaceAll("'", "\\'")}'`;
+}
+
+function quoteShell(value) {
+  return `'${String(value).replaceAll("'", "'\\''")}'`;
 }
 
 function quoteYaml(value) {

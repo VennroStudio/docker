@@ -11,6 +11,9 @@ REDISINSIGHT_COMPOSE := docker compose -f docker-compose-redisinsight.yml
 REGISTRY_COMPOSE := docker compose -f docker-compose-registry.yml
 REGISTRY_UI_COMPOSE := docker compose -f docker-compose-registry-ui.yml
 DATE := $(shell date +%d-%m-%Y)
+NODE = docker run --rm -v "$(PWD):/app" -w /app
+NODE_IMAGE ?= node:$(if $(NODE_LIBRARY),$(NODE_LIBRARY),24-bookworm)
+NODE_BIN ?= node
 
 help: ## Показать список команд
 	@echo ""
@@ -20,7 +23,7 @@ help: ## Показать список команд
 		$(MAKEFILE_LIST)
 	@echo ""
 
-##@ Контейнеры
+##@ Проект
 init: ## Первый запуск: создать локальные env/config файлы без перезаписи существующих
 	@cp -n .env.example .env 2>/dev/null || true
 	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres docker/services
@@ -29,12 +32,14 @@ init: ## Первый запуск: создать локальные env/config
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
 	@echo "Init complete. Check .env and run make ui"
 
+##@ Docker network
 add-proxy: ## Создать общую сеть
 	docker network create proxy
 
 delete-proxy: ## Удалить общую сеть
 	docker network rm proxy
 
+##@ Web UI
 ui: ## Запустить локальный web-интерфейс управления
 	@docker build -t infrastructure-ui -f web-ui/Dockerfile .
 	@docker run --rm \
@@ -51,6 +56,8 @@ ui: ## Запустить локальный web-интерфейс управл
 		-e NPM_PASSWORD \
 		infrastructure-ui ./web-ui/server.mjs
 
+web-ui: ui
+
 ##@ Локальные домены и Nginx Proxy Manager
 host-add: ## Добавить локальный домен в /etc/hosts, передать DOMAIN=site.local
 	@./scripts/hosts.sh add "$(DOMAIN)"
@@ -58,8 +65,6 @@ host-add: ## Добавить локальный домен в /etc/hosts, пе�
 host-remove: ## Удалить локальный домен из /etc/hosts, передать DOMAIN=site.local
 	@./scripts/hosts.sh remove "$(DOMAIN)"
 
-NODE = docker run --rm -v "$(PWD):/app" -w /app
-NODE_IMAGE = node:24-bookworm
 app-proxy: ## Создать/обновить Proxy Host в NPM, передать DOMAIN=site.local TARGET=container PORT=80, опционально SSL=1
 	@$(NODE) \
 		-e NPM_URL \
@@ -80,25 +85,6 @@ app-proxy-remove: ## Удалить Proxy Host и SSL из NPM, передать
 		$(NODE_IMAGE) node ./scripts/npm-proxy.mjs \
 			--delete \
 			--domain "$(DOMAIN)"
-
-##@ Для работы с Mysql
-go-db: ## Вход в shell MariaDB
-	docker exec -it mariadb-container sh
-
-import-db-h: ## Импорт SQL дампа (.sql)
-	docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} < ${HOME_DUMP_PATH}${DUMP_NAME}
-
-import-db-gz: ## Импорт сжатого дампа (.sql.gz)
-	gunzip -c ${HOME_DUMP_PATH}${DUMP_NAME} | docker exec -i mariadb-container mysql -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME}
-
-export-db-h: ## Экспорт SQL дампа (.sql)
-	docker exec mariadb-container mysqldump -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} > ${HOME_DUMP_PATH}${DUMP_NAME}
-
-export-db-gz: ## Экспорт сжатого дампа (.sql.gz)
-	docker exec mariadb-container mysqldump -u root -p${MYSQL_ROOT_PASSWORD} ${DB_NAME} | gzip > ${HOME_DUMP_PATH}${DUMP_NAME}
-
-upload-dump: ## Загрузка дампа на сервер
-	scp ${HOME_DUMP_PATH}${DUMP_NAME} ${SSH}:${SERVER_DUMP_PATH}
 
 ##@ Nginx Proxy Manager
 npm-up: ## Запустить контейнер NPM
@@ -146,6 +132,25 @@ mariadb-clean: ## Удалить контейнер и образ MariaDB
 mariadb-logs: ## Логи MariaDB
 	$(MARIADB_COMPOSE) logs -f db
 
+mariadb-shell: ## Shell MariaDB instance, опционально NAME=legacy-10-6 или CONTAINER=container-name
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action shell
+
+mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/app.sql, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/mariadb-import.mjs
+
+mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/app.sql.gz, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/mariadb-export.mjs
+
+mariadb-dump-upload: ## Загрузить дамп на сервер, передать FILE=dumps/app.sql или DUMP_FILE=dumps/app.sql
+	@file="$${FILE:-$${DUMP_FILE:-$${HOME_DUMP_PATH}$${DUMP_NAME}}}"; \
+	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
+	scp "$$file" "$(SSH):$(SERVER_DUMP_PATH)"
+
+go-db: mariadb-shell
+import-db-h import-db-gz: mariadb-import
+export-db-h export-db-gz: mariadb-export
+upload-dump: mariadb-dump-upload
+
 ##@ phpMyAdmin
 phpmyadmin-up: ## Запустить контейнер phpMyAdmin
 	$(PHPMYADMIN_COMPOSE) up -d
@@ -169,6 +174,12 @@ phpmyadmin-clean: ## Удалить контейнер и образ phpMyAdmin
 phpmyadmin-logs: ## Логи phpMyAdmin
 	$(PHPMYADMIN_COMPOSE) logs -f phpmyadmin
 
+phpmyadmin-config-generate: ## Перегенерировать список серверов phpMyAdmin
+	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
+
+phpmyadmin-reload: ## Перезапустить phpMyAdmin после изменения списка серверов
+	$(PHPMYADMIN_COMPOSE) restart
+
 ##@ MariaDB instances
 mariadb-instance-add: ## Создать MariaDB instance, передать VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWORD=root-secret, опционально PORT=3307 AUTH_MODE=config|cookie
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs add \
@@ -185,33 +196,26 @@ mariadb-instance-list: ## Показать MariaDB instances
 mariadb-instance-generate: ## Перегенерировать phpMyAdmin servers config
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
 
-mariadb-instance-up: ## Запустить MariaDB instance, передать NAME=11-4
-	docker compose -f docker-compose-mariadb-$(NAME).yml up -d
+mariadb-instance-up: ## Запустить MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action up
 
-mariadb-instance-start: ## Запустить существующий MariaDB instance, передать NAME=11-4
-	docker compose -f docker-compose-mariadb-$(NAME).yml start
+mariadb-instance-start: ## Запустить существующий MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action start
 
-mariadb-instance-stop: ## Остановить MariaDB instance, передать NAME=11-4
-	docker compose -f docker-compose-mariadb-$(NAME).yml stop
+mariadb-instance-stop: ## Остановить MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action stop
 
-mariadb-instance-down: ## Удалить контейнер MariaDB instance, передать NAME=11-4
-	docker compose -f docker-compose-mariadb-$(NAME).yml down
+mariadb-instance-down: ## Удалить контейнер MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action down
 
-mariadb-instance-clean: ## Удалить контейнер и образ MariaDB instance, передать NAME=11-4 VERSION=11.4
-	docker compose -f docker-compose-mariadb-$(NAME).yml down
-	docker rmi mariadb:$(VERSION) 2>/dev/null || true
+mariadb-instance-clean: ## Удалить контейнер и образ MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action clean
 
-mariadb-instance-logs: ## Логи MariaDB instance, передать NAME=11-4
-	docker compose -f docker-compose-mariadb-$(NAME).yml logs -f
+mariadb-instance-logs: ## Логи MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action logs
 
-mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4
-	docker exec -it mariadb-$(NAME)-container sh
-
-phpmyadmin-config-generate: ## Перегенерировать список серверов phpMyAdmin
-	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
-
-phpmyadmin-reload: ## Перезапустить phpMyAdmin после изменения списка серверов
-	$(PHPMYADMIN_COMPOSE) restart
+mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action shell
 
 ##@ Registry
 generate-user: ## Создание пользователя Registry
@@ -454,12 +458,12 @@ push: ## Auto save
 	git commit -m "update"
 	git push
 
-.PHONY: ui go-db
+.PHONY: ui web-ui
 .PHONY: host-add host-remove app-proxy app-proxy-remove
-.PHONY: import-db-h import-db-gz export-db-h export-db-gz upload-dump
+.PHONY: go-db import-db-h import-db-gz export-db-h export-db-gz upload-dump
 .PHONY: generate-user ansible-build ansible-setup ansible-clean
 .PHONY: npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
-.PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs
+.PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs mariadb-shell mariadb-import mariadb-export mariadb-dump-upload
 .PHONY: phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs
 .PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
 .PHONY: phpmyadmin-config-generate phpmyadmin-reload

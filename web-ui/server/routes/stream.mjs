@@ -111,7 +111,7 @@ export async function streamRoute(req, res) {
   }
 
   if (url.pathname === "/api/stream/mariadb-import") {
-    const container = param("container") || "mariadb-container";
+    const container = param("container");
     const filePath = param("filePath");
     const database = param("database");
 
@@ -121,27 +121,17 @@ export async function streamRoute(req, res) {
     validateDumpFilePath(filePath);
     validateDatabaseName(database);
 
-    return streamSse(
-      req,
-      res,
-      "node",
-      [
-        "./scripts/mariadb-import.mjs",
-        "--container",
-        container,
-        "--root-password",
-        instance.rootPassword,
-        "--file",
-        filePath,
-        "--database",
-        database,
-      ],
-      runtimeEnv,
-    );
+    return streamSse(req, res, "make", ["-e", "mariadb-import"], {
+      ...runtimeEnv,
+      DB_NAME: database,
+      DUMP_FILE: filePath,
+      MARIADB_CONTAINER: container,
+      MARIADB_ROOT_PASSWORD: instance.rootPassword,
+    });
   }
 
   if (url.pathname === "/api/stream/mariadb-export") {
-    const container = param("container") || "mariadb-container";
+    const container = param("container");
     const filePath = param("filePath");
     const database = param("database");
 
@@ -151,23 +141,13 @@ export async function streamRoute(req, res) {
     validateDumpFilePath(filePath);
     validateDatabaseName(database);
 
-    return streamSse(
-      req,
-      res,
-      "node",
-      [
-        "./scripts/mariadb-export.mjs",
-        "--container",
-        container,
-        "--root-password",
-        instance.rootPassword,
-        "--file",
-        filePath,
-        "--database",
-        database,
-      ],
-      runtimeEnv,
-    );
+    return streamSse(req, res, "make", ["-e", "mariadb-export"], {
+      ...runtimeEnv,
+      DB_NAME: database,
+      DUMP_FILE: filePath,
+      MARIADB_CONTAINER: container,
+      MARIADB_ROOT_PASSWORD: instance.rootPassword,
+    });
   }
 
   if (url.pathname === "/api/stream/postgres-instance-add") {
