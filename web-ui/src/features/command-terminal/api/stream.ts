@@ -5,6 +5,8 @@ import type {
   MariaDbInstanceAction,
   MariaDbInstanceForm,
   PostgresInstanceAction,
+  PostgresExportForm,
+  PostgresImportForm,
   PostgresInstanceForm,
   ProxyFormState,
 } from "@/entities/infrastructure";
@@ -117,6 +119,30 @@ export function streamPostgresInstanceAction(
 ): () => void {
   const url = streamUrl("/api/stream/postgres-instance", { action, name });
   return openStream(url, handlers);
+}
+
+export function streamPostgresImport(form: PostgresImportForm, handlers: StreamHandlers): () => void {
+  return openPostStream(
+    "/api/stream/postgres-import",
+    {
+      container: form.container,
+      database: form.database,
+      filePath: form.filePath,
+    },
+    handlers,
+  );
+}
+
+export function streamPostgresExport(form: PostgresExportForm, handlers: StreamHandlers): () => void {
+  return openPostStream(
+    "/api/stream/postgres-export",
+    {
+      container: form.container,
+      database: form.database,
+      filePath: form.filePath,
+    },
+    handlers,
+  );
 }
 
 export async function sendShellInput(sessionId: string, input: string): Promise<void> {

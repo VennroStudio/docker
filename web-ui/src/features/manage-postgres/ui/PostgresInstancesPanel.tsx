@@ -5,16 +5,22 @@ import type {
   AppText,
   CommandAction,
   PgAdminOverview,
+  PostgresExportForm,
+  PostgresImportForm,
   PostgresInstance,
   PostgresInstanceAction,
   PostgresInstanceForm,
   ShellAction,
 } from "@/entities/infrastructure";
 import { PostgresCreateModal } from "./PostgresCreateModal";
+import { PostgresExportBlock } from "./PostgresExportBlock";
+import { PostgresImportBlock } from "./PostgresImportBlock";
 
 type PostgresInstancesPanelProps = {
   activeOperationKey?: null | string;
   defaultCreateForm?: Partial<PostgresInstanceForm>;
+  defaultDatabase?: string;
+  defaultDumpPath?: string;
   error: string | null;
   instances: PostgresInstance[];
   loading: boolean;
@@ -22,6 +28,8 @@ type PostgresInstancesPanelProps = {
   operationDisabledTitle?: string;
   text: AppText;
   onCreate: (form: PostgresInstanceForm) => void;
+  onExport: (form: PostgresExportForm) => void;
+  onImport: (form: PostgresImportForm) => void;
   onRun: (instance: PostgresInstance, action: PostgresInstanceAction) => void;
   onShellOpen: (instance: PostgresInstance) => void;
 };
@@ -42,10 +50,14 @@ type PgAdminPanelProps = {
 export function PostgresInstancesPanel({
   activeOperationKey,
   defaultCreateForm,
+  defaultDatabase,
+  defaultDumpPath,
   error,
   instances,
   loading,
   onCreate,
+  onExport,
+  onImport,
   onRun,
   onShellOpen,
   operationDisabled,
@@ -56,6 +68,7 @@ export function PostgresInstancesPanel({
   const [postgresOpen, setPostgresOpen] = useState(true);
   const copy = text.postgresInstances;
   const actionLabels = text.mariadbInstances.actions;
+  const runningInstances = instances.filter((instance) => instance.state === "running");
 
   return (
     <>
@@ -83,7 +96,30 @@ export function PostgresInstancesPanel({
         onOpenChange={setPostgresOpen}
         onRun={onRun}
         onShellOpen={onShellOpen}
-      />
+      >
+        <div className="grid gap-3 min-[1280px]:grid-cols-2">
+          <PostgresImportBlock
+            copy={copy.import}
+            defaultDatabase={defaultDatabase}
+            defaultFilePath={defaultDumpPath}
+            disabled={operationDisabled}
+            disabledTitle={operationDisabledTitle}
+            instances={runningInstances}
+            loading={operationDisabled && activeOperationKey === "postgres:import"}
+            onImport={onImport}
+          />
+          <PostgresExportBlock
+            copy={copy.export}
+            defaultDatabase={defaultDatabase}
+            defaultFilePath={defaultDumpPath}
+            disabled={operationDisabled}
+            disabledTitle={operationDisabledTitle}
+            instances={runningInstances}
+            loading={operationDisabled && activeOperationKey === "postgres:export"}
+            onExport={onExport}
+          />
+        </div>
+      </DatabaseInstancesSection>
 
       {createOpen ? (
         <PostgresCreateModal

@@ -1,23 +1,23 @@
 import { Download } from "lucide-react";
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
-import type { AppText, MariaDbExportForm, MariaDbInstance } from "@/entities/infrastructure";
+import type { AppText, PostgresExportForm, PostgresInstance } from "@/entities/infrastructure";
 import { Button, Field } from "@/shared/ui";
 
-type MariaDbExportBlockProps = {
-  copy: AppText["mariadbInstances"]["export"];
+type PostgresExportBlockProps = {
+  copy: AppText["postgresInstances"]["export"];
   defaultDatabase?: string;
   defaultFilePath?: string;
   disabled?: boolean;
   disabledTitle?: string;
-  instances: MariaDbInstance[];
+  instances: PostgresInstance[];
   loading?: boolean;
-  onExport: (form: MariaDbExportForm) => void;
+  onExport: (form: PostgresExportForm) => void;
 };
 
 const initialDatabase = "app";
 
-export function MariaDbExportBlock({
+export function PostgresExportBlock({
   copy,
   defaultDatabase = "",
   defaultFilePath = "",
@@ -26,7 +26,7 @@ export function MariaDbExportBlock({
   instances,
   loading = false,
   onExport,
-}: MariaDbExportBlockProps) {
+}: PostgresExportBlockProps) {
   const [container, setContainer] = useState<string>();
   const [database, setDatabase] = useState<string>();
   const [filePath, setFilePath] = useState<string>();
@@ -38,12 +38,12 @@ export function MariaDbExportBlock({
   const normalizedDatabase = databaseValue.trim();
   const normalizedFilePath = filePathValue.trim();
   const containerReady = instances.some((instance) => instance.container === normalizedContainer);
-  const fileReady = normalizedFilePath.endsWith(".sql") || normalizedFilePath.endsWith(".sql.gz");
-  const databaseReady = /^[A-Za-z0-9_$.-]+$/.test(normalizedDatabase);
+  const fileReady = isSupportedDumpPath(normalizedFilePath);
+  const databaseReady = /^[A-Za-z0-9_]+$/.test(normalizedDatabase);
   const formReady = containerReady && fileReady && databaseReady;
   const suggestedPath = useMemo(() => {
     const name = normalizedDatabase || initialDatabase;
-    return `dumps/mariadb/${name}.sql.gz`;
+    return `dumps/postgres/${name}.dump`;
   }, [normalizedDatabase]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -82,6 +82,7 @@ export function MariaDbExportBlock({
             <span className="text-xs font-medium text-red-200">{copy.validation.container}</span>
           ) : null}
         </label>
+
         <Field
           disabled={disabled}
           error={normalizedFilePath && !fileReady ? copy.validation.filePath : undefined}
@@ -102,7 +103,7 @@ export function MariaDbExportBlock({
               const nextDatabase = event.target.value;
               setDatabase(nextDatabase);
               if (!filePathValue || filePathValue === suggestedPath)
-                setFilePath(`dumps/mariadb/${nextDatabase.trim() || initialDatabase}.sql.gz`);
+                setFilePath(`dumps/postgres/${nextDatabase.trim() || initialDatabase}.dump`);
             }}
           />
           <Button
@@ -122,6 +123,10 @@ export function MariaDbExportBlock({
   );
 }
 
-function instanceLabel(instance: MariaDbInstance) {
-  return `MariaDB ${instance.version} / ${instance.container} / :${instance.hostPort}`;
+function isSupportedDumpPath(filePath: string) {
+  return filePath.endsWith(".sql") || filePath.endsWith(".sql.gz") || filePath.endsWith(".dump");
+}
+
+function instanceLabel(instance: PostgresInstance) {
+  return `Postgres ${instance.version} / ${instance.container} / :${instance.hostPort}`;
 }

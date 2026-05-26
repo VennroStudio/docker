@@ -17,6 +17,8 @@ import {
   type MariaDbInstance,
   type MariaDbInstanceAction,
   type MariaDbInstanceForm,
+  type PostgresExportForm,
+  type PostgresImportForm,
   type PostgresInstance,
   type PostgresInstanceAction,
   type PostgresInstanceForm,
@@ -35,6 +37,8 @@ import {
   streamMariaDbImport,
   streamMariaDbInstanceAction,
   streamMariaDbInstanceCreate,
+  streamPostgresExport,
+  streamPostgresImport,
   streamPostgresInstanceAction,
   streamPostgresInstanceCreate,
   streamProxy,
@@ -311,6 +315,26 @@ export function useInfrastructureController() {
     });
   };
 
+  const runPostgresImport = (form: PostgresImportForm) => {
+    runWithTerminal({
+      key: "postgres:import",
+      label: text.postgresInstances.import.action,
+      onSettled: postgresInstances.refresh,
+      open: (handlers) => streamPostgresImport(form, handlers),
+      preview: `make -e postgres-import CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
+    });
+  };
+
+  const runPostgresExport = (form: PostgresExportForm) => {
+    runWithTerminal({
+      key: "postgres:export",
+      label: text.postgresInstances.export.action,
+      onSettled: postgresInstances.refresh,
+      open: (handlers) => streamPostgresExport(form, handlers),
+      preview: `make -e postgres-export CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
+    });
+  };
+
   const runPostgresInstanceAction = async (instance: PostgresInstance, action: PostgresInstanceAction) => {
     if (action === "clean" || action === "down" || action === "stop") {
       const confirmed = await confirmDialog.confirm({
@@ -378,6 +402,8 @@ export function useInfrastructureController() {
     runMariaDbInstanceCreate,
     runMariaDbImport,
     runMariaDbInstanceShell,
+    runPostgresExport,
+    runPostgresImport,
     runPostgresInstanceAction,
     runPostgresInstanceCreate,
     runPostgresInstanceShell,

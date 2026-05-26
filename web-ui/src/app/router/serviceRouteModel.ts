@@ -1,7 +1,5 @@
 import {
   commandPageRegistry,
-  pgadminActions,
-  postgresActions,
   redisActions,
   redisinsightActions,
   registryActions,
@@ -23,39 +21,6 @@ export function getServiceRouteModel(controller: InfrastructureController): Serv
     controller;
   const statusLabel = text.mariadbInstances.statusLabel;
   const containerLabel = text.mariadbInstances.containerLabel;
-
-  if (activeView === "postgres") {
-    const page = text.servicePages.postgres;
-    const shells = translateShells(commandPageRegistry.postgres.shells || []);
-    const postgresShell = findShell(shells, "postgres-container");
-    const pgAdminShell = findShell(shells, "pgadmin-container");
-
-    return {
-      description: page.description,
-      eyebrow: page.eyebrow,
-      modules: [
-        {
-          actions: translateActions(postgresActions),
-          details: [{ label: containerLabel, value: postgresShell?.container }],
-          eyebrow: text.panels.serviceControl.database,
-          shell: postgresShell,
-          status: containerStates.states["postgres-container"],
-          statusLabel,
-          title: "Postgres",
-        },
-        {
-          actions: translateActions(pgadminActions),
-          details: moduleDetails(pgAdminShell?.container),
-          eyebrow: text.panels.serviceControl.adminPanel,
-          link: serviceLinks.links["pgadmin-container"],
-          shell: pgAdminShell,
-          status: containerStates.states["pgadmin-container"],
-          statusLabel,
-          title: "pgAdmin",
-        },
-      ],
-    };
-  }
 
   if (activeView === "redis") {
     const page = text.servicePages.redis;

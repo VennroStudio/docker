@@ -22,6 +22,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
     runMariaDbInstanceAction,
     runMariaDbInstanceCreate,
     runMariaDbInstanceShell,
+    runPostgresExport,
+    runPostgresImport,
     runPostgresInstanceAction,
     runPostgresInstanceCreate,
     runPostgresInstanceShell,
@@ -39,6 +41,9 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
   const postgresDefaults = settings.settings?.postgres;
   const defaultDumpPath = mariaDbDefaults
     ? joinPath(mariaDbDefaults.homeDumpPath, mariaDbDefaults.dumpName)
+    : undefined;
+  const defaultPostgresDumpPath = postgresDefaults
+    ? joinPath(postgresDefaults.homeDumpPath, postgresDefaults.dumpName)
     : undefined;
   const defaultMariaDbCreateForm = mariaDbDefaults
     ? {
@@ -82,6 +87,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
         <PostgresInstancesPanel
           activeOperationKey={activeOperationKey}
           defaultCreateForm={defaultPostgresCreateForm}
+          defaultDatabase={postgresDefaults?.database}
+          defaultDumpPath={defaultPostgresDumpPath}
           error={postgresInstances.error}
           instances={postgresInstances.instances}
           loading={postgresInstances.loading}
@@ -89,6 +96,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
           operationDisabledTitle={operationBlockTitle}
           text={text}
           onCreate={runPostgresInstanceCreate}
+          onExport={runPostgresExport}
+          onImport={runPostgresImport}
           onRun={runPostgresInstanceAction}
           onShellOpen={runPostgresInstanceShell}
         />

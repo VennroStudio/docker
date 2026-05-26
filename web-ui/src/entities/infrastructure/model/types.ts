@@ -122,6 +122,18 @@ export type PostgresInstanceForm = {
   version: string;
 };
 
+export type PostgresImportForm = {
+  container: string;
+  database: string;
+  filePath: string;
+};
+
+export type PostgresExportForm = {
+  container: string;
+  database: string;
+  filePath: string;
+};
+
 export type StreamState = "ready" | "running" | "done" | "error" | "stopped";
 export type ServiceRuntimeState = "missing" | "partial" | "running" | "stopped" | "unknown";
 

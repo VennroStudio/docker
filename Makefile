@@ -4,7 +4,6 @@ export
 NPM_COMPOSE := docker compose -f docker-compose-npm.yml
 MARIADB_COMPOSE := docker compose -f docker-compose-mariadb.yml
 PHPMYADMIN_COMPOSE := docker compose -f docker-compose-phpmyadmin.yml
-POSTGRES_COMPOSE := docker compose -f docker-compose-postgres.yml
 PGADMIN_COMPOSE := docker compose -f docker-compose-pgadmin.yml
 REDIS_COMPOSE := docker compose -f docker-compose-redis.yml
 REDISINSIGHT_COMPOSE := docker compose -f docker-compose-redisinsight.yml
@@ -26,7 +25,7 @@ help: ## Показать список команд
 ##@ Проект
 init: ## Первый запуск: создать локальные env/config файлы без перезаписи существующих
 	@cp -n .env.example .env 2>/dev/null || true
-	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres docker/services
+	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres docker/services dumps/mariadb dumps/postgres
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
@@ -135,13 +134,13 @@ mariadb-logs: ## Логи MariaDB
 mariadb-shell: ## Shell MariaDB instance, опционально NAME=legacy-10-6 или CONTAINER=container-name
 	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action shell
 
-mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/app.sql, опционально NAME=... или CONTAINER=...
+mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/mariadb/app.sql, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/mariadb-import.mjs
 
-mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/app.sql.gz, опционально NAME=... или CONTAINER=...
+mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/mariadb/app.sql.gz, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/mariadb-export.mjs
 
-mariadb-dump-upload: ## Загрузить дамп на сервер, передать FILE=dumps/app.sql или DUMP_FILE=dumps/app.sql
+mariadb-dump-upload: ## Загрузить дамп на сервер, передать FILE=dumps/mariadb/app.sql или DUMP_FILE=dumps/mariadb/app.sql
 	@file="$${FILE:-$${DUMP_FILE:-$${HOME_DUMP_PATH}$${DUMP_NAME}}}"; \
 	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
 	scp "$$file" "$(SSH):$(SERVER_DUMP_PATH)"
@@ -351,27 +350,38 @@ redisinsight-logs: ## Логи RedisInsight
 	$(REDISINSIGHT_COMPOSE) logs -f
 
 ##@ Postgres
-postgres-up: ## Запустить контейнер PostgreSQL
-	$(POSTGRES_COMPOSE) up -d
+postgres-up: ## Запустить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action up
 
-postgres-pull: ## Скачать/обновить образ PostgreSQL
-	$(POSTGRES_COMPOSE) pull
+postgres-start: ## Запустить существующий Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action start
 
-postgres-start: ## Запустить существующие контейнеры PostgreSQL
-	$(POSTGRES_COMPOSE) start
+postgres-stop: ## Остановить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action stop
 
-postgres-stop: ## Остановить контейнер PostgreSQL
-	$(POSTGRES_COMPOSE) stop
+postgres-down: ## Удалить контейнер Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action down
 
-postgres-down: ## Удалить контейнеры PostgreSQL
-	$(POSTGRES_COMPOSE) down
+postgres-clean: ## Удалить контейнер и образ Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action clean
 
-postgres-clean: ## Удалить контейнеры и образы PostgreSQL
-	$(POSTGRES_COMPOSE) down
-	docker rmi postgres:16-alpine 2>/dev/null || true
+postgres-logs: ## Логи Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action logs
 
-postgres-logs: ## Логи PostgreSQL
-	$(POSTGRES_COMPOSE) logs -f
+postgres-shell: ## Shell Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action shell
+
+postgres-import: ## Импорт .sql/.sql.gz/.dump дампа, передать POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.sql, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/postgres-import.mjs
+
+postgres-export: ## Экспорт .sql/.sql.gz/.dump дампа, передать POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.dump, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/postgres-export.mjs
+
+postgres-dump-upload: ## Загрузить Postgres dump на сервер, передать FILE=dumps/postgres/app.dump или DUMP_FILE=dumps/postgres/app.dump
+	@file="$${FILE:-$${DUMP_FILE:-$${POSTGRES_HOME_DUMP_PATH}$${POSTGRES_DUMP_NAME}}}"; \
+	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
+	target_path="$${POSTGRES_SERVER_DUMP_PATH:-$(SERVER_DUMP_PATH)}"; \
+	scp "$$file" "$(SSH):$$target_path"
 
 ##@ Postgres instances
 postgres-instance-add: ## Создать Postgres instance, передать VERSION=17 DB_USER=admin PASSWORD=secret DB_NAME=app
@@ -384,27 +394,26 @@ postgres-instance-add: ## Создать Postgres instance, передать VER
 postgres-instance-list: ## Показать Postgres instances
 	@$(NODE) $(NODE_IMAGE) node ./scripts/postgres-instances.mjs list
 
-postgres-instance-up: ## Запустить Postgres instance, передать NAME=17
-	docker compose -f docker-compose-postgres-$(NAME).yml up -d
+postgres-instance-up: ## Запустить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action up
 
-postgres-instance-start: ## Запустить существующий Postgres instance, передать NAME=17
-	docker compose -f docker-compose-postgres-$(NAME).yml start
+postgres-instance-start: ## Запустить существующий Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action start
 
-postgres-instance-stop: ## Остановить Postgres instance, передать NAME=17
-	docker compose -f docker-compose-postgres-$(NAME).yml stop
+postgres-instance-stop: ## Остановить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action stop
 
-postgres-instance-down: ## Удалить контейнер Postgres instance, передать NAME=17
-	docker compose -f docker-compose-postgres-$(NAME).yml down
+postgres-instance-down: ## Удалить контейнер Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action down
 
-postgres-instance-clean: ## Удалить контейнер и образ Postgres instance, передать NAME=17 VERSION=17
-	docker compose -f docker-compose-postgres-$(NAME).yml down
-	docker rmi postgres:$(VERSION)-alpine 2>/dev/null || true
+postgres-instance-clean: ## Удалить контейнер и образ Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action clean
 
-postgres-instance-logs: ## Логи Postgres instance, передать NAME=17
-	docker compose -f docker-compose-postgres-$(NAME).yml logs -f
+postgres-instance-logs: ## Логи Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action logs
 
-postgres-instance-shell: ## Shell Postgres instance, передать NAME=17
-	docker exec -it postgres-$(NAME)-container sh
+postgres-instance-shell: ## Shell Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_BIN) ./scripts/postgres-instances.mjs run --action shell
 
 ##@ pgAdmin
 pgadmin-up: ## Запустить контейнер pgAdmin
@@ -472,7 +481,7 @@ push: ## Auto save
 .PHONY: minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs
 .PHONY: redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs
 .PHONY: redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs
-.PHONY: postgres-up postgres-pull postgres-start postgres-stop postgres-down postgres-clean postgres-logs
+.PHONY: postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-dump-upload
 .PHONY: postgres-instance-add postgres-instance-list postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
 .PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs
 .PHONY: rclone-install rclone-config rclone-test rclone-backup-s3

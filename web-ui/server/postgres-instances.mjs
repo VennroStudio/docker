@@ -7,8 +7,7 @@ const instancesPath = path.join(projectRoot, "docker/postgres/instances.json");
 const instanceActions = new Set(["clean", "down", "logs", "start", "stop", "up"]);
 
 export function readPostgresInstances() {
-  if (!existsSync(instancesPath)) return [];
-  return JSON.parse(readFileSync(instancesPath, "utf8"));
+  return existsSync(instancesPath) ? JSON.parse(readFileSync(instancesPath, "utf8")) : [];
 }
 
 export function findPostgresInstance(name) {

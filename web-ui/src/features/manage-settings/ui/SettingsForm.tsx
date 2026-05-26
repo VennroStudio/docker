@@ -92,7 +92,7 @@ const sections: SettingsSectionDefinition[] = [
         group: "mariadb",
         label: "Local dump path",
         name: "homeDumpPath",
-        placeholder: "dumps/",
+        placeholder: "dumps/mariadb/",
       },
       {
         env: "SERVER_DUMP_PATH",
@@ -195,6 +195,27 @@ const sections: SettingsSectionDefinition[] = [
         type: "password",
       },
       { env: "POSTGRES_DB", group: "postgres", label: "Postgres database", name: "database", placeholder: "mydb" },
+      {
+        env: "POSTGRES_DUMP_NAME",
+        group: "postgres",
+        label: "Postgres dump name",
+        name: "dumpName",
+        placeholder: "app.dump",
+      },
+      {
+        env: "POSTGRES_HOME_DUMP_PATH",
+        group: "postgres",
+        label: "Postgres local dump path",
+        name: "homeDumpPath",
+        placeholder: "dumps/postgres/",
+      },
+      {
+        env: "POSTGRES_SERVER_DUMP_PATH",
+        group: "postgres",
+        label: "Postgres server dump path",
+        name: "serverDumpPath",
+        placeholder: "/home/user/infrastructure/",
+      },
       {
         autocomplete: "username",
         env: "PGADMIN_EMAIL",

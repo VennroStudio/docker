@@ -494,10 +494,6 @@
     ],
     "postgres": [
       {
-        "container": "postgres-container",
-        "label": "Postgres"
-      },
-      {
         "container": "pgadmin-container",
         "label": "pgAdmin"
       }
@@ -533,7 +529,6 @@
     "mariadb": ["mariadb-container", "phpmyadmin-container"],
     "minio": ["minio-container"],
     "nginx": ["nginx-container"],
-    "postgres": ["postgres-container", "pgadmin-container"],
     "proxy": ["nginx-container"],
     "redis": ["redis-container", "redisinsight-container"],
     "registry": ["registry-container", "registry-ui-container"]

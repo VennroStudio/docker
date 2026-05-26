@@ -3,7 +3,7 @@ import { sendSseError, streamSse } from "../command-runner.mjs";
 import { getContainerStates } from "../docker-status.mjs";
 import { assert, body, validateDomain, validatePort, validateTarget } from "../http.mjs";
 import { mariaDbInstanceCommand, readMariaDbInstances } from "../mariadb-instances.mjs";
-import { postgresInstanceCommand } from "../postgres-instances.mjs";
+import { postgresInstanceCommand, readPostgresInstances } from "../postgres-instances.mjs";
 import { getRuntimeEnv } from "../settings-store.mjs";
 import { streamShell } from "../shell-sessions.mjs";
 
@@ -186,6 +186,48 @@ export async function streamRoute(req, res) {
     return streamSse(req, res, command, args, runtimeEnv);
   }
 
+  if (url.pathname === "/api/stream/postgres-import") {
+    const container = param("container");
+    const filePath = param("filePath");
+    const database = param("database");
+
+    validateContainerName(container);
+    const instance = findPostgresInstanceByContainer(container);
+    await validateRunningPostgresContainer(container);
+    validatePostgresDumpFilePath(filePath);
+    validatePostgresDatabaseName(database);
+
+    return streamSse(req, res, "make", ["-e", "postgres-import"], {
+      ...runtimeEnv,
+      DUMP_FILE: filePath,
+      POSTGRES_CONTAINER: container,
+      POSTGRES_DB: database,
+      POSTGRES_PASSWORD: instance.password,
+      POSTGRES_USER: instance.user,
+    });
+  }
+
+  if (url.pathname === "/api/stream/postgres-export") {
+    const container = param("container");
+    const filePath = param("filePath");
+    const database = param("database");
+
+    validateContainerName(container);
+    const instance = findPostgresInstanceByContainer(container);
+    await validateRunningPostgresContainer(container);
+    validatePostgresDumpFilePath(filePath);
+    validatePostgresDatabaseName(database);
+
+    return streamSse(req, res, "make", ["-e", "postgres-export"], {
+      ...runtimeEnv,
+      DUMP_FILE: filePath,
+      POSTGRES_CONTAINER: container,
+      POSTGRES_DB: database,
+      POSTGRES_PASSWORD: instance.password,
+      POSTGRES_USER: instance.user,
+    });
+  }
+
   sendSseError(res, "Not found");
 }
 
@@ -208,13 +250,39 @@ function findMariaDbInstanceByContainer(container) {
   return instance;
 }
 
+function findPostgresInstanceByContainer(container) {
+  const instance = readPostgresInstances().find((item) => item.container === container);
+  assert(instance, "Postgres container is not configured");
+  assert(instance.user, "Postgres user is not configured");
+  assert(instance.password, "Postgres password is not configured");
+  return instance;
+}
+
 async function validateRunningMariaDbContainer(container) {
   const state = (await getContainerStates([container])).get(container);
   assert(state?.state === "running", "MariaDB container must be running");
+}
+
+async function validateRunningPostgresContainer(container) {
+  const state = (await getContainerStates([container])).get(container);
+  assert(state?.state === "running", "Postgres container must be running");
 }
 
 function validateDumpFilePath(filePath) {
   assert(filePath, "Dump file path is required");
   assert(!/[\0\r\n]/.test(filePath), "Invalid dump file path");
   assert(String(filePath).endsWith(".sql") || String(filePath).endsWith(".sql.gz"), "Invalid dump file extension");
+}
+
+function validatePostgresDatabaseName(database) {
+  assert(/^[A-Za-z0-9_]+$/.test(database || ""), "Invalid Postgres database name");
+}
+
+function validatePostgresDumpFilePath(filePath) {
+  assert(filePath, "Dump file path is required");
+  assert(!/[\0\r\n]/.test(filePath), "Invalid dump file path");
+  assert(
+    String(filePath).endsWith(".sql") || String(filePath).endsWith(".sql.gz") || String(filePath).endsWith(".dump"),
+    "Invalid dump file extension",
+  );
 }

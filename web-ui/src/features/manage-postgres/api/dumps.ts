@@ -1,4 +1,4 @@
-export type MariaDbDumpFile = {
+export type PostgresDumpFile = {
   modifiedAt: string;
   name: string;
   path: string;
@@ -6,11 +6,11 @@ export type MariaDbDumpFile = {
 };
 
 type DumpFilesResponse = {
-  dumps: MariaDbDumpFile[];
+  dumps: PostgresDumpFile[];
 };
 
-export async function fetchMariaDbDumps(): Promise<MariaDbDumpFile[]> {
-  const response = await fetch("/api/dumps?engine=mariadb");
+export async function fetchPostgresDumps(): Promise<PostgresDumpFile[]> {
+  const response = await fetch("/api/dumps?engine=postgres");
   if (!response.ok) throw new Error(await response.text());
 
   const payload = (await response.json()) as DumpFilesResponse;

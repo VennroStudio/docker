@@ -22,7 +22,7 @@ createServer(async (req, res) => {
     }
     if (req.method === "GET" && req.url === "/api/status") return await status(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/containers")) return await containers(req, res);
-    if (req.method === "GET" && req.url === "/api/dumps") return await dumps(req, res);
+    if (req.method === "GET" && req.url.startsWith("/api/dumps")) return await dumps(req, res);
     if (req.method === "GET" && req.url === "/api/links") return await links(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);

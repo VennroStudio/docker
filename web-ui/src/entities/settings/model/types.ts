@@ -38,6 +38,9 @@ export type AppSettings = {
     user: string;
     password: string;
     database: string;
+    dumpName: string;
+    homeDumpPath: string;
+    serverDumpPath: string;
     pgAdminEmail: string;
     pgAdminPassword: string;
   };
