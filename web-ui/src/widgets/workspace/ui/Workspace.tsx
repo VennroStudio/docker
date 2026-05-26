@@ -16,6 +16,7 @@ type WorkspaceProps = {
   terminalInputEnabled?: boolean;
   terminalOpen?: boolean;
   terminalPrompt?: string;
+  terminalStateLabels: Record<StreamState, string>;
   terminalLabel: string;
   terminalTitle: string;
   output: string;
@@ -41,6 +42,7 @@ export function Workspace({
   terminalLabel,
   terminalOpen = true,
   terminalPrompt,
+  terminalStateLabels,
   terminalTitle,
   view,
   onInput,
@@ -69,6 +71,7 @@ export function Workspace({
             cwd={terminalCwd}
             output={output}
             state={streamState}
+            stateLabels={terminalStateLabels}
             inputEnabled={terminalInputEnabled}
             prompt={terminalPrompt}
             title={terminalTitle}

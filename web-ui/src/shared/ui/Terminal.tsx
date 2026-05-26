@@ -1,6 +1,7 @@
 import { Minimize2, Square, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { cn } from "@/shared/lib";
 import { Button } from "./Button";
 
 type TerminalState = "done" | "error" | "ready" | "running" | "stopped";
@@ -18,6 +19,7 @@ type TerminalProps = {
   output: string;
   prompt?: string;
   state: TerminalState;
+  stateLabels: Record<TerminalState, string>;
   title: string;
   onClear: () => void;
   onCollapse?: () => void;
@@ -37,6 +39,7 @@ export function Terminal({
   output,
   prompt = "$",
   state,
+  stateLabels,
   title,
 }: TerminalProps) {
   const outputRef = useRef<HTMLPreElement>(null);
@@ -68,6 +71,15 @@ export function Terminal({
           <strong className="block truncate text-sm font-bold text-zinc-100">{title}</strong>
           <span className="block truncate text-xs text-zinc-500">{cwd}</span>
         </div>
+        <span
+          className={cn(
+            "inline-flex shrink-0 items-center gap-2 rounded-md border px-2 py-1 text-xs font-bold uppercase",
+            terminalStateClass(state),
+          )}
+        >
+          <span className="h-2 w-2 rounded-full bg-current shadow-[0_0_14px_currentColor]" />
+          {stateLabels[state]}
+        </span>
         <div className="flex flex-wrap gap-2">
           {collapsible ? (
             <Button icon={<Minimize2 size={15} />} onClick={onCollapse}>
@@ -103,4 +115,14 @@ export function Terminal({
       </form>
     </section>
   );
+}
+
+function terminalStateClass(state: TerminalState) {
+  return {
+    done: "border-emerald-300/25 bg-emerald-400/10 text-emerald-100",
+    error: "border-red-300/30 bg-red-500/10 text-red-100",
+    ready: "border-zinc-700/80 bg-zinc-900 text-zinc-400",
+    running: "border-teal-300/30 bg-teal-400/10 text-teal-100",
+    stopped: "border-amber-300/30 bg-amber-400/10 text-amber-100",
+  }[state];
 }

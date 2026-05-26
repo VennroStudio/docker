@@ -15,13 +15,16 @@ import { serveStatic } from "./server/static.mjs";
 
 createServer(async (req, res) => {
   try {
-    if (req.method === "GET" && req.url.startsWith("/api/stream/")) return await streamRoute(req, res);
+    if ((req.method === "GET" || req.method === "POST") && req.url.startsWith("/api/stream/")) {
+      return await streamRoute(req, res);
+    }
     if (req.method === "GET" && req.url === "/api/status") return await status(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/containers")) return await containers(req, res);
     if (req.method === "GET" && req.url === "/api/links") return await links(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);
     if (req.method === "GET" && req.url === "/api/postgres/instances") return await postgresInstances(req, res);
+    if (req.url.startsWith("/api/")) return sendJson(res, 404, { ok: false, output: "Not found" });
     if (req.method === "GET" || req.method === "HEAD") return await serveStatic(req, res);
     if (req.method === "POST" && req.url === "/api/host/add") return await host(req, res, "add");
     if (req.method === "POST" && req.url === "/api/host/remove") return await host(req, res, "remove");

@@ -1,5 +1,7 @@
 import { spawn } from "node:child_process";
 
+const sensitiveFlags = new Set(["--password", "--root-password", "--secret", "--token", "--npm-password", "--api-key"]);
+
 export function stream(res, command, args, env = process.env) {
   let child;
 
@@ -9,7 +11,7 @@ export function stream(res, command, args, env = process.env) {
     "X-Accel-Buffering": "no",
   });
 
-  res.write(`$ ${[command, ...args].join(" ")}\n\n`);
+  res.write(`$ ${formatCommandForDisplay(command, args)}\n\n`);
   child = spawn(command, args, { env });
 
   child.stdout.on("data", (data) => res.write(data));
@@ -39,7 +41,7 @@ export function streamSse(req, res, command, args, env = process.env) {
     "X-Accel-Buffering": "no",
   });
 
-  sse(res, `$ ${[command, ...args].join(" ")}\n\n`);
+  sse(res, `$ ${formatCommandForDisplay(command, args)}\n\n`);
   child = spawn(command, args, { env });
 
   child.stdout.on("data", (data) => sse(res, data));
@@ -58,8 +60,30 @@ export function streamSse(req, res, command, args, env = process.env) {
     }
   });
 
-  req.on("close", () => {
+  res.on("close", () => {
     if (child && !child.killed) child.kill("SIGTERM");
+  });
+}
+
+export function formatCommandForDisplay(command, args) {
+  return [command, ...redactArgs(args)].join(" ");
+}
+
+function redactArgs(args) {
+  let redactNext = false;
+
+  return args.map((arg) => {
+    if (redactNext) {
+      redactNext = false;
+      return "********";
+    }
+
+    const [flag] = String(arg).split("=", 1);
+    if (!sensitiveFlags.has(flag)) return arg;
+
+    if (String(arg).includes("=")) return `${flag}=********`;
+    redactNext = true;
+    return arg;
   });
 }
 

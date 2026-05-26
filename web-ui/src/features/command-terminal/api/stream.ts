@@ -29,9 +29,9 @@ export function streamHost(action: "add" | "remove", domain: string, handlers: S
 export function streamProxy(form: ProxyFormState, handlers: StreamHandlers): () => void {
   const url = streamUrl("/api/stream/proxy", {
     domain: form.domain,
-    target: form.target,
     port: form.port,
     ssl: form.ssl,
+    target: form.target,
   });
 
   return openStream(url, handlers);
@@ -48,16 +48,18 @@ export function streamShell(container: string, handlers: StreamHandlers): () => 
 }
 
 export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers: StreamHandlers): () => void {
-  const url = streamUrl("/api/stream/mariadb-instance-add", {
-    authMode: form.authMode,
-    password: form.password,
-    port: form.port,
-    rootPassword: form.rootPassword,
-    user: form.user,
-    version: form.version,
-  });
-
-  return openStream(url, handlers);
+  return openPostStream(
+    "/api/stream/mariadb-instance-add",
+    {
+      authMode: form.authMode,
+      password: form.password,
+      port: form.port,
+      rootPassword: form.rootPassword,
+      user: form.user,
+      version: form.version,
+    },
+    handlers,
+  );
 }
 
 export function streamMariaDbInstanceAction(
@@ -70,14 +72,16 @@ export function streamMariaDbInstanceAction(
 }
 
 export function streamPostgresInstanceCreate(form: PostgresInstanceForm, handlers: StreamHandlers): () => void {
-  const url = streamUrl("/api/stream/postgres-instance-add", {
-    database: form.database,
-    password: form.password,
-    user: form.user,
-    version: form.version,
-  });
-
-  return openStream(url, handlers);
+  return openPostStream(
+    "/api/stream/postgres-instance-add",
+    {
+      database: form.database,
+      password: form.password,
+      user: form.user,
+      version: form.version,
+    },
+    handlers,
+  );
 }
 
 export function streamPostgresInstanceAction(
@@ -90,7 +94,7 @@ export function streamPostgresInstanceAction(
 }
 
 export async function sendShellInput(sessionId: string, input: string): Promise<void> {
-  await sendShellRequest("/api/stream/shell/input", { sessionId, input });
+  await sendShellRequest("/api/stream/shell/input", { input, sessionId });
 }
 
 export async function stopShellSession(sessionId: string): Promise<void> {
@@ -122,6 +126,88 @@ function openStream(url: URL, handlers: StreamHandlers): () => void {
   return () => source.close();
 }
 
+function openPostStream(
+  path: string,
+  payload: Record<string, boolean | number | string | undefined>,
+  handlers: StreamHandlers,
+): () => void {
+  const abortController = new AbortController();
+
+  void readPostStream(path, payload, handlers, abortController).catch((error: unknown) => {
+    if (!abortController.signal.aborted) {
+      handlers.onError(error instanceof Error ? error.message : String(error));
+    }
+  });
+
+  return () => abortController.abort();
+}
+
+async function readPostStream(
+  path: string,
+  payload: Record<string, boolean | number | string | undefined>,
+  handlers: StreamHandlers,
+  abortController: AbortController,
+) {
+  const response = await fetch(path, {
+    body: JSON.stringify(dropEmptyValues(payload)),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+    signal: abortController.signal,
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error((await response.text()) || "Stream connection closed");
+  }
+
+  handlers.onOpen?.();
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (!abortController.signal.aborted) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    buffer = readSseBuffer(buffer, handlers);
+  }
+
+  buffer += decoder.decode();
+  readSseBuffer(buffer, handlers);
+}
+
+function readSseBuffer(buffer: string, handlers: StreamHandlers) {
+  let nextBuffer = buffer;
+  let blockEnd = nextBuffer.indexOf("\n\n");
+
+  while (blockEnd >= 0) {
+    const block = nextBuffer.slice(0, blockEnd);
+    nextBuffer = nextBuffer.slice(blockEnd + 2);
+    dispatchSseBlock(block, handlers);
+    blockEnd = nextBuffer.indexOf("\n\n");
+  }
+
+  return nextBuffer;
+}
+
+function dispatchSseBlock(block: string, handlers: StreamHandlers) {
+  let event = "message";
+  const data: string[] = [];
+
+  block.split("\n").forEach((line) => {
+    if (line.startsWith("event:")) event = line.slice(6).trim();
+    if (line.startsWith("data:")) data.push(line.slice(5).replace(/^ /, ""));
+  });
+
+  const text = data.join("\n");
+
+  if (event === "done") handlers.onDone(text, text.includes("[exit 0]"));
+  else if (event === "prompt") handlers.onPrompt?.(text);
+  else if (event === "session") handlers.onSession?.(text);
+  else handlers.onMessage(text);
+}
+
 function streamUrl(path: string, params: Record<string, boolean | number | string | undefined>): URL {
   const url = new URL(path, window.location.origin);
 
@@ -132,6 +218,14 @@ function streamUrl(path: string, params: Record<string, boolean | number | strin
   });
 
   return url;
+}
+
+function dropEmptyValues(payload: Record<string, boolean | number | string | undefined>) {
+  return Object.fromEntries(
+    Object.entries(payload).filter(
+      ([, value]) => value !== false && value !== "" && value !== null && value !== undefined,
+    ),
+  );
 }
 
 async function sendShellRequest(path: string, payload: Record<string, string>): Promise<void> {

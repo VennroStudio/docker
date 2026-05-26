@@ -21,14 +21,14 @@ export function Button({ className = "", icon, tone = "default", children, ...pr
   return (
     <button
       className={cn(
-        "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-teal-300/60 disabled:cursor-not-allowed disabled:opacity-45",
+        "inline-flex min-h-10 min-w-0 items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-semibold transition outline-none focus-visible:ring-2 focus-visible:ring-teal-300/60 disabled:cursor-not-allowed disabled:opacity-45",
         toneClass,
         className,
       )}
       {...props}
     >
       {icon ? <span className="grid shrink-0 place-items-center">{icon}</span> : null}
-      <span>{children}</span>
+      <span className="min-w-0 truncate">{children}</span>
     </button>
   );
 }

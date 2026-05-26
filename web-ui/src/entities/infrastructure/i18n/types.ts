@@ -1,4 +1,4 @@
-import type { CommandId, ServiceRuntimeState, ViewId } from "../model/types";
+import type { CommandId, ServiceRuntimeState, StreamState, ViewId } from "../model/types";
 
 export type Language = "en" | "ru";
 
@@ -12,6 +12,7 @@ export type AppText = {
     panels: string;
     statusLabels: Record<ServiceRuntimeState, string>;
     stop: string;
+    streamLabels: Record<StreamState, string>;
     terminal: string;
   };
   shell: {
@@ -138,9 +139,21 @@ export type AppText = {
       deleteProxy: string;
       domain: string;
       eyebrow: string;
+      hints: {
+        domain: string;
+        port: string;
+        target: string;
+      };
       removeHost: string;
       target: string;
       title: string;
+      validation: {
+        domain: string;
+        hostDisabled: string;
+        port: string;
+        proxyDisabled: string;
+        target: string;
+      };
     };
   };
   servicePages: Record<

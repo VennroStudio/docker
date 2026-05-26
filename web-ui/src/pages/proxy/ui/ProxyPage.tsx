@@ -1,10 +1,10 @@
-import { ServiceModuleAccordion } from "@/widgets/service-module";
 import { ProxyPanel } from "@/features/manage-proxy";
 import type { ContainerStateInfo } from "@/entities/infrastructure";
 import type { ServiceLink } from "@/entities/infrastructure";
 import type { AppText } from "@/entities/infrastructure";
 import type { CommandAction, ProxyFormState, ShellAction, ViewConfig } from "@/entities/infrastructure";
 import { ServicePageLayout } from "@/widgets/service-page-layout";
+import { ProxyRuntimeModules } from "./ProxyRuntimeModules";
 
 type ProxyPageProps = {
   networkActions: CommandAction[];
@@ -58,46 +58,18 @@ export function ProxyPage({
             onProxyDelete={onProxyDelete}
           />
 
-          <ServiceModuleAccordion
-            actions={nginxActions}
-            eyebrow={text.panels.npm.nginxEyebrow}
-            link={shellAction ? serviceLinks[shellAction.container] : undefined}
-            shell={shellAction}
-            status={shellAction ? statusByContainer[shellAction.container] : undefined}
-            statusLabel={text.mariadbInstances.statusLabel}
-            title={text.panels.npm.nginxTitle}
-            details={moduleDetails(serviceLinks, shellAction?.container, text)}
-            onRun={onRunCommand}
+          <ProxyRuntimeModules
+            networkActions={networkActions}
+            nginxActions={nginxActions}
+            serviceLinks={serviceLinks}
+            shellAction={shellAction}
+            statusByContainer={statusByContainer}
+            text={text}
+            onRunCommand={onRunCommand}
             onShellOpen={onShellOpen}
           />
         </section>
-
-        <ServiceModuleAccordion
-          actions={networkActions}
-          eyebrow={text.panels.npm.networkEyebrow}
-          defaultOpen
-          title={text.panels.npm.networkTitle}
-          details={[{ label: "Network", value: "proxy" }]}
-          onRun={onRunCommand}
-        />
       </div>
     </ServicePageLayout>
   );
-}
-
-function linkDetail(links: Record<string, ServiceLink>, container: string | undefined, label: string) {
-  if (!container) return undefined;
-
-  const link = links[container];
-  return link ? { href: link.url, label, value: link.url } : undefined;
-}
-
-function moduleDetails(links: Record<string, ServiceLink>, container: string | undefined, text: AppText) {
-  const details: Array<{ href?: string; label: string; value?: string }> = [
-    { label: text.mariadbInstances.containerLabel, value: container },
-  ];
-  const link = linkDetail(links, container, text.common.link);
-
-  if (link) details.push(link);
-  return details;
 }

@@ -1,12 +1,11 @@
-import { ArrowDown, ArrowUp, ExternalLink, ListTree, Play, Square, TerminalSquare, Trash2 } from "lucide-react";
-import type { ReactNode } from "react";
+import { ArrowDown, ArrowUp, ListTree, Play, Square, TerminalSquare, Trash2 } from "lucide-react";
 import { cn } from "@/shared/lib";
+import { IconButton } from "@/shared/ui";
 import type { ContainerRuntimeState, MariaDbInstanceAction } from "../model/types";
 
 const actionIcon = {
   clean: <Trash2 size={16} strokeWidth={2.5} />,
   down: <ArrowDown size={16} strokeWidth={2.7} />,
-  link: <ExternalLink size={16} strokeWidth={2.5} />,
   logs: <ListTree size={16} strokeWidth={2.4} />,
   shell: <TerminalSquare size={16} strokeWidth={2.4} />,
   start: <Play size={16} strokeWidth={2.6} />,
@@ -34,49 +33,17 @@ export function DatabaseAction({
   onClick: () => void;
 }) {
   return (
-    <IconAction label={label} tone={actionTone[action]} onClick={onClick}>
+    <IconButton label={label} tone={actionTone[action]} onClick={onClick}>
       {actionIcon[action]}
-    </IconAction>
+    </IconButton>
   );
 }
 
 export function ShellIconButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <IconAction label={label} tone="primary" onClick={onClick}>
+    <IconButton label={label} tone="primary" onClick={onClick}>
       {actionIcon.shell}
-    </IconAction>
-  );
-}
-
-export function IconAction({
-  children,
-  label,
-  onClick,
-  tone,
-}: {
-  children: ReactNode;
-  label: string;
-  onClick: () => void;
-  tone: "danger" | "default" | "primary" | "success";
-}) {
-  return (
-    <button
-      className={cn(
-        "grid h-9 w-9 place-items-center rounded-lg border transition outline-none focus-visible:ring-2 focus-visible:ring-teal-300/60",
-        {
-          danger: "border-red-400/25 bg-red-500/10 text-red-100 hover:border-red-300/60 hover:bg-red-500/18",
-          default: "border-zinc-700/70 bg-zinc-900 text-zinc-300 hover:border-zinc-500 hover:text-zinc-50",
-          primary: "border-teal-300/30 bg-teal-400/10 text-teal-100 hover:border-teal-200/60 hover:bg-teal-400/18",
-          success:
-            "border-emerald-300/28 bg-emerald-400/10 text-emerald-100 hover:border-emerald-200/60 hover:bg-emerald-400/18",
-        }[tone],
-      )}
-      title={label}
-      type="button"
-      onClick={onClick}
-    >
-      {children}
-    </button>
+    </IconButton>
   );
 }
 

@@ -8,6 +8,14 @@ export function isValidHostForm(form: ProxyFormState): boolean {
   return isValidDomain(form.domain);
 }
 
+export function getProxyFieldValidity(form: ProxyFormState) {
+  return {
+    domain: isValidDomain(form.domain),
+    port: isValidPort(form.port),
+    target: isValidTarget(form.target),
+  };
+}
+
 function isValidDomain(value: string): boolean {
   return /^[a-zA-Z0-9.-]+$/.test(value.trim());
 }
