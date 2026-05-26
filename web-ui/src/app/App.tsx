@@ -36,13 +36,14 @@ export function App() {
           view={activeConfig}
           onClear={commandStream.clear}
           onInput={commandStream.sendInput}
-          onStop={commandStream.stop}
+          onStop={controller.stopCommand}
           onToggleTerminal={controller.toggleTerminal}
         >
           <AppRouter controller={controller} />
         </Workspace>
       </AppShell>
       {confirmDialog.dialog}
+      {controller.toast.viewport}
     </>
   );
 }

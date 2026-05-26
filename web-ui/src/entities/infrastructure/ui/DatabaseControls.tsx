@@ -25,23 +25,48 @@ const actionTone = {
 
 export function DatabaseAction({
   action,
+  disabled,
   label,
+  loading,
   onClick,
+  title,
 }: {
   action: MariaDbInstanceAction;
+  disabled?: boolean;
   label: string;
+  loading?: boolean;
   onClick: () => void;
+  title?: string;
 }) {
   return (
-    <IconButton label={label} tone={actionTone[action]} onClick={onClick}>
+    <IconButton
+      disabled={disabled}
+      label={label}
+      loading={loading}
+      title={title}
+      tone={actionTone[action]}
+      onClick={onClick}
+    >
       {actionIcon[action]}
     </IconButton>
   );
 }
 
-export function ShellIconButton({ label, onClick }: { label: string; onClick: () => void }) {
+export function ShellIconButton({
+  disabled,
+  label,
+  loading,
+  onClick,
+  title,
+}: {
+  disabled?: boolean;
+  label: string;
+  loading?: boolean;
+  onClick: () => void;
+  title?: string;
+}) {
   return (
-    <IconButton label={label} tone="primary" onClick={onClick}>
+    <IconButton disabled={disabled} label={label} loading={loading} title={title} tone="primary" onClick={onClick}>
       {actionIcon.shell}
     </IconButton>
   );

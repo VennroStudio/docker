@@ -6,6 +6,9 @@ import { ProxyActionGrid } from "./ProxyActionGrid";
 import { ProxyFormFields } from "./ProxyFormFields";
 
 type ProxyPanelProps = {
+  activeOperationKey?: null | string;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   text: AppText;
   value: ProxyFormState;
   onChange: (value: ProxyFormState) => void;
@@ -16,11 +19,14 @@ type ProxyPanelProps = {
 };
 
 export function ProxyPanel({
+  activeOperationKey,
   onChange,
   onCreateProxy,
   onHostAdd,
   onHostRemove,
   onProxyDelete,
+  operationDisabled,
+  operationDisabledTitle,
   text,
   value,
 }: ProxyPanelProps) {
@@ -33,8 +39,11 @@ export function ProxyPanel({
     <Panel title={copy.title} eyebrow={copy.eyebrow} badge="NPM">
       <ProxyFormFields copy={copy} value={value} onChange={update} />
       <ProxyActionGrid
+        activeOperationKey={activeOperationKey}
         copy={copy}
         hostReady={hostReady}
+        operationDisabled={operationDisabled}
+        operationDisabledTitle={operationDisabledTitle}
         proxyReady={proxyReady}
         onCreateProxy={onCreateProxy}
         onHostAdd={onHostAdd}

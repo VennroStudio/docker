@@ -12,8 +12,11 @@ type AppRouterProps = {
 export function AppRouter({ controller }: AppRouterProps) {
   const {
     activeConfig,
+    activeOperationKey,
     activeView,
     containerStates,
+    operationBlockTitle,
+    operationRunning,
     proxyForm,
     runCommand,
     runHost,
@@ -38,6 +41,9 @@ export function AppRouter({ controller }: AppRouterProps) {
       <ProxyPage
         networkActions={translateActions(networkActions)}
         nginxActions={translateActions(nginxActions)}
+        activeOperationKey={activeOperationKey}
+        operationDisabled={operationRunning}
+        operationDisabledTitle={operationBlockTitle}
         shellActions={translateShells(proxyShells)}
         statusByContainer={containerStates.states}
         serviceLinks={serviceLinks.links}

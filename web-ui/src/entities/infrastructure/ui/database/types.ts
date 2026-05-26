@@ -40,11 +40,14 @@ export type DatabaseAdminOverview = {
 };
 
 export type DatabaseAdminSectionProps = {
+  activeOperationKey?: null | string;
   actions: CommandAction[];
   copy: DatabaseAdminCopy;
   eyebrow: string;
   link?: ServiceLink;
   open: boolean;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   overview: DatabaseAdminOverview;
   shell?: ShellAction;
   title: string;
@@ -54,12 +57,17 @@ export type DatabaseAdminSectionProps = {
 };
 
 export type DatabaseInstancesSectionProps<Instance extends DatabaseInstanceRuntime> = {
+  activeOperationKey?: null | string;
   actionLabels: Record<DatabaseRuntimeAction | "shell", string>;
   copy: DatabaseInstancesCopy;
   error: string | null;
   instances: Instance[];
   loading: boolean;
   open: boolean;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
+  operationKeyForAction: (instance: Instance, action: DatabaseRuntimeAction) => string;
+  operationKeyForShell: (instance: Instance) => string;
   onCreateClick: () => void;
   onOpenChange: (open: boolean) => void;
   onRun: (instance: Instance, action: DatabaseRuntimeAction) => void;

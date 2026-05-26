@@ -13,9 +13,12 @@ import type {
 import { MariaDbCreateModal } from "./MariaDbCreateModal";
 
 type MariaDbInstancesPanelProps = {
+  activeOperationKey?: null | string;
   error: string | null;
   instances: MariaDbInstance[];
   loading: boolean;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   phpmyadmin: PhpMyAdminOverview;
   phpmyadminActions: CommandAction[];
   phpmyadminLink?: ServiceLink;
@@ -29,6 +32,7 @@ type MariaDbInstancesPanelProps = {
 };
 
 export function MariaDbInstancesPanel({
+  activeOperationKey,
   error,
   instances,
   loading,
@@ -37,6 +41,8 @@ export function MariaDbInstancesPanel({
   onPhpMyAdminShellOpen,
   onRun,
   onShellOpen,
+  operationDisabled,
+  operationDisabledTitle,
   phpmyadmin,
   phpmyadminActions,
   phpmyadminLink,
@@ -60,11 +66,16 @@ export function MariaDbInstancesPanel({
           stop: copy.actions.stop.label,
           up: copy.actions.up.label,
         }}
+        activeOperationKey={activeOperationKey}
         copy={copy}
         error={error}
         instances={instances}
         loading={loading}
         open={mariadbOpen}
+        operationDisabled={operationDisabled}
+        operationDisabledTitle={operationDisabledTitle}
+        operationKeyForAction={(instance, action) => `mariadb:${instance.name}:${action}`}
+        operationKeyForShell={(instance) => `shell:${instance.container}`}
         onCreateClick={() => setCreateOpen(true)}
         onOpenChange={setMariaDbOpen}
         onRun={onRun}
@@ -75,6 +86,7 @@ export function MariaDbInstancesPanel({
 
       <DatabaseAdminSection
         actions={phpmyadminActions}
+        activeOperationKey={activeOperationKey}
         copy={{
           containerLabel: copy.containerLabel,
           domainLabel: copy.domainLabel,
@@ -86,6 +98,8 @@ export function MariaDbInstancesPanel({
         eyebrow={copy.phpmyadminEyebrow}
         link={phpmyadminLink}
         open={phpMyAdminOpen}
+        operationDisabled={operationDisabled}
+        operationDisabledTitle={operationDisabledTitle}
         overview={phpmyadmin}
         shell={phpmyadminShell}
         title="phpMyAdmin"

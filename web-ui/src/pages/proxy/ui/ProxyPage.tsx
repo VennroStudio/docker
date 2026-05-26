@@ -7,8 +7,11 @@ import { ServicePageLayout } from "@/widgets/service-page-layout";
 import { ProxyRuntimeModules } from "./ProxyRuntimeModules";
 
 type ProxyPageProps = {
+  activeOperationKey?: null | string;
   networkActions: CommandAction[];
   nginxActions: CommandAction[];
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   shellActions: ShellAction[];
   serviceLinks: Record<string, ServiceLink>;
   statusByContainer: Record<string, ContainerStateInfo>;
@@ -25,6 +28,7 @@ type ProxyPageProps = {
 };
 
 export function ProxyPage({
+  activeOperationKey,
   networkActions,
   nginxActions,
   onChange,
@@ -34,6 +38,8 @@ export function ProxyPage({
   onProxyDelete,
   onRunCommand,
   onShellOpen,
+  operationDisabled,
+  operationDisabledTitle,
   serviceLinks,
   shellActions,
   statusByContainer,
@@ -49,6 +55,9 @@ export function ProxyPage({
       <div className="space-y-4">
         <section className="grid gap-4 min-[1500px]:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
           <ProxyPanel
+            activeOperationKey={activeOperationKey}
+            operationDisabled={operationDisabled}
+            operationDisabledTitle={operationDisabledTitle}
             text={text}
             value={value}
             onChange={onChange}
@@ -61,6 +70,9 @@ export function ProxyPage({
           <ProxyRuntimeModules
             networkActions={networkActions}
             nginxActions={nginxActions}
+            activeOperationKey={activeOperationKey}
+            operationDisabled={operationDisabled}
+            operationDisabledTitle={operationDisabledTitle}
             serviceLinks={serviceLinks}
             shellAction={shellAction}
             statusByContainer={statusByContainer}

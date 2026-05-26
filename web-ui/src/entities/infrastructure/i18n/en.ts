@@ -88,6 +88,12 @@ export const en: AppText = {
     },
     terminal: "Terminal",
   },
+  operationToast: {
+    blocked: (label) => `Wait until this finishes: ${label}`,
+    error: (label) => `${label}: failed`,
+    stopped: (label) => `${label}: stopped`,
+    success: (label) => `${label}: completed`,
+  },
   shell: {
     detail: (container) => `docker exec: ${container}`,
     inputPlaceholder: "Type a command inside the container and press Enter",

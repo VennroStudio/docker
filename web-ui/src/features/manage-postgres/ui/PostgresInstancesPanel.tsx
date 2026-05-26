@@ -13,9 +13,12 @@ import type {
 import { PostgresCreateModal } from "./PostgresCreateModal";
 
 type PostgresInstancesPanelProps = {
+  activeOperationKey?: null | string;
   error: string | null;
   instances: PostgresInstance[];
   loading: boolean;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   pgadmin: PgAdminOverview;
   pgadminActions: CommandAction[];
   pgadminLink?: ServiceLink;
@@ -29,6 +32,7 @@ type PostgresInstancesPanelProps = {
 };
 
 export function PostgresInstancesPanel({
+  activeOperationKey,
   error,
   instances,
   loading,
@@ -37,6 +41,8 @@ export function PostgresInstancesPanel({
   onPgAdminShellOpen,
   onRun,
   onShellOpen,
+  operationDisabled,
+  operationDisabledTitle,
   pgadmin,
   pgadminActions,
   pgadminLink,
@@ -61,11 +67,16 @@ export function PostgresInstancesPanel({
           stop: actionLabels.stop.label,
           up: actionLabels.up.label,
         }}
+        activeOperationKey={activeOperationKey}
         copy={copy}
         error={error}
         instances={instances}
         loading={loading}
         open={postgresOpen}
+        operationDisabled={operationDisabled}
+        operationDisabledTitle={operationDisabledTitle}
+        operationKeyForAction={(instance, action) => `postgres:${instance.name}:${action}`}
+        operationKeyForShell={(instance) => `shell:${instance.container}`}
         onCreateClick={() => setCreateOpen(true)}
         onOpenChange={setPostgresOpen}
         onRun={onRun}
@@ -76,6 +87,7 @@ export function PostgresInstancesPanel({
 
       <DatabaseAdminSection
         actions={pgadminActions}
+        activeOperationKey={activeOperationKey}
         copy={{
           containerLabel: copy.containerLabel,
           domainLabel: copy.domainLabel,
@@ -87,6 +99,8 @@ export function PostgresInstancesPanel({
         eyebrow={copy.pgadminEyebrow}
         link={pgadminLink}
         open={pgAdminOpen}
+        operationDisabled={operationDisabled}
+        operationDisabledTitle={operationDisabledTitle}
         overview={pgadmin}
         shell={pgadminShell}
         title="pgAdmin"

@@ -88,6 +88,12 @@ export const ru: AppText = {
     },
     terminal: "Терминал",
   },
+  operationToast: {
+    blocked: (label) => `Дождись завершения: ${label}`,
+    error: (label) => `${label}: завершилось с ошибкой`,
+    stopped: (label) => `${label}: остановлено`,
+    success: (label) => `${label}: выполнено`,
+  },
   shell: {
     detail: (container) => `docker exec: ${container}`,
     inputPlaceholder: "Введи команду внутри контейнера и нажми Enter",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   commandPageRegistry,
@@ -41,6 +41,7 @@ import {
 import { useMariaDbInstances } from "@/features/manage-mariadb";
 import { usePostgresInstances } from "@/features/manage-postgres";
 import { useConfirmDialog } from "@/shared/lib/hooks";
+import { useToast } from "@/shared/lib/hooks";
 import { useLanguage } from "./useLanguage";
 
 const initialProxyForm: ProxyFormState = {
@@ -50,12 +51,28 @@ const initialProxyForm: ProxyFormState = {
   target: "phpmyadmin-container",
 };
 
+type OperationState = {
+  key: string;
+  label: string;
+};
+
+type RunWithTerminalConfig = {
+  key: string;
+  label: string;
+  onSettled?: () => void;
+  open: Parameters<ReturnType<typeof useCommandStream>["run"]>[1];
+  preview: string;
+};
+
 export function useInfrastructureController() {
   const { language, toggleLanguage } = useLanguage();
   const [terminalOpen, setTerminalOpen] = useState(false);
+  const [activeOperation, setActiveOperation] = useState<OperationState | null>(null);
+  const activeOperationRef = useRef<OperationState | null>(null);
   const [proxyForm, setProxyForm] = useState(initialProxyForm);
   const commandStream = useCommandStream();
   const confirmDialog = useConfirmDialog();
+  const toast = useToast();
   const appMeta = useAppMeta();
   const location = useLocation();
   const navigate = useNavigate();
@@ -76,6 +93,10 @@ export function useInfrastructureController() {
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const postgresInstances = usePostgresInstances(activeView === "mariadb");
   const text = dictionaries[language];
+  const operationRunning = commandStream.streamState === "running" && Boolean(activeOperation);
+  const activeOperationKey = operationRunning ? activeOperation?.key : null;
+  const operationBlockTitle =
+    operationRunning && activeOperation ? text.operationToast.blocked(activeOperation.label) : undefined;
 
   const toggleTerminal = () => setTerminalOpen((value) => !value);
   const selectView = (view: ViewId) => navigate(getViewById(view).path);
@@ -91,16 +112,51 @@ export function useInfrastructureController() {
       label: text.shell.openLabel(action.label),
     }));
 
-  const runWithTerminal = (preview: string, open: Parameters<typeof commandStream.run>[1], onSettled?: () => void) => {
+  const runWithTerminal = ({ key, label, onSettled, open, preview }: RunWithTerminalConfig) => {
+    const lockedOperation = activeOperationRef.current;
+    if (lockedOperation) {
+      toast.show({ title: text.operationToast.blocked(lockedOperation.label), tone: "info" });
+      return;
+    }
+
+    const nextOperation = { key, label };
+    activeOperationRef.current = nextOperation;
+    setActiveOperation(nextOperation);
     setTerminalOpen(true);
-    commandStream.run(preview, open, {
-      onSettled: () => {
-        serviceStatuses.refresh();
-        void containerStates.refresh();
-        void serviceLinks.refresh();
-        onSettled?.();
-      },
-    });
+
+    try {
+      commandStream.run(preview, open, {
+        onSettled: ({ ok }) => {
+          serviceStatuses.refresh();
+          void containerStates.refresh();
+          void serviceLinks.refresh();
+          toast.show({
+            title: ok ? text.operationToast.success(label) : text.operationToast.error(label),
+            tone: ok ? "success" : "danger",
+          });
+          activeOperationRef.current = null;
+          setActiveOperation(null);
+          onSettled?.();
+        },
+      });
+    } catch (error) {
+      activeOperationRef.current = null;
+      setActiveOperation(null);
+      toast.show({
+        message: error instanceof Error ? error.message : String(error),
+        title: text.operationToast.error(label),
+        tone: "danger",
+      });
+    }
+  };
+
+  const stopCommand = () => {
+    const stoppedOperation = activeOperationRef.current ?? activeOperation;
+
+    commandStream.stop();
+    activeOperationRef.current = null;
+    setActiveOperation(null);
+    if (stoppedOperation) toast.show({ title: text.operationToast.stopped(stoppedOperation.label), tone: "info" });
   };
 
   const runCommand = async (action: CommandAction) => {
@@ -115,11 +171,21 @@ export function useInfrastructureController() {
       if (!confirmed) return;
     }
 
-    runWithTerminal(commandPreview(action.id), (handlers) => streamCommand(action.id, handlers));
+    runWithTerminal({
+      key: action.id,
+      label: action.label,
+      open: (handlers) => streamCommand(action.id, handlers),
+      preview: commandPreview(action.id),
+    });
   };
 
   const runProxy = () => {
-    runWithTerminal(proxyPreview(proxyForm), (handlers) => streamProxy(proxyForm, handlers));
+    runWithTerminal({
+      key: "proxy:create",
+      label: text.panels.proxy.createProxy,
+      open: (handlers) => streamProxy(proxyForm, handlers),
+      preview: proxyPreview(proxyForm),
+    });
   };
 
   const runProxyDelete = async () => {
@@ -132,7 +198,12 @@ export function useInfrastructureController() {
     });
     if (!confirmed) return;
 
-    runWithTerminal(proxyDeletePreview(proxyForm.domain), (handlers) => streamProxyDelete(proxyForm.domain, handlers));
+    runWithTerminal({
+      key: "proxy:delete",
+      label: text.panels.proxy.deleteProxy,
+      open: (handlers) => streamProxyDelete(proxyForm.domain, handlers),
+      preview: proxyDeletePreview(proxyForm.domain),
+    });
   };
 
   const runHost = async (action: "add" | "remove") => {
@@ -147,21 +218,31 @@ export function useInfrastructureController() {
       if (!confirmed) return;
     }
 
-    runWithTerminal(hostPreview(action, proxyForm.domain), (handlers) =>
-      streamHost(action, proxyForm.domain, handlers),
-    );
+    runWithTerminal({
+      key: `host:${action}`,
+      label: action === "add" ? text.panels.proxy.addHost : text.panels.proxy.removeHost,
+      open: (handlers) => streamHost(action, proxyForm.domain, handlers),
+      preview: hostPreview(action, proxyForm.domain),
+    });
   };
 
   const runShell = (action: ShellAction) => {
-    runWithTerminal(`docker exec -i ${action.container} sh`, (handlers) => streamShell(action.container, handlers));
+    runWithTerminal({
+      key: `shell:${action.container}`,
+      label: action.label,
+      open: (handlers) => streamShell(action.container, handlers),
+      preview: `docker exec -i ${action.container} sh`,
+    });
   };
 
   const runMariaDbInstanceCreate = (form: MariaDbInstanceForm) => {
-    runWithTerminal(
-      `node ./scripts/mariadb-instances.mjs add --version ${form.version}`,
-      (handlers) => streamMariaDbInstanceCreate(form, handlers),
-      mariaDbInstances.refresh,
-    );
+    runWithTerminal({
+      key: "mariadb:create",
+      label: text.mariadbInstances.create,
+      onSettled: mariaDbInstances.refresh,
+      open: (handlers) => streamMariaDbInstanceCreate(form, handlers),
+      preview: `node ./scripts/mariadb-instances.mjs add --version ${form.version}`,
+    });
   };
 
   const runMariaDbInstanceAction = async (instance: MariaDbInstance, action: MariaDbInstanceAction) => {
@@ -176,23 +257,32 @@ export function useInfrastructureController() {
       if (!confirmed) return;
     }
 
-    runWithTerminal(
-      `docker compose -f ${instance.composeFile} ${action}`,
-      (handlers) => streamMariaDbInstanceAction(instance.name, action, handlers),
-      mariaDbInstances.refresh,
-    );
+    runWithTerminal({
+      key: `mariadb:${instance.name}:${action}`,
+      label: text.mariadbInstances.actions[action].label,
+      onSettled: mariaDbInstances.refresh,
+      open: (handlers) => streamMariaDbInstanceAction(instance.name, action, handlers),
+      preview: `docker compose -f ${instance.composeFile} ${action}`,
+    });
   };
 
   const runMariaDbInstanceShell = (instance: MariaDbInstance) => {
-    runWithTerminal(`docker exec -i ${instance.container} sh`, (handlers) => streamShell(instance.container, handlers));
+    runWithTerminal({
+      key: `shell:${instance.container}`,
+      label: text.mariadbInstances.actions.shell.label,
+      open: (handlers) => streamShell(instance.container, handlers),
+      preview: `docker exec -i ${instance.container} sh`,
+    });
   };
 
   const runPostgresInstanceCreate = (form: PostgresInstanceForm) => {
-    runWithTerminal(
-      `node ./scripts/postgres-instances.mjs add --version ${form.version}`,
-      (handlers) => streamPostgresInstanceCreate(form, handlers),
-      postgresInstances.refresh,
-    );
+    runWithTerminal({
+      key: "postgres:create",
+      label: text.postgresInstances.create,
+      onSettled: postgresInstances.refresh,
+      open: (handlers) => streamPostgresInstanceCreate(form, handlers),
+      preview: `node ./scripts/postgres-instances.mjs add --version ${form.version}`,
+    });
   };
 
   const runPostgresInstanceAction = async (instance: PostgresInstance, action: PostgresInstanceAction) => {
@@ -207,15 +297,22 @@ export function useInfrastructureController() {
       if (!confirmed) return;
     }
 
-    runWithTerminal(
-      `docker compose -f ${instance.composeFile} ${action}`,
-      (handlers) => streamPostgresInstanceAction(instance.name, action, handlers),
-      postgresInstances.refresh,
-    );
+    runWithTerminal({
+      key: `postgres:${instance.name}:${action}`,
+      label: text.mariadbInstances.actions[action].label,
+      onSettled: postgresInstances.refresh,
+      open: (handlers) => streamPostgresInstanceAction(instance.name, action, handlers),
+      preview: `docker compose -f ${instance.composeFile} ${action}`,
+    });
   };
 
   const runPostgresInstanceShell = (instance: PostgresInstance) => {
-    runWithTerminal(`docker exec -i ${instance.container} sh`, (handlers) => streamShell(instance.container, handlers));
+    runWithTerminal({
+      key: `shell:${instance.container}`,
+      label: text.mariadbInstances.actions.shell.label,
+      open: (handlers) => streamShell(instance.container, handlers),
+      preview: `docker exec -i ${instance.container} sh`,
+    });
   };
 
   const linkDetail = (container: string) => {
@@ -235,6 +332,7 @@ export function useInfrastructureController() {
 
   return {
     activeConfig,
+    activeOperationKey,
     activeView,
     appMeta,
     commandStream,
@@ -243,6 +341,8 @@ export function useInfrastructureController() {
     language,
     mariaDbInstances,
     moduleDetails,
+    operationBlockTitle,
+    operationRunning,
     postgresInstances,
     proxyForm,
     runCommand,
@@ -260,12 +360,14 @@ export function useInfrastructureController() {
     serviceLinks,
     serviceStatuses,
     setProxyForm,
+    stopCommand,
     terminalOpen,
     text,
     toggleLanguage,
     toggleTerminal,
     translateActions,
     translateShells,
+    toast,
   };
 }
 

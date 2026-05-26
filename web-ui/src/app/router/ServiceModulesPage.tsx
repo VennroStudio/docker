@@ -20,20 +20,26 @@ export type ServiceModuleDescriptor = {
 };
 
 type ServiceModulesPageProps = {
+  activeOperationKey?: null | string;
   description: string;
   eyebrow: string;
   modules: ServiceModuleDescriptor[];
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   view: ViewConfig;
   onRun: (action: CommandAction) => void;
   onShellOpen: (action: ShellAction) => void;
 };
 
 export function ServiceModulesPage({
+  activeOperationKey,
   description,
   eyebrow,
   modules,
   onRun,
   onShellOpen,
+  operationDisabled,
+  operationDisabledTitle,
   view,
 }: ServiceModulesPageProps) {
   return (
@@ -46,6 +52,9 @@ export function ServiceModulesPage({
             details={module.details}
             eyebrow={module.eyebrow}
             link={module.link}
+            activeOperationKey={activeOperationKey}
+            operationDisabled={operationDisabled}
+            operationDisabledTitle={operationDisabledTitle}
             shell={module.shell}
             status={module.status}
             statusLabel={module.statusLabel}

@@ -3,8 +3,11 @@ import type { AppText } from "@/entities/infrastructure";
 import { Button } from "@/shared/ui";
 
 type ProxyActionGridProps = {
+  activeOperationKey?: null | string;
   copy: AppText["panels"]["proxy"];
   hostReady: boolean;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   proxyReady: boolean;
   onCreateProxy: () => void;
   onHostAdd: () => void;
@@ -13,16 +16,24 @@ type ProxyActionGridProps = {
 };
 
 export function ProxyActionGrid({
+  activeOperationKey,
   copy,
   hostReady,
   onCreateProxy,
   onHostAdd,
   onHostRemove,
   onProxyDelete,
+  operationDisabled = false,
+  operationDisabledTitle,
   proxyReady,
 }: ProxyActionGridProps) {
-  const hostTitle = hostReady ? undefined : copy.validation.hostDisabled;
-  const proxyTitle = proxyReady ? undefined : copy.validation.proxyDisabled;
+  const actionTitle = (ready: boolean, operationKey: string, validationTitle: string) => {
+    if (!ready) return validationTitle;
+    if (operationDisabled && activeOperationKey !== operationKey) return operationDisabledTitle;
+    return undefined;
+  };
+  const isLoading = (operationKey: string) => operationDisabled && activeOperationKey === operationKey;
+  const isDisabled = (ready: boolean) => !ready || operationDisabled;
 
   return (
     <div className="mt-4 grid gap-3">
@@ -31,8 +42,9 @@ export function ProxyActionGrid({
           className="w-full"
           tone="primary"
           icon={<Link2 size={17} />}
-          disabled={!proxyReady}
-          title={proxyTitle}
+          disabled={isDisabled(proxyReady)}
+          loading={isLoading("proxy:create")}
+          title={actionTitle(proxyReady, "proxy:create", copy.validation.proxyDisabled)}
           onClick={onCreateProxy}
         >
           {copy.createProxy}
@@ -41,8 +53,9 @@ export function ProxyActionGrid({
           className="w-full"
           tone="danger"
           icon={<Unlink2 size={17} />}
-          disabled={!hostReady}
-          title={hostTitle}
+          disabled={isDisabled(hostReady)}
+          loading={isLoading("proxy:delete")}
+          title={actionTitle(hostReady, "proxy:delete", copy.validation.hostDisabled)}
           onClick={onProxyDelete}
         >
           {copy.deleteProxy}
@@ -52,8 +65,9 @@ export function ProxyActionGrid({
         <Button
           className="w-full"
           icon={<Globe2 size={17} />}
-          disabled={!hostReady}
-          title={hostTitle}
+          disabled={isDisabled(hostReady)}
+          loading={isLoading("host:add")}
+          title={actionTitle(hostReady, "host:add", copy.validation.hostDisabled)}
           onClick={onHostAdd}
         >
           {copy.addHost}
@@ -62,8 +76,9 @@ export function ProxyActionGrid({
           className="w-full"
           tone="danger"
           icon={<Trash2 size={17} />}
-          disabled={!hostReady}
-          title={hostTitle}
+          disabled={isDisabled(hostReady)}
+          loading={isLoading("host:remove")}
+          title={actionTitle(hostReady, "host:remove", copy.validation.hostDisabled)}
           onClick={onHostRemove}
         >
           {copy.removeHost}

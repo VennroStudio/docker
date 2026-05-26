@@ -15,6 +15,12 @@ export type AppText = {
     streamLabels: Record<StreamState, string>;
     terminal: string;
   };
+  operationToast: {
+    blocked: (label: string) => string;
+    error: (label: string) => string;
+    stopped: (label: string) => string;
+    success: (label: string) => string;
+  };
   shell: {
     detail: (container: string) => string;
     inputPlaceholder: string;

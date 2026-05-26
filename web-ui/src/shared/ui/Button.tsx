@@ -1,3 +1,4 @@
+import { LoaderCircle } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/shared/lib";
 
@@ -6,9 +7,18 @@ export type ButtonTone = "danger" | "default" | "primary";
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   tone?: ButtonTone;
   icon?: ReactNode;
+  loading?: boolean;
 };
 
-export function Button({ className = "", icon, tone = "default", children, ...props }: ButtonProps) {
+export function Button({
+  className = "",
+  disabled,
+  icon,
+  loading = false,
+  tone = "default",
+  children,
+  ...props
+}: ButtonProps) {
   const toneClass = {
     danger:
       "border-red-400/35 bg-red-500/12 text-red-50 hover:border-red-300/60 hover:bg-red-500/20 disabled:hover:bg-red-500/12",
@@ -25,9 +35,14 @@ export function Button({ className = "", icon, tone = "default", children, ...pr
         toneClass,
         className,
       )}
+      disabled={disabled || loading}
       {...props}
     >
-      {icon ? <span className="grid shrink-0 place-items-center">{icon}</span> : null}
+      {loading || icon ? (
+        <span className="grid shrink-0 place-items-center">
+          {loading ? <LoaderCircle className="animate-spin" size={17} strokeWidth={2.4} /> : icon}
+        </span>
+      ) : null}
       <span className="min-w-0 truncate">{children}</span>
     </button>
   );

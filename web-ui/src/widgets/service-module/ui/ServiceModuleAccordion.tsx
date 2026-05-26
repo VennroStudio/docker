@@ -9,11 +9,14 @@ import { moduleActionIcon, moduleActionTone, orderModuleActions } from "../model
 import { ModuleActionButton } from "./ModuleActionButton";
 
 type ServiceModuleAccordionProps = {
+  activeOperationKey?: null | string;
   actions: CommandAction[];
   defaultOpen?: boolean;
   details?: Array<{ href?: string; label: string; value?: string }>;
   eyebrow: string;
   link?: ServiceLink;
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
   shell?: ShellAction;
   status?: ContainerStateInfo;
   statusLabel?: string;
@@ -23,6 +26,7 @@ type ServiceModuleAccordionProps = {
 };
 
 export function ServiceModuleAccordion({
+  activeOperationKey = null,
   actions,
   defaultOpen = false,
   details = [],
@@ -30,6 +34,8 @@ export function ServiceModuleAccordion({
   link,
   onRun,
   onShellOpen,
+  operationDisabled = false,
+  operationDisabledTitle,
   shell,
   status,
   statusLabel = "Status",
@@ -38,6 +44,7 @@ export function ServiceModuleAccordion({
   const [open, setOpen] = useState(defaultOpen);
   const orderedActions = useMemo(() => orderModuleActions(actions), [actions]);
   const visibleDetails = details.filter((detail) => detail.value);
+  const shellOperationKey = shell ? `shell:${shell.container}` : undefined;
 
   return (
     <AccordionPanel
@@ -57,15 +64,27 @@ export function ServiceModuleAccordion({
           {orderedActions.map(({ action, suffix }) => (
             <ModuleActionButton
               key={action.id}
+              disabled={operationDisabled}
               label={action.label}
+              loading={operationDisabled && activeOperationKey === action.id}
               tone={moduleActionTone[suffix]}
+              title={operationDisabled && activeOperationKey !== action.id ? operationDisabledTitle : action.label}
               onClick={() => onRun(action)}
             >
               {moduleActionIcon[suffix]}
             </ModuleActionButton>
           ))}
           {shell ? (
-            <ModuleActionButton label={shell.label} tone={moduleActionTone.shell} onClick={() => onShellOpen?.(shell)}>
+            <ModuleActionButton
+              disabled={operationDisabled}
+              label={shell.label}
+              loading={operationDisabled && activeOperationKey === shellOperationKey}
+              tone={moduleActionTone.shell}
+              title={
+                operationDisabled && activeOperationKey !== shellOperationKey ? operationDisabledTitle : shell.label
+              }
+              onClick={() => onShellOpen?.(shell)}
+            >
               {moduleActionIcon.shell}
             </ModuleActionButton>
           ) : null}

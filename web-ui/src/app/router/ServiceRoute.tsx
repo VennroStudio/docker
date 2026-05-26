@@ -12,9 +12,12 @@ export function ServiceRoute({ controller }: ServiceRouteProps) {
 
   return (
     <ServiceModulesPage
+      activeOperationKey={controller.activeOperationKey}
       description={route.description}
       eyebrow={route.eyebrow}
       modules={route.modules}
+      operationDisabled={controller.operationRunning}
+      operationDisabledTitle={controller.operationBlockTitle}
       view={controller.activeConfig}
       onRun={controller.runCommand}
       onShellOpen={controller.runShell}

@@ -11,8 +11,12 @@ type StreamHandlers = {
 };
 
 type OpenStream = (handlers: StreamHandlers) => () => void;
+type RunResult = {
+  ok: boolean;
+  text: string;
+};
 type RunOptions = {
-  onSettled?: () => void;
+  onSettled?: (result: RunResult) => void;
 };
 
 const idleOutput = "Waiting for action...";
@@ -34,7 +38,7 @@ export function useCommandStream() {
     setShellPrompt("$");
     setOutput(`${preview}\n\n`);
     setStreamState("running");
-    stopStream.current = open({
+    const handlers: StreamHandlers = {
       onPrompt: setShellPrompt,
       onSession: setShellSessionId,
       onMessage: append,
@@ -44,7 +48,7 @@ export function useCommandStream() {
         setShellSessionId(null);
         setShellPrompt("$");
         setStreamState(ok ? "done" : "error");
-        options.onSettled?.();
+        options.onSettled?.({ ok, text });
       },
       onError: (text) => {
         append(text);
@@ -52,9 +56,21 @@ export function useCommandStream() {
         setShellSessionId(null);
         setShellPrompt("$");
         setStreamState("error");
-        options.onSettled?.();
+        options.onSettled?.({ ok: false, text });
       },
-    });
+    };
+
+    try {
+      stopStream.current = open(handlers);
+    } catch (error) {
+      const text = `\n${error instanceof Error ? error.message : String(error)}\n`;
+      append(text);
+      stopStream.current = null;
+      setShellSessionId(null);
+      setShellPrompt("$");
+      setStreamState("error");
+      options.onSettled?.({ ok: false, text });
+    }
   };
 
   const stop = () => {

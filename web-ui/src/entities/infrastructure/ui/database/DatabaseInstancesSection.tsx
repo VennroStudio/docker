@@ -5,6 +5,7 @@ import { DatabaseSectionState } from "./DatabaseSectionState";
 import type { DatabaseInstanceRuntime, DatabaseInstancesSectionProps } from "./types";
 
 export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntime>({
+  activeOperationKey,
   actionLabels,
   copy,
   error,
@@ -15,6 +16,10 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
   onRun,
   onShellOpen,
   open,
+  operationDisabled,
+  operationDisabledTitle,
+  operationKeyForAction,
+  operationKeyForShell,
 }: DatabaseInstancesSectionProps<Instance>) {
   return (
     <AccordionPanel
@@ -29,7 +34,9 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
           <Button
             className="min-h-9 px-3 py-1.5"
             icon={<Plus size={15} strokeWidth={2.6} />}
+            disabled={operationDisabled}
             tone="primary"
+            title={operationDisabled ? operationDisabledTitle : undefined}
             type="button"
             onClick={onCreateClick}
           >
@@ -46,9 +53,14 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
         {instances.map((instance) => (
           <DatabaseInstanceRow
             key={instance.name}
+            activeOperationKey={activeOperationKey}
             actionLabels={actionLabels}
             copy={copy}
             instance={instance}
+            operationDisabled={operationDisabled}
+            operationDisabledTitle={operationDisabledTitle}
+            operationKeyForAction={operationKeyForAction}
+            operationKeyForShell={operationKeyForShell}
             onRun={onRun}
             onShellOpen={onShellOpen}
           />

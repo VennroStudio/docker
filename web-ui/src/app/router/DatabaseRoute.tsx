@@ -11,7 +11,10 @@ type DatabaseRouteProps = {
 export function DatabaseRoute({ controller }: DatabaseRouteProps) {
   const {
     activeConfig,
+    activeOperationKey,
     mariaDbInstances,
+    operationBlockTitle,
+    operationRunning,
     postgresInstances,
     runCommand,
     runMariaDbInstanceAction,
@@ -39,9 +42,12 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
     >
       <div className="grid gap-4 min-[1500px]:grid-cols-2">
         <MariaDbInstancesPanel
+          activeOperationKey={activeOperationKey}
           error={mariaDbInstances.error}
           instances={mariaDbInstances.instances}
           loading={mariaDbInstances.loading}
+          operationDisabled={operationRunning}
+          operationDisabledTitle={operationBlockTitle}
           phpmyadmin={mariaDbInstances.phpmyadmin}
           phpmyadminActions={translateActions(phpmyadminActions)}
           phpmyadminLink={serviceLinks.links["phpmyadmin-container"]}
@@ -54,9 +60,12 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
           onShellOpen={runMariaDbInstanceShell}
         />
         <PostgresInstancesPanel
+          activeOperationKey={activeOperationKey}
           error={postgresInstances.error}
           instances={postgresInstances.instances}
           loading={postgresInstances.loading}
+          operationDisabled={operationRunning}
+          operationDisabledTitle={operationBlockTitle}
           pgadmin={postgresInstances.pgadmin}
           pgadminActions={translateActions(pgadminActions)}
           pgadminLink={serviceLinks.links["pgadmin-container"]}
