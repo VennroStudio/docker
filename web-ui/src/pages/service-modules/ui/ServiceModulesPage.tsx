@@ -1,23 +1,7 @@
-import type {
-  CommandAction,
-  ContainerStateInfo,
-  ServiceLink,
-  ShellAction,
-  ViewConfig,
-} from "@/entities/infrastructure";
+import type { CommandAction, ShellAction, ViewConfig } from "@/entities/infrastructure";
 import { ServiceModuleAccordion } from "@/widgets/service-module";
 import { ServicePageLayout } from "@/widgets/service-page-layout";
-
-export type ServiceModuleDescriptor = {
-  actions: CommandAction[];
-  details?: Array<{ href?: string; label: string; value?: string }>;
-  eyebrow: string;
-  link?: ServiceLink;
-  shell?: ShellAction;
-  status?: ContainerStateInfo;
-  statusLabel: string;
-  title: string;
-};
+import type { ServiceModuleDescriptor } from "../model/types";
 
 type ServiceModulesPageProps = {
   activeOperationKey?: null | string;

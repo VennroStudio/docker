@@ -5,8 +5,9 @@ import type { ContainerStateInfo } from "@/entities/infrastructure";
 import type { ServiceLink } from "@/entities/infrastructure";
 import type { CommandAction, ShellAction } from "@/entities/infrastructure";
 import { AccordionPanel, IconLink } from "@/shared/ui";
-import { moduleActionIcon, moduleActionTone, orderModuleActions } from "../model/moduleActions";
+import { moduleActionTone, orderModuleActions } from "../model/moduleActions";
 import { ModuleActionButton } from "./ModuleActionButton";
+import { moduleActionIcon } from "./moduleActionIcon";
 
 type ServiceModuleAccordionProps = {
   activeOperationKey?: null | string;

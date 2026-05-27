@@ -1,0 +1,202 @@
+import {
+  commandPageRegistry,
+  pgadminActions,
+  phpmyadminActions,
+  type AppText,
+  type CommandAction,
+  type MariaDbDatabaseForm,
+  type MariaDbExportForm,
+  type MariaDbImportForm,
+  type MariaDbInstance,
+  type MariaDbInstanceAction,
+  type MariaDbInstanceForm,
+  type PgAdminOverview,
+  type PhpMyAdminOverview,
+  type PostgresDatabaseForm,
+  type PostgresExportForm,
+  type PostgresImportForm,
+  type PostgresInstance,
+  type PostgresInstanceAction,
+  type PostgresInstanceForm,
+  type ServiceLink,
+  type ShellAction,
+  type ViewConfig,
+} from "@/entities/infrastructure";
+import type { AppSettings } from "@/entities/settings";
+import { MariaDbInstancesPanel, PhpMyAdminPanel } from "@/features/manage-mariadb";
+import { PgAdminPanel, PostgresInstancesPanel } from "@/features/manage-postgres";
+import { ServicePageLayout } from "@/widgets/service-page-layout";
+
+type DatabasesPageProps = {
+  activeOperationKey?: null | string;
+  databaseRefreshSignal?: number;
+  mariaDb: {
+    error: string | null;
+    instances: MariaDbInstance[];
+    loading: boolean;
+    phpmyadmin: PhpMyAdminOverview;
+  };
+  operationDisabled?: boolean;
+  operationDisabledTitle?: string;
+  postgres: {
+    error: string | null;
+    instances: PostgresInstance[];
+    loading: boolean;
+    pgadmin: PgAdminOverview;
+  };
+  serviceLinks: Record<string, ServiceLink>;
+  settings?: AppSettings | null;
+  text: AppText;
+  view: ViewConfig;
+  translateActions: (actions: CommandAction[]) => CommandAction[];
+  translateShells: (actions: ShellAction[]) => ShellAction[];
+  onCommandRun: (action: CommandAction) => void;
+  onMariaDbCreate: (form: MariaDbInstanceForm) => void;
+  onMariaDbDatabaseCreate: (form: MariaDbDatabaseForm) => void;
+  onMariaDbDatabaseDrop: (form: MariaDbDatabaseForm) => void;
+  onMariaDbExport: (form: MariaDbExportForm) => void;
+  onMariaDbImport: (form: MariaDbImportForm) => void;
+  onMariaDbRun: (instance: MariaDbInstance, action: MariaDbInstanceAction) => void;
+  onMariaDbShellOpen: (instance: MariaDbInstance) => void;
+  onPostgresCreate: (form: PostgresInstanceForm) => void;
+  onPostgresDatabaseCreate: (form: PostgresDatabaseForm) => void;
+  onPostgresDatabaseDrop: (form: PostgresDatabaseForm) => void;
+  onPostgresExport: (form: PostgresExportForm) => void;
+  onPostgresImport: (form: PostgresImportForm) => void;
+  onPostgresRun: (instance: PostgresInstance, action: PostgresInstanceAction) => void;
+  onPostgresShellOpen: (instance: PostgresInstance) => void;
+  onShellOpen: (action: ShellAction) => void;
+};
+
+export function DatabasesPage({
+  activeOperationKey,
+  databaseRefreshSignal,
+  mariaDb,
+  onCommandRun,
+  onMariaDbCreate,
+  onMariaDbDatabaseCreate,
+  onMariaDbDatabaseDrop,
+  onMariaDbExport,
+  onMariaDbImport,
+  onMariaDbRun,
+  onMariaDbShellOpen,
+  onPostgresCreate,
+  onPostgresDatabaseCreate,
+  onPostgresDatabaseDrop,
+  onPostgresExport,
+  onPostgresImport,
+  onPostgresRun,
+  onPostgresShellOpen,
+  onShellOpen,
+  operationDisabled,
+  operationDisabledTitle,
+  postgres,
+  serviceLinks,
+  settings,
+  text,
+  translateActions,
+  translateShells,
+  view,
+}: DatabasesPageProps) {
+  const page = text.servicePages.mariadb;
+  const mariaShells = translateShells(commandPageRegistry.mariadb.shells || []);
+  const postgresShells = translateShells(commandPageRegistry.postgres.shells || []);
+  const mariaDbDefaults = settings?.mariadb;
+  const postgresDefaults = settings?.postgres;
+  const defaultDumpPath = mariaDbDefaults
+    ? joinPath(mariaDbDefaults.homeDumpPath, mariaDbDefaults.dumpName)
+    : undefined;
+  const defaultPostgresDumpPath = postgresDefaults
+    ? joinPath(postgresDefaults.homeDumpPath, postgresDefaults.dumpName)
+    : undefined;
+  const defaultMariaDbCreateForm = mariaDbDefaults
+    ? {
+        rootPassword: mariaDbDefaults.rootPassword,
+        version: mariaDbDefaults.defaultVersion,
+      }
+    : undefined;
+  const defaultPostgresCreateForm = postgresDefaults
+    ? {
+        database: postgresDefaults.database,
+        password: postgresDefaults.password,
+        user: postgresDefaults.user,
+      }
+    : undefined;
+
+  return (
+    <ServicePageLayout view={view} eyebrow={page.eyebrow} description={page.description} title={text.views.mariadb}>
+      <div className="space-y-4">
+        <MariaDbInstancesPanel
+          activeOperationKey={activeOperationKey}
+          databaseRefreshSignal={databaseRefreshSignal}
+          defaultCreateForm={defaultMariaDbCreateForm}
+          defaultDatabase={mariaDbDefaults?.defaultDatabase}
+          defaultDumpPath={defaultDumpPath}
+          error={mariaDb.error}
+          instances={mariaDb.instances}
+          loading={mariaDb.loading}
+          operationDisabled={operationDisabled}
+          operationDisabledTitle={operationDisabledTitle}
+          text={text}
+          onCreate={onMariaDbCreate}
+          onDatabaseCreate={onMariaDbDatabaseCreate}
+          onDatabaseDrop={onMariaDbDatabaseDrop}
+          onExport={onMariaDbExport}
+          onImport={onMariaDbImport}
+          onRun={onMariaDbRun}
+          onShellOpen={onMariaDbShellOpen}
+        />
+        <PostgresInstancesPanel
+          activeOperationKey={activeOperationKey}
+          databaseRefreshSignal={databaseRefreshSignal}
+          defaultCreateForm={defaultPostgresCreateForm}
+          defaultDatabase={postgresDefaults?.database}
+          defaultDumpPath={defaultPostgresDumpPath}
+          error={postgres.error}
+          instances={postgres.instances}
+          loading={postgres.loading}
+          operationDisabled={operationDisabled}
+          operationDisabledTitle={operationDisabledTitle}
+          text={text}
+          onCreate={onPostgresCreate}
+          onDatabaseCreate={onPostgresDatabaseCreate}
+          onDatabaseDrop={onPostgresDatabaseDrop}
+          onExport={onPostgresExport}
+          onImport={onPostgresImport}
+          onRun={onPostgresRun}
+          onShellOpen={onPostgresShellOpen}
+        />
+        <PhpMyAdminPanel
+          actions={translateActions(phpmyadminActions)}
+          activeOperationKey={activeOperationKey}
+          link={serviceLinks["phpmyadmin-container"]}
+          operationDisabled={operationDisabled}
+          operationDisabledTitle={operationDisabledTitle}
+          overview={mariaDb.phpmyadmin}
+          shell={mariaShells.find((shell) => shell.container === "phpmyadmin-container")}
+          text={text}
+          onRun={onCommandRun}
+          onShellOpen={onShellOpen}
+        />
+        <PgAdminPanel
+          actions={translateActions(pgadminActions)}
+          activeOperationKey={activeOperationKey}
+          link={serviceLinks["pgadmin-container"]}
+          operationDisabled={operationDisabled}
+          operationDisabledTitle={operationDisabledTitle}
+          overview={postgres.pgadmin}
+          shell={postgresShells.find((shell) => shell.container === "pgadmin-container")}
+          text={text}
+          onRun={onCommandRun}
+          onShellOpen={onShellOpen}
+        />
+      </div>
+    </ServicePageLayout>
+  );
+}
+
+function joinPath(base: string, name: string) {
+  if (!base) return name;
+  if (!name) return base;
+  return `${base.replace(/\/+$/, "")}/${name.replace(/^\/+/, "")}`;
+}

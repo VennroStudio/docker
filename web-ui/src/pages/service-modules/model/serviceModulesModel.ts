@@ -4,23 +4,50 @@ import {
   redisinsightActions,
   registryActions,
   registryUiActions,
+  type AppText,
+  type CommandAction,
   type CommandPageId,
+  type ContainerStateInfo,
+  type ServiceLink,
   type ShellAction,
+  type ViewId,
 } from "@/entities/infrastructure";
-import type { InfrastructureController } from "../model/useInfrastructureController";
-import type { ServiceModuleDescriptor } from "./ServiceModulesPage";
+import type { ServiceModuleDescriptor } from "./types";
 
-type ServiceRouteModel = {
+type ServiceModulesModelSource = {
+  activeView: ViewId;
+  containerStates: Record<string, ContainerStateInfo>;
+  serviceLinks: Record<string, ServiceLink>;
+  text: AppText;
+  translateActions: (actions: CommandAction[]) => CommandAction[];
+  translateShells: (actions: ShellAction[]) => ShellAction[];
+};
+
+type ServiceModulesPageModel = {
   description: string;
   eyebrow: string;
   modules: ServiceModuleDescriptor[];
 };
 
-export function getServiceRouteModel(controller: InfrastructureController): ServiceRouteModel | null {
-  const { activeView, containerStates, moduleDetails, serviceLinks, text, translateActions, translateShells } =
-    controller;
+export function getServiceModulesPageModel({
+  activeView,
+  containerStates,
+  serviceLinks,
+  text,
+  translateActions,
+  translateShells,
+}: ServiceModulesModelSource): ServiceModulesPageModel | null {
   const statusLabel = text.mariadbInstances.statusLabel;
   const containerLabel = text.mariadbInstances.containerLabel;
+  const moduleDetails = (container: string | undefined) => {
+    const details: Array<{ href?: string; label: string; value?: string }> = [
+      { label: containerLabel, value: container },
+    ];
+    const link = container ? serviceLinks[container] : undefined;
+
+    if (link) details.push({ href: link.url, label: text.common.link, value: link.url });
+    return details;
+  };
 
   if (activeView === "redis") {
     const page = text.servicePages.redis;
@@ -37,7 +64,7 @@ export function getServiceRouteModel(controller: InfrastructureController): Serv
           details: [{ label: containerLabel, value: redisShell?.container }],
           eyebrow: text.panels.serviceControl.cache,
           shell: redisShell,
-          status: containerStates.states["redis-container"],
+          status: containerStates["redis-container"],
           statusLabel,
           title: "Redis",
         },
@@ -45,9 +72,9 @@ export function getServiceRouteModel(controller: InfrastructureController): Serv
           actions: translateActions(redisinsightActions),
           details: moduleDetails(redisInsightShell?.container),
           eyebrow: text.panels.serviceControl.interface,
-          link: serviceLinks.links["redisinsight-container"],
+          link: serviceLinks["redisinsight-container"],
           shell: redisInsightShell,
-          status: containerStates.states["redisinsight-container"],
+          status: containerStates["redisinsight-container"],
           statusLabel,
           title: "RedisInsight",
         },
@@ -70,7 +97,7 @@ export function getServiceRouteModel(controller: InfrastructureController): Serv
           details: moduleDetails(registryShell?.container),
           eyebrow: page.panelEyebrow,
           shell: registryShell,
-          status: containerStates.states["registry-container"],
+          status: containerStates["registry-container"],
           statusLabel,
           title: "Registry",
         },
@@ -78,9 +105,9 @@ export function getServiceRouteModel(controller: InfrastructureController): Serv
           actions: translateActions(registryUiActions),
           details: moduleDetails(registryUiShell?.container),
           eyebrow: "Registry UI",
-          link: serviceLinks.links["registry-ui-container"],
+          link: serviceLinks["registry-ui-container"],
           shell: registryUiShell,
-          status: containerStates.states["registry-ui-container"],
+          status: containerStates["registry-ui-container"],
           statusLabel,
           title: "Registry UI",
         },
@@ -102,9 +129,9 @@ export function getServiceRouteModel(controller: InfrastructureController): Serv
         actions: translateActions(commandPage.actions),
         details: moduleDetails(shell?.container),
         eyebrow: page.panelEyebrow,
-        link: shell ? serviceLinks.links[shell.container] : undefined,
+        link: shell ? serviceLinks[shell.container] : undefined,
         shell,
-        status: shell ? containerStates.states[shell.container] : undefined,
+        status: shell ? containerStates[shell.container] : undefined,
         statusLabel,
         title: page.panelTitle,
       },

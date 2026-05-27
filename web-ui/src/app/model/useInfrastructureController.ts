@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   commandPageRegistry,
@@ -12,18 +12,6 @@ import {
   useServiceStatuses,
   type CommandAction,
   type CommandPageId,
-  type MariaDbDatabaseForm,
-  type MariaDbExportForm,
-  type MariaDbImportForm,
-  type MariaDbInstance,
-  type MariaDbInstanceAction,
-  type MariaDbInstanceForm,
-  type PostgresDatabaseForm,
-  type PostgresExportForm,
-  type PostgresImportForm,
-  type PostgresInstance,
-  type PostgresInstanceAction,
-  type PostgresInstanceForm,
   type ProxyFormState,
   type ShellAction,
   type ViewId,
@@ -35,27 +23,18 @@ import {
   proxyPreview,
   streamCommand,
   streamHost,
-  streamMariaDbExport,
-  streamMariaDbDatabase,
-  streamMariaDbImport,
-  streamMariaDbInstanceAction,
-  streamMariaDbInstanceCreate,
-  streamPostgresDatabase,
-  streamPostgresExport,
-  streamPostgresImport,
-  streamPostgresInstanceAction,
-  streamPostgresInstanceCreate,
   streamProxy,
   streamProxyDelete,
   streamShell,
-  useCommandStream,
 } from "@/features/command-terminal";
 import { useMariaDbInstances } from "@/features/manage-mariadb";
 import { usePostgresInstances } from "@/features/manage-postgres";
 import { useSettings } from "@/entities/settings";
 import { useConfirmDialog } from "@/shared/lib/hooks";
 import { useToast } from "@/shared/lib/hooks";
+import { useDatabaseOperations } from "./useDatabaseOperations";
 import { useLanguage } from "./useLanguage";
+import { useTerminalOperations } from "./useTerminalOperations";
 
 const initialProxyForm: ProxyFormState = {
   domain: "pma.local",
@@ -64,27 +43,10 @@ const initialProxyForm: ProxyFormState = {
   target: "phpmyadmin-container",
 };
 
-type OperationState = {
-  key: string;
-  label: string;
-};
-
-type RunWithTerminalConfig = {
-  key: string;
-  label: string;
-  onSettled?: () => void;
-  open: Parameters<ReturnType<typeof useCommandStream>["run"]>[1];
-  preview: string;
-};
-
 export function useInfrastructureController() {
   const { language, toggleLanguage } = useLanguage();
-  const [terminalOpen, setTerminalOpen] = useState(false);
-  const [activeOperation, setActiveOperation] = useState<OperationState | null>(null);
   const [databaseRefreshSignal, setDatabaseRefreshSignal] = useState(0);
-  const activeOperationRef = useRef<OperationState | null>(null);
   const [proxyForm, setProxyForm] = useState(initialProxyForm);
-  const commandStream = useCommandStream();
   const confirmDialog = useConfirmDialog();
   const toast = useToast();
   const appMeta = useAppMeta();
@@ -108,13 +70,32 @@ export function useInfrastructureController() {
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const postgresInstances = usePostgresInstances(activeView === "mariadb");
   const text = dictionaries[language];
-  const operationRunning = commandStream.streamState === "running" && Boolean(activeOperation);
-  const activeOperationKey = operationRunning ? activeOperation?.key : null;
-  const operationBlockTitle =
-    operationRunning && activeOperation ? text.operationToast.blocked(activeOperation.label) : undefined;
+  const {
+    activeOperationKey,
+    commandStream,
+    operationBlockTitle,
+    operationRunning,
+    runWithTerminal,
+    stopCommand,
+    terminalOpen,
+    toggleTerminal,
+  } = useTerminalOperations({
+    containerStatesRefresh: containerStates.refresh,
+    serviceLinksRefresh: serviceLinks.refresh,
+    serviceStatusesRefresh: serviceStatuses.refresh,
+    text,
+    toast,
+  });
 
-  const toggleTerminal = () => setTerminalOpen((value) => !value);
   const refreshDatabaseCatalog = () => setDatabaseRefreshSignal((value) => value + 1);
+  const databaseOperations = useDatabaseOperations({
+    confirmDialog,
+    refreshDatabaseCatalog,
+    refreshMariaDbInstances: mariaDbInstances.refresh,
+    refreshPostgresInstances: postgresInstances.refresh,
+    runWithTerminal,
+    text,
+  });
   const selectView = (view: ViewId) => navigate(getViewById(view).path);
   const translateActions = (actions: CommandAction[]) =>
     actions.map((action) => ({
@@ -127,53 +108,6 @@ export function useInfrastructureController() {
       detail: text.shell.detail(action.container),
       label: text.shell.openLabel(action.label),
     }));
-
-  const runWithTerminal = ({ key, label, onSettled, open, preview }: RunWithTerminalConfig) => {
-    const lockedOperation = activeOperationRef.current;
-    if (lockedOperation) {
-      toast.show({ title: text.operationToast.blocked(lockedOperation.label), tone: "info" });
-      return;
-    }
-
-    const nextOperation = { key, label };
-    activeOperationRef.current = nextOperation;
-    setActiveOperation(nextOperation);
-    setTerminalOpen(true);
-
-    try {
-      commandStream.run(preview, open, {
-        onSettled: ({ ok }) => {
-          serviceStatuses.refresh();
-          void containerStates.refresh();
-          void serviceLinks.refresh();
-          toast.show({
-            title: ok ? text.operationToast.success(label) : text.operationToast.error(label),
-            tone: ok ? "success" : "danger",
-          });
-          activeOperationRef.current = null;
-          setActiveOperation(null);
-          onSettled?.();
-        },
-      });
-    } catch (error) {
-      activeOperationRef.current = null;
-      setActiveOperation(null);
-      toast.show({
-        message: error instanceof Error ? error.message : String(error),
-        title: text.operationToast.error(label),
-        tone: "danger",
-      });
-    }
-  };
-
-  const stopCommand = () => {
-    const stoppedOperation = activeOperationRef.current ?? activeOperation;
-
-    commandStream.stop();
-    activeOperationRef.current = null;
-    setActiveOperation(null);
-    if (stoppedOperation) toast.show({ title: text.operationToast.stopped(stoppedOperation.label), tone: "info" });
-  };
 
   const runCommand = async (action: CommandAction) => {
     if (action.confirm) {
@@ -251,199 +185,6 @@ export function useInfrastructureController() {
     });
   };
 
-  const runMariaDbInstanceCreate = (form: MariaDbInstanceForm) => {
-    runWithTerminal({
-      key: "mariadb:create",
-      label: text.mariadbInstances.create,
-      onSettled: mariaDbInstances.refresh,
-      open: (handlers) => streamMariaDbInstanceCreate(form, handlers),
-      preview: `node ./scripts/mariadb-instances.mjs add --version ${form.version}`,
-    });
-  };
-
-  const runMariaDbImport = (form: MariaDbImportForm) => {
-    runWithTerminal({
-      key: "mariadb:import",
-      label: text.mariadbInstances.import.action,
-      onSettled: mariaDbInstances.refresh,
-      open: (handlers) => streamMariaDbImport(form, handlers),
-      preview: `make -e mariadb-import CONTAINER=${form.container} DB_NAME=${form.database} DUMP_FILE=${form.filePath}`,
-    });
-  };
-
-  const runMariaDbExport = (form: MariaDbExportForm) => {
-    runWithTerminal({
-      key: "mariadb:export",
-      label: text.mariadbInstances.export.action,
-      onSettled: mariaDbInstances.refresh,
-      open: (handlers) => streamMariaDbExport(form, handlers),
-      preview: `make -e mariadb-export CONTAINER=${form.container} DB_NAME=${form.database} DUMP_FILE=${form.filePath}`,
-    });
-  };
-
-  const runMariaDbDatabaseCreate = (form: MariaDbDatabaseForm) => {
-    runWithTerminal({
-      key: "mariadb:database:create",
-      label: text.mariadbInstances.databaseManager.createAction,
-      onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamMariaDbDatabase(form, "create", handlers),
-      preview: `make -e mariadb-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
-    });
-  };
-
-  const runMariaDbDatabaseDrop = async (form: MariaDbDatabaseForm) => {
-    const confirmed = await confirmDialog.confirm({
-      body: text.confirm.runCommand.body(`drop MariaDB database ${form.database} on ${form.container}`),
-      cancelLabel: text.common.cancel,
-      confirmLabel: text.confirm.runCommand.confirmLabel,
-      title: text.mariadbInstances.databaseManager.deleteAction,
-      tone: "danger",
-    });
-    if (!confirmed) return;
-
-    runWithTerminal({
-      key: "mariadb:database:drop",
-      label: text.mariadbInstances.databaseManager.deleteAction,
-      onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamMariaDbDatabase(form, "drop", handlers),
-      preview: `make -e mariadb-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
-    });
-  };
-
-  const runMariaDbInstanceAction = async (instance: MariaDbInstance, action: MariaDbInstanceAction) => {
-    if (action === "clean" || action === "down" || action === "stop") {
-      const confirmed = await confirmDialog.confirm({
-        body: text.confirm.runCommand.body(`mariadb instance ${action}: ${instance.name}`),
-        cancelLabel: text.common.cancel,
-        confirmLabel: text.confirm.runCommand.confirmLabel,
-        title: text.mariadbInstances.actions[action].label,
-        tone: "danger",
-      });
-      if (!confirmed) return;
-    }
-
-    runWithTerminal({
-      key: `mariadb:${instance.name}:${action}`,
-      label: text.mariadbInstances.actions[action].label,
-      onSettled: mariaDbInstances.refresh,
-      open: (handlers) => streamMariaDbInstanceAction(instance.name, action, handlers),
-      preview: `docker compose -f ${instance.composeFile} ${action}`,
-    });
-  };
-
-  const runMariaDbInstanceShell = (instance: MariaDbInstance) => {
-    runWithTerminal({
-      key: `shell:${instance.container}`,
-      label: text.mariadbInstances.actions.shell.label,
-      open: (handlers) => streamShell(instance.container, handlers),
-      preview: `docker exec -i ${instance.container} sh`,
-    });
-  };
-
-  const runPostgresInstanceCreate = (form: PostgresInstanceForm) => {
-    runWithTerminal({
-      key: "postgres:create",
-      label: text.postgresInstances.create,
-      onSettled: postgresInstances.refresh,
-      open: (handlers) => streamPostgresInstanceCreate(form, handlers),
-      preview: `node ./scripts/postgres-instances.mjs add --version ${form.version}`,
-    });
-  };
-
-  const runPostgresImport = (form: PostgresImportForm) => {
-    runWithTerminal({
-      key: "postgres:import",
-      label: text.postgresInstances.import.action,
-      onSettled: postgresInstances.refresh,
-      open: (handlers) => streamPostgresImport(form, handlers),
-      preview: `make -e postgres-import CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
-    });
-  };
-
-  const runPostgresExport = (form: PostgresExportForm) => {
-    runWithTerminal({
-      key: "postgres:export",
-      label: text.postgresInstances.export.action,
-      onSettled: postgresInstances.refresh,
-      open: (handlers) => streamPostgresExport(form, handlers),
-      preview: `make -e postgres-export CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
-    });
-  };
-
-  const runPostgresDatabaseCreate = (form: PostgresDatabaseForm) => {
-    runWithTerminal({
-      key: "postgres:database:create",
-      label: text.postgresInstances.databaseManager.createAction,
-      onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamPostgresDatabase(form, "create", handlers),
-      preview: `make -e postgres-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
-    });
-  };
-
-  const runPostgresDatabaseDrop = async (form: PostgresDatabaseForm) => {
-    const confirmed = await confirmDialog.confirm({
-      body: text.confirm.runCommand.body(`drop Postgres database ${form.database} on ${form.container}`),
-      cancelLabel: text.common.cancel,
-      confirmLabel: text.confirm.runCommand.confirmLabel,
-      title: text.postgresInstances.databaseManager.deleteAction,
-      tone: "danger",
-    });
-    if (!confirmed) return;
-
-    runWithTerminal({
-      key: "postgres:database:drop",
-      label: text.postgresInstances.databaseManager.deleteAction,
-      onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamPostgresDatabase(form, "drop", handlers),
-      preview: `make -e postgres-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
-    });
-  };
-
-  const runPostgresInstanceAction = async (instance: PostgresInstance, action: PostgresInstanceAction) => {
-    if (action === "clean" || action === "down" || action === "stop") {
-      const confirmed = await confirmDialog.confirm({
-        body: text.confirm.runCommand.body(`postgres instance ${action}: ${instance.name}`),
-        cancelLabel: text.common.cancel,
-        confirmLabel: text.confirm.runCommand.confirmLabel,
-        title: text.mariadbInstances.actions[action].label,
-        tone: "danger",
-      });
-      if (!confirmed) return;
-    }
-
-    runWithTerminal({
-      key: `postgres:${instance.name}:${action}`,
-      label: text.mariadbInstances.actions[action].label,
-      onSettled: postgresInstances.refresh,
-      open: (handlers) => streamPostgresInstanceAction(instance.name, action, handlers),
-      preview: `docker compose -f ${instance.composeFile} ${action}`,
-    });
-  };
-
-  const runPostgresInstanceShell = (instance: PostgresInstance) => {
-    runWithTerminal({
-      key: `shell:${instance.container}`,
-      label: text.mariadbInstances.actions.shell.label,
-      open: (handlers) => streamShell(instance.container, handlers),
-      preview: `docker exec -i ${instance.container} sh`,
-    });
-  };
-
-  const linkDetail = (container: string) => {
-    const link = serviceLinks.links[container];
-    return link ? { href: link.url, label: text.common.link, value: link.url } : undefined;
-  };
-
-  const moduleDetails = (container: string | undefined) => {
-    const details: Array<{ href?: string; label: string; value?: string }> = [
-      { label: text.mariadbInstances.containerLabel, value: container },
-    ];
-    const link = container ? linkDetail(container) : undefined;
-
-    if (link) details.push(link);
-    return details;
-  };
-
   return {
     activeConfig,
     activeOperationKey,
@@ -455,27 +196,13 @@ export function useInfrastructureController() {
     databaseRefreshSignal,
     language,
     mariaDbInstances,
-    moduleDetails,
     operationBlockTitle,
     operationRunning,
     postgresInstances,
     proxyForm,
     runCommand,
     runHost,
-    runMariaDbDatabaseCreate,
-    runMariaDbDatabaseDrop,
-    runMariaDbExport,
-    runMariaDbInstanceAction,
-    runMariaDbInstanceCreate,
-    runMariaDbImport,
-    runMariaDbInstanceShell,
-    runPostgresDatabaseCreate,
-    runPostgresDatabaseDrop,
-    runPostgresExport,
-    runPostgresImport,
-    runPostgresInstanceAction,
-    runPostgresInstanceCreate,
-    runPostgresInstanceShell,
+    ...databaseOperations,
     runProxy,
     runProxyDelete,
     runShell,
