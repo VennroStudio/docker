@@ -4,6 +4,7 @@ import { port } from "./server/config.mjs";
 import { getErrorMessage, sendJson } from "./server/http.mjs";
 import { host, proxy, runCommand } from "./server/routes/actions.mjs";
 import { containers } from "./server/routes/containers.mjs";
+import { databases } from "./server/routes/databases.mjs";
 import { dumps } from "./server/routes/dumps.mjs";
 import { links } from "./server/routes/links.mjs";
 import { mariadbInstances } from "./server/routes/mariadb.mjs";
@@ -22,6 +23,7 @@ createServer(async (req, res) => {
     }
     if (req.method === "GET" && req.url === "/api/status") return await status(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/containers")) return await containers(req, res);
+    if (req.method === "GET" && req.url.startsWith("/api/databases")) return await databases(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/dumps")) return await dumps(req, res);
     if (req.method === "GET" && req.url === "/api/links") return await links(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);

@@ -3,6 +3,7 @@ import { DatabaseAdminSection, DatabaseInstancesSection } from "@/entities/infra
 import type { ServiceLink } from "@/entities/infrastructure";
 import type {
   AppText,
+  MariaDbDatabaseForm,
   MariaDbExportForm,
   MariaDbImportForm,
   CommandAction,
@@ -13,11 +14,13 @@ import type {
   ShellAction,
 } from "@/entities/infrastructure";
 import { MariaDbCreateModal } from "./MariaDbCreateModal";
+import { MariaDbDatabaseBlock } from "./MariaDbDatabaseBlock";
 import { MariaDbExportBlock } from "./MariaDbExportBlock";
 import { MariaDbImportBlock } from "./MariaDbImportBlock";
 
 type MariaDbInstancesPanelProps = {
   activeOperationKey?: null | string;
+  databaseRefreshSignal?: number;
   defaultCreateForm?: Partial<MariaDbInstanceForm>;
   defaultDatabase?: string;
   defaultDumpPath?: string;
@@ -28,6 +31,8 @@ type MariaDbInstancesPanelProps = {
   operationDisabledTitle?: string;
   text: AppText;
   onCreate: (form: MariaDbInstanceForm) => void;
+  onDatabaseCreate: (form: MariaDbDatabaseForm) => void;
+  onDatabaseDrop: (form: MariaDbDatabaseForm) => void;
   onExport: (form: MariaDbExportForm) => void;
   onImport: (form: MariaDbImportForm) => void;
   onRun: (instance: MariaDbInstance, action: MariaDbInstanceAction) => void;
@@ -49,6 +54,7 @@ type PhpMyAdminPanelProps = {
 
 export function MariaDbInstancesPanel({
   activeOperationKey,
+  databaseRefreshSignal = 0,
   defaultCreateForm,
   defaultDatabase,
   defaultDumpPath,
@@ -56,6 +62,8 @@ export function MariaDbInstancesPanel({
   instances,
   loading,
   onCreate,
+  onDatabaseCreate,
+  onDatabaseDrop,
   onExport,
   onImport,
   onRun,
@@ -99,6 +107,7 @@ export function MariaDbInstancesPanel({
         <div className="grid gap-3 min-[1280px]:grid-cols-2">
           <MariaDbImportBlock
             copy={copy.import}
+            databaseRefreshSignal={databaseRefreshSignal}
             defaultDatabase={defaultDatabase}
             defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
@@ -109,6 +118,7 @@ export function MariaDbInstancesPanel({
           />
           <MariaDbExportBlock
             copy={copy.export}
+            databaseRefreshSignal={databaseRefreshSignal}
             defaultDatabase={defaultDatabase}
             defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
@@ -118,6 +128,17 @@ export function MariaDbInstancesPanel({
             onExport={onExport}
           />
         </div>
+        <MariaDbDatabaseBlock
+          copy={copy.databaseManager}
+          disabled={operationDisabled}
+          disabledTitle={operationDisabledTitle}
+          instances={runningInstances}
+          loadingCreate={operationDisabled && activeOperationKey === "mariadb:database:create"}
+          loadingDrop={operationDisabled && activeOperationKey === "mariadb:database:drop"}
+          refreshSignal={databaseRefreshSignal}
+          onCreate={onDatabaseCreate}
+          onDrop={onDatabaseDrop}
+        />
       </DatabaseInstancesSection>
 
       {createOpen ? (

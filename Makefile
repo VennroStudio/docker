@@ -131,7 +131,7 @@ mariadb-clean: ## Удалить контейнер и образ MariaDB
 mariadb-logs: ## Логи MariaDB
 	$(MARIADB_COMPOSE) logs -f db
 
-mariadb-shell: ## Shell MariaDB instance, опционально NAME=legacy-10-6 или CONTAINER=container-name
+mariadb-shell: ## Shell MariaDB instance, опционально NAME=10-6 или CONTAINER=container-name
 	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action shell
 
 mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/mariadb/app.sql, опционально NAME=... или CONTAINER=...
@@ -139,6 +139,15 @@ mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DB_NAM
 
 mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/mariadb/app.sql.gz, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/mariadb-export.mjs
+
+mariadb-db-list: ## Показать базы MariaDB, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/mariadb-databases.mjs list
+
+mariadb-db-create: ## Создать базу MariaDB, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/mariadb-databases.mjs create --database "$(DATABASE)"
+
+mariadb-db-drop: ## Удалить базу MariaDB, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/mariadb-databases.mjs drop --database "$(DATABASE)"
 
 mariadb-dump-upload: ## Загрузить дамп на сервер, передать FILE=dumps/mariadb/app.sql или DUMP_FILE=dumps/mariadb/app.sql
 	@file="$${FILE:-$${DUMP_FILE:-$${HOME_DUMP_PATH}$${DUMP_NAME}}}"; \
@@ -377,6 +386,15 @@ postgres-import: ## Импорт .sql/.sql.gz/.dump дампа, передать
 postgres-export: ## Экспорт .sql/.sql.gz/.dump дампа, передать POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.dump, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/postgres-export.mjs
 
+postgres-db-list: ## Показать базы Postgres, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/postgres-databases.mjs list
+
+postgres-db-create: ## Создать базу Postgres, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/postgres-databases.mjs create --database "$(DATABASE)"
+
+postgres-db-drop: ## Удалить базу Postgres, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_BIN) ./scripts/postgres-databases.mjs drop --database "$(DATABASE)"
+
 postgres-dump-upload: ## Загрузить Postgres dump на сервер, передать FILE=dumps/postgres/app.dump или DUMP_FILE=dumps/postgres/app.dump
 	@file="$${FILE:-$${DUMP_FILE:-$${POSTGRES_HOME_DUMP_PATH}$${POSTGRES_DUMP_NAME}}}"; \
 	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
@@ -472,7 +490,7 @@ push: ## Auto save
 .PHONY: go-db import-db-h import-db-gz export-db-h export-db-gz upload-dump
 .PHONY: generate-user ansible-build ansible-setup ansible-clean
 .PHONY: npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
-.PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs mariadb-shell mariadb-import mariadb-export mariadb-dump-upload
+.PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs mariadb-shell mariadb-import mariadb-export mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
 .PHONY: phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs
 .PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
 .PHONY: phpmyadmin-config-generate phpmyadmin-reload
@@ -481,7 +499,7 @@ push: ## Auto save
 .PHONY: minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs
 .PHONY: redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs
 .PHONY: redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs
-.PHONY: postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-dump-upload
+.PHONY: postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload
 .PHONY: postgres-instance-add postgres-instance-list postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
 .PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs
 .PHONY: rclone-install rclone-config rclone-test rclone-backup-s3

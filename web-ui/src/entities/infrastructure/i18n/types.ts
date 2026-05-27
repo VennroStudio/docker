@@ -133,8 +133,26 @@ export type AppText = {
         filePath: string;
       };
     };
+    databaseManager: {
+      container: string;
+      containerPlaceholder: string;
+      createAction: string;
+      createPlaceholder: string;
+      database: string;
+      deleteAction: string;
+      emptyDatabases: string;
+      emptyInstances: string;
+      refresh: string;
+      title: string;
+      titleEyebrow: string;
+      validation: {
+        container: string;
+        createDisabled: string;
+        database: string;
+        deleteDisabled: string;
+      };
+    };
     instanceTitle: (version: string) => string;
-    legacy: string;
     loading: string;
     phpmyadminEyebrow: string;
     portAuto: string;
@@ -198,6 +216,25 @@ export type AppText = {
         database: string;
         disabled: string;
         filePath: string;
+      };
+    };
+    databaseManager: {
+      container: string;
+      containerPlaceholder: string;
+      createAction: string;
+      createPlaceholder: string;
+      database: string;
+      deleteAction: string;
+      emptyDatabases: string;
+      emptyInstances: string;
+      refresh: string;
+      title: string;
+      titleEyebrow: string;
+      validation: {
+        container: string;
+        createDisabled: string;
+        database: string;
+        deleteDisabled: string;
       };
     };
     instanceTitle: (version: string) => string;

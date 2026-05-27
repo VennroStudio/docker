@@ -12,16 +12,21 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
   const {
     activeConfig,
     activeOperationKey,
+    databaseRefreshSignal,
     mariaDbInstances,
     operationBlockTitle,
     operationRunning,
     postgresInstances,
     runCommand,
+    runMariaDbDatabaseCreate,
+    runMariaDbDatabaseDrop,
     runMariaDbExport,
     runMariaDbImport,
     runMariaDbInstanceAction,
     runMariaDbInstanceCreate,
     runMariaDbInstanceShell,
+    runPostgresDatabaseCreate,
+    runPostgresDatabaseDrop,
     runPostgresExport,
     runPostgresImport,
     runPostgresInstanceAction,
@@ -69,6 +74,7 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
       <div className="space-y-4">
         <MariaDbInstancesPanel
           activeOperationKey={activeOperationKey}
+          databaseRefreshSignal={databaseRefreshSignal}
           defaultCreateForm={defaultMariaDbCreateForm}
           defaultDatabase={mariaDbDefaults?.defaultDatabase}
           defaultDumpPath={defaultDumpPath}
@@ -79,6 +85,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
           operationDisabledTitle={operationBlockTitle}
           text={text}
           onCreate={runMariaDbInstanceCreate}
+          onDatabaseCreate={runMariaDbDatabaseCreate}
+          onDatabaseDrop={runMariaDbDatabaseDrop}
           onExport={runMariaDbExport}
           onImport={runMariaDbImport}
           onRun={runMariaDbInstanceAction}
@@ -86,6 +94,7 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
         />
         <PostgresInstancesPanel
           activeOperationKey={activeOperationKey}
+          databaseRefreshSignal={databaseRefreshSignal}
           defaultCreateForm={defaultPostgresCreateForm}
           defaultDatabase={postgresDefaults?.database}
           defaultDumpPath={defaultPostgresDumpPath}
@@ -96,6 +105,8 @@ export function DatabaseRoute({ controller }: DatabaseRouteProps) {
           operationDisabledTitle={operationBlockTitle}
           text={text}
           onCreate={runPostgresInstanceCreate}
+          onDatabaseCreate={runPostgresDatabaseCreate}
+          onDatabaseDrop={runPostgresDatabaseDrop}
           onExport={runPostgresExport}
           onImport={runPostgresImport}
           onRun={runPostgresInstanceAction}

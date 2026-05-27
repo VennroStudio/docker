@@ -94,6 +94,11 @@ export type MariaDbExportForm = {
   filePath: string;
 };
 
+export type MariaDbDatabaseForm = {
+  container: string;
+  database: string;
+};
+
 export type PostgresInstance = {
   composeFile: string;
   container: string;
@@ -132,6 +137,11 @@ export type PostgresExportForm = {
   container: string;
   database: string;
   filePath: string;
+};
+
+export type PostgresDatabaseForm = {
+  container: string;
+  database: string;
 };
 
 export type StreamState = "ready" | "running" | "done" | "error" | "stopped";

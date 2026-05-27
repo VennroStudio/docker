@@ -1,9 +1,11 @@
 import type {
   CommandId,
+  MariaDbDatabaseForm,
   MariaDbExportForm,
   MariaDbImportForm,
   MariaDbInstanceAction,
   MariaDbInstanceForm,
+  PostgresDatabaseForm,
   PostgresInstanceAction,
   PostgresExportForm,
   PostgresImportForm,
@@ -99,6 +101,22 @@ export function streamMariaDbExport(form: MariaDbExportForm, handlers: StreamHan
   );
 }
 
+export function streamMariaDbDatabase(
+  form: MariaDbDatabaseForm,
+  action: "create" | "drop",
+  handlers: StreamHandlers,
+): () => void {
+  return openPostStream(
+    "/api/stream/mariadb-database",
+    {
+      action,
+      container: form.container,
+      database: form.database,
+    },
+    handlers,
+  );
+}
+
 export function streamPostgresInstanceCreate(form: PostgresInstanceForm, handlers: StreamHandlers): () => void {
   return openPostStream(
     "/api/stream/postgres-instance-add",
@@ -140,6 +158,22 @@ export function streamPostgresExport(form: PostgresExportForm, handlers: StreamH
       container: form.container,
       database: form.database,
       filePath: form.filePath,
+    },
+    handlers,
+  );
+}
+
+export function streamPostgresDatabase(
+  form: PostgresDatabaseForm,
+  action: "create" | "drop",
+  handlers: StreamHandlers,
+): () => void {
+  return openPostStream(
+    "/api/stream/postgres-database",
+    {
+      action,
+      container: form.container,
+      database: form.database,
     },
     handlers,
   );

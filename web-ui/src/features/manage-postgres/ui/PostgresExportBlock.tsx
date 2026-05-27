@@ -1,11 +1,13 @@
 import { Download } from "lucide-react";
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AppText, PostgresExportForm, PostgresInstance } from "@/entities/infrastructure";
 import { Button, Field } from "@/shared/ui";
+import { fetchPostgresDatabases } from "../api/databases";
 
 type PostgresExportBlockProps = {
   copy: AppText["postgresInstances"]["export"];
+  databaseRefreshSignal?: number;
   defaultDatabase?: string;
   defaultFilePath?: string;
   disabled?: boolean;
@@ -19,6 +21,7 @@ const initialDatabase = "app";
 
 export function PostgresExportBlock({
   copy,
+  databaseRefreshSignal = 0,
   defaultDatabase = "",
   defaultFilePath = "",
   disabled = false,
@@ -29,6 +32,9 @@ export function PostgresExportBlock({
 }: PostgresExportBlockProps) {
   const [container, setContainer] = useState<string>();
   const [database, setDatabase] = useState<string>();
+  const [databases, setDatabases] = useState<string[]>([]);
+  const [databasesError, setDatabasesError] = useState<string | null>(null);
+  const [databasesLoading, setDatabasesLoading] = useState(false);
   const [filePath, setFilePath] = useState<string>();
   const defaultContainer = instances[0]?.container ?? "";
   const containerValue = container ?? defaultContainer;
@@ -39,7 +45,9 @@ export function PostgresExportBlock({
   const normalizedFilePath = filePathValue.trim();
   const containerReady = instances.some((instance) => instance.container === normalizedContainer);
   const fileReady = isSupportedDumpPath(normalizedFilePath);
-  const databaseReady = /^[A-Za-z0-9_]+$/.test(normalizedDatabase);
+  const databaseOptions = databases;
+  const selectedDatabase = databaseOptions.includes(normalizedDatabase) ? normalizedDatabase : "";
+  const databaseReady = /^[A-Za-z0-9_]+$/.test(normalizedDatabase) && databaseOptions.includes(normalizedDatabase);
   const formReady = containerReady && fileReady && databaseReady;
   const suggestedPath = useMemo(() => {
     const name = normalizedDatabase || initialDatabase;
@@ -51,6 +59,42 @@ export function PostgresExportBlock({
     if (!formReady || disabled) return;
     onExport({ container: normalizedContainer, database: normalizedDatabase, filePath: normalizedFilePath });
   };
+
+  useEffect(() => {
+    if (!containerReady) return undefined;
+
+    let mounted = true;
+
+    void Promise.resolve()
+      .then(() => {
+        if (mounted) {
+          setDatabasesLoading(true);
+          setDatabasesError(null);
+        }
+        return fetchPostgresDatabases(normalizedContainer);
+      })
+      .then((names) => {
+        if (!mounted) return;
+        setDatabases(names);
+        setDatabase((current) => {
+          const currentDatabase = (current ?? defaultDatabase).trim();
+          if (currentDatabase && names.includes(currentDatabase)) return current;
+          return names[0] ?? "";
+        });
+      })
+      .catch((error: unknown) => {
+        if (!mounted) return;
+        setDatabases([]);
+        setDatabasesError(error instanceof Error ? error.message : String(error));
+      })
+      .finally(() => {
+        if (mounted) setDatabasesLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [containerReady, databaseRefreshSignal, defaultDatabase, normalizedContainer]);
 
   return (
     <form
@@ -69,7 +113,11 @@ export function PostgresExportBlock({
             className="h-10 min-w-0 rounded-lg border border-zinc-700/80 bg-zinc-950/72 px-3 text-sm text-zinc-100 outline-none transition focus:border-teal-300/70 focus:ring-2 focus:ring-teal-300/20 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={disabled || instances.length === 0}
             value={containerValue}
-            onChange={(event) => setContainer(event.target.value)}
+            onChange={(event) => {
+              setContainer(event.target.value);
+              setDatabases([]);
+              setDatabasesError(null);
+            }}
           >
             <option value="">{instances.length > 0 ? copy.containerPlaceholder : copy.emptyInstances}</option>
             {instances.map((instance) => (
@@ -93,19 +141,32 @@ export function PostgresExportBlock({
         />
 
         <div className="grid gap-3 min-[780px]:grid-cols-[minmax(0,1fr)_minmax(190px,240px)] min-[780px]:items-start">
-          <Field
-            disabled={disabled}
-            error={normalizedDatabase && !databaseReady ? copy.validation.database : undefined}
-            label={copy.database}
-            placeholder={copy.databasePlaceholder}
-            value={databaseValue}
-            onChange={(event) => {
-              const nextDatabase = event.target.value;
-              setDatabase(nextDatabase);
-              if (!filePathValue || filePathValue === suggestedPath)
-                setFilePath(`dumps/postgres/${nextDatabase.trim() || initialDatabase}.dump`);
-            }}
-          />
+          <label className="grid gap-2 text-sm">
+            <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
+            <select
+              className="h-10 min-w-0 rounded-lg border border-zinc-700/80 bg-zinc-950/72 px-3 text-sm text-zinc-100 outline-none transition focus:border-teal-300/70 focus:ring-2 focus:ring-teal-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={disabled || !containerReady || databasesLoading || databaseOptions.length === 0}
+              value={selectedDatabase}
+              onChange={(event) => {
+                const nextDatabase = event.target.value;
+                setDatabase(nextDatabase);
+                if (!filePathValue || filePathValue === suggestedPath)
+                  setFilePath(`dumps/postgres/${nextDatabase.trim() || initialDatabase}.dump`);
+              }}
+            >
+              <option value="">{databasesLoading ? copy.containerPlaceholder : copy.databasePlaceholder}</option>
+              {databaseOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            {databasesError ? (
+              <span className="text-xs font-medium text-red-200">{databasesError}</span>
+            ) : normalizedDatabase && !databaseReady ? (
+              <span className="text-xs font-medium text-red-200">{copy.validation.database}</span>
+            ) : null}
+          </label>
           <Button
             className="w-full min-[780px]:mt-6"
             disabled={!formReady || disabled}

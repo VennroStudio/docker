@@ -1,0 +1,128 @@
+#!/usr/bin/env node
+import { spawn } from "node:child_process";
+import {
+  assert,
+  assertRunningContainer,
+  assertValidContainerName,
+  assertValidDatabaseName,
+  getRuntimeEnv,
+  parseArgs,
+  resolveDatabaseName,
+  resolveMariaDbTarget,
+} from "./mariadb-common.mjs";
+
+const systemDatabases = new Set([
+  "information_schema",
+  "mysql",
+  "performance_schema",
+  "sys",
+]);
+
+const [command, ...argv] = process.argv.slice(2);
+const args = parseArgs(argv);
+const env = await getRuntimeEnv();
+
+try {
+  assert(
+    ["create", "drop", "list"].includes(command),
+    "Usage: node scripts/mariadb-databases.mjs list|create|drop",
+  );
+
+  const { container, password } = await resolveMariaDbTarget(args, env);
+  assertValidContainerName(container);
+  assert(password, "MariaDB root password is required");
+  await assertRunningContainer(container);
+
+  if (command === "list") {
+    const databases = await listDatabases({ container, password });
+    console.log(databases.join("\n"));
+    process.exit(0);
+  }
+
+  const database = resolveDatabaseName(args, env);
+  assertValidDatabaseName(database);
+  assert(
+    !systemDatabases.has(database),
+    `Refusing to ${command} system database ${database}`,
+  );
+
+  if (command === "create")
+    await executeSql({
+      container,
+      password,
+      sql: `CREATE DATABASE ${quoteIdentifier(database)};`,
+    });
+  if (command === "drop")
+    await executeSql({
+      container,
+      password,
+      sql: `DROP DATABASE IF EXISTS ${quoteIdentifier(database)};`,
+    });
+
+  console.log(
+    `MariaDB database ${database} ${command === "create" ? "created" : "dropped"}`,
+  );
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+}
+
+async function listDatabases({ container, password }) {
+  const { stdout } = await executeSql({
+    container,
+    password,
+    sql: "SHOW DATABASES;",
+  });
+
+  return stdout
+    .split(/\r?\n/)
+    .map((name) => name.trim())
+    .filter((name) => name && !systemDatabases.has(name));
+}
+
+async function executeSql({ container, password, sql }) {
+  const result = await collect("docker", [
+    "exec",
+    container,
+    "mysql",
+    "-N",
+    "-B",
+    "-u",
+    "root",
+    `-p${password}`,
+    "-e",
+    sql,
+  ]);
+
+  assert(
+    result.code === 0,
+    result.stderr.trim() ||
+      `MariaDB command failed with exit code ${result.code}`,
+  );
+  return result;
+}
+
+function quoteIdentifier(identifier) {
+  return `\`${String(identifier).replaceAll("`", "``")}\``;
+}
+
+function collect(commandName, args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(commandName, args, {
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const stdout = [];
+    const stderr = [];
+
+    child.stdout.on("data", (chunk) => stdout.push(chunk));
+    child.stderr.on("data", (chunk) => stderr.push(chunk));
+    child.on("error", reject);
+    child.on("close", (code) => {
+      resolve({
+        code,
+        stderr: Buffer.concat(stderr).toString("utf8"),
+        stdout: Buffer.concat(stdout).toString("utf8"),
+      });
+    });
+  });
+}

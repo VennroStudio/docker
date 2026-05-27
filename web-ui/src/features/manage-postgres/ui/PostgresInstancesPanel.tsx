@@ -5,6 +5,7 @@ import type {
   AppText,
   CommandAction,
   PgAdminOverview,
+  PostgresDatabaseForm,
   PostgresExportForm,
   PostgresImportForm,
   PostgresInstance,
@@ -13,11 +14,13 @@ import type {
   ShellAction,
 } from "@/entities/infrastructure";
 import { PostgresCreateModal } from "./PostgresCreateModal";
+import { PostgresDatabaseBlock } from "./PostgresDatabaseBlock";
 import { PostgresExportBlock } from "./PostgresExportBlock";
 import { PostgresImportBlock } from "./PostgresImportBlock";
 
 type PostgresInstancesPanelProps = {
   activeOperationKey?: null | string;
+  databaseRefreshSignal?: number;
   defaultCreateForm?: Partial<PostgresInstanceForm>;
   defaultDatabase?: string;
   defaultDumpPath?: string;
@@ -28,6 +31,8 @@ type PostgresInstancesPanelProps = {
   operationDisabledTitle?: string;
   text: AppText;
   onCreate: (form: PostgresInstanceForm) => void;
+  onDatabaseCreate: (form: PostgresDatabaseForm) => void;
+  onDatabaseDrop: (form: PostgresDatabaseForm) => void;
   onExport: (form: PostgresExportForm) => void;
   onImport: (form: PostgresImportForm) => void;
   onRun: (instance: PostgresInstance, action: PostgresInstanceAction) => void;
@@ -49,6 +54,7 @@ type PgAdminPanelProps = {
 
 export function PostgresInstancesPanel({
   activeOperationKey,
+  databaseRefreshSignal = 0,
   defaultCreateForm,
   defaultDatabase,
   defaultDumpPath,
@@ -56,6 +62,8 @@ export function PostgresInstancesPanel({
   instances,
   loading,
   onCreate,
+  onDatabaseCreate,
+  onDatabaseDrop,
   onExport,
   onImport,
   onRun,
@@ -100,6 +108,7 @@ export function PostgresInstancesPanel({
         <div className="grid gap-3 min-[1280px]:grid-cols-2">
           <PostgresImportBlock
             copy={copy.import}
+            databaseRefreshSignal={databaseRefreshSignal}
             defaultDatabase={defaultDatabase}
             defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
@@ -110,6 +119,7 @@ export function PostgresInstancesPanel({
           />
           <PostgresExportBlock
             copy={copy.export}
+            databaseRefreshSignal={databaseRefreshSignal}
             defaultDatabase={defaultDatabase}
             defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
@@ -119,6 +129,17 @@ export function PostgresInstancesPanel({
             onExport={onExport}
           />
         </div>
+        <PostgresDatabaseBlock
+          copy={copy.databaseManager}
+          disabled={operationDisabled}
+          disabledTitle={operationDisabledTitle}
+          instances={runningInstances}
+          loadingCreate={operationDisabled && activeOperationKey === "postgres:database:create"}
+          loadingDrop={operationDisabled && activeOperationKey === "postgres:database:drop"}
+          refreshSignal={databaseRefreshSignal}
+          onCreate={onDatabaseCreate}
+          onDrop={onDatabaseDrop}
+        />
       </DatabaseInstancesSection>
 
       {createOpen ? (

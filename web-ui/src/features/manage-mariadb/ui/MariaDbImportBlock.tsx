@@ -3,10 +3,12 @@ import type { FormEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 import type { AppText, MariaDbImportForm, MariaDbInstance } from "@/entities/infrastructure";
 import { Button, Field } from "@/shared/ui";
+import { fetchMariaDbDatabases } from "../api/databases";
 import { fetchMariaDbDumps, type MariaDbDumpFile } from "../api/dumps";
 
 type MariaDbImportBlockProps = {
   copy: AppText["mariadbInstances"]["import"];
+  databaseRefreshSignal?: number;
   defaultDatabase?: string;
   defaultFilePath?: string;
   disabled?: boolean;
@@ -18,6 +20,7 @@ type MariaDbImportBlockProps = {
 
 export function MariaDbImportBlock({
   copy,
+  databaseRefreshSignal = 0,
   defaultDatabase = "",
   defaultFilePath = "",
   disabled = false,
@@ -28,6 +31,9 @@ export function MariaDbImportBlock({
 }: MariaDbImportBlockProps) {
   const [form, setForm] = useState<Partial<MariaDbImportForm>>({});
   const [dumpFiles, setDumpFiles] = useState<MariaDbDumpFile[]>([]);
+  const [databases, setDatabases] = useState<string[]>([]);
+  const [databasesError, setDatabasesError] = useState<string | null>(null);
+  const [databasesLoading, setDatabasesLoading] = useState(false);
   const [dumpFilesError, setDumpFilesError] = useState<string | null>(null);
   const [dumpFilesLoading, setDumpFilesLoading] = useState(true);
   const defaultContainer = instances[0]?.container ?? "";
@@ -39,7 +45,9 @@ export function MariaDbImportBlock({
   const database = databaseValue.trim();
   const containerReady = instances.some((instance) => instance.container === container);
   const fileReady = filePath.endsWith(".sql") || filePath.endsWith(".sql.gz");
-  const databaseReady = /^[A-Za-z0-9_$.-]+$/.test(database);
+  const databaseOptions = databases;
+  const selectedDatabase = databaseOptions.includes(database) ? database : "";
+  const databaseReady = /^[A-Za-z0-9_$.-]+$/.test(database) && databaseOptions.includes(database);
   const formReady = containerReady && fileReady && databaseReady;
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -76,6 +84,42 @@ export function MariaDbImportBlock({
     };
   }, []);
 
+  useEffect(() => {
+    if (!containerReady) return undefined;
+
+    let mounted = true;
+
+    void Promise.resolve()
+      .then(() => {
+        if (mounted) {
+          setDatabasesLoading(true);
+          setDatabasesError(null);
+        }
+        return fetchMariaDbDatabases(container);
+      })
+      .then((names) => {
+        if (!mounted) return;
+        setDatabases(names);
+        setForm((current) => {
+          const currentDatabase = (current.database ?? defaultDatabase).trim();
+          if (currentDatabase && names.includes(currentDatabase)) return current;
+          return { ...current, database: names[0] ?? "" };
+        });
+      })
+      .catch((error: unknown) => {
+        if (!mounted) return;
+        setDatabases([]);
+        setDatabasesError(error instanceof Error ? error.message : String(error));
+      })
+      .finally(() => {
+        if (mounted) setDatabasesLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [container, containerReady, databaseRefreshSignal, defaultDatabase]);
+
   return (
     <form
       className="flex h-full min-h-[430px] flex-col rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 shadow-sm shadow-black/15"
@@ -93,7 +137,11 @@ export function MariaDbImportBlock({
             className="h-10 min-w-0 rounded-lg border border-zinc-700/80 bg-zinc-950/72 px-3 text-sm text-zinc-100 outline-none transition focus:border-teal-300/70 focus:ring-2 focus:ring-teal-300/20 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={disabled || instances.length === 0}
             value={containerValue}
-            onChange={(event) => setForm((current) => ({ ...current, container: event.target.value }))}
+            onChange={(event) => {
+              setDatabases([]);
+              setDatabasesError(null);
+              setForm((current) => ({ ...current, container: event.target.value }));
+            }}
           >
             <option value="">{instances.length > 0 ? copy.containerPlaceholder : copy.emptyInstances}</option>
             {instances.map((instance) => (
@@ -156,14 +204,27 @@ export function MariaDbImportBlock({
         />
 
         <div className="grid gap-3 min-[780px]:grid-cols-[minmax(0,1fr)_minmax(190px,240px)] min-[780px]:items-start">
-          <Field
-            disabled={disabled}
-            error={database && !databaseReady ? copy.validation.database : undefined}
-            label={copy.database}
-            placeholder={copy.databasePlaceholder}
-            value={databaseValue}
-            onChange={(event) => setForm((current) => ({ ...current, database: event.target.value }))}
-          />
+          <label className="grid gap-2 text-sm">
+            <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
+            <select
+              className="h-10 min-w-0 rounded-lg border border-zinc-700/80 bg-zinc-950/72 px-3 text-sm text-zinc-100 outline-none transition focus:border-teal-300/70 focus:ring-2 focus:ring-teal-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={disabled || !containerReady || databasesLoading || databaseOptions.length === 0}
+              value={selectedDatabase}
+              onChange={(event) => setForm((current) => ({ ...current, database: event.target.value }))}
+            >
+              <option value="">{databasesLoading ? copy.refreshFiles : copy.databasePlaceholder}</option>
+              {databaseOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            {databasesError ? (
+              <span className="text-xs font-medium text-red-200">{databasesError}</span>
+            ) : database && !databaseReady ? (
+              <span className="text-xs font-medium text-red-200">{copy.validation.database}</span>
+            ) : null}
+          </label>
           <Button
             className="w-full min-[780px]:mt-6"
             disabled={!formReady || disabled}

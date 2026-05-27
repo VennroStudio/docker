@@ -150,6 +150,25 @@ export async function streamRoute(req, res) {
     });
   }
 
+  if (url.pathname === "/api/stream/mariadb-database") {
+    const action = param("action");
+    const container = param("container");
+    const database = param("database");
+
+    assert(action === "create" || action === "drop", "Invalid MariaDB database action");
+    validateContainerName(container);
+    const instance = findMariaDbInstanceByContainer(container);
+    await validateRunningMariaDbContainer(container);
+    validateDatabaseName(database);
+
+    return streamSse(req, res, "make", ["-e", `mariadb-db-${action === "create" ? "create" : "drop"}`], {
+      ...runtimeEnv,
+      DATABASE: database,
+      MARIADB_CONTAINER: container,
+      MARIADB_ROOT_PASSWORD: instance.rootPassword,
+    });
+  }
+
   if (url.pathname === "/api/stream/postgres-instance-add") {
     const version = param("version");
     const user = param("user");
@@ -223,6 +242,26 @@ export async function streamRoute(req, res) {
       DUMP_FILE: filePath,
       POSTGRES_CONTAINER: container,
       POSTGRES_DB: database,
+      POSTGRES_PASSWORD: instance.password,
+      POSTGRES_USER: instance.user,
+    });
+  }
+
+  if (url.pathname === "/api/stream/postgres-database") {
+    const action = param("action");
+    const container = param("container");
+    const database = param("database");
+
+    assert(action === "create" || action === "drop", "Invalid Postgres database action");
+    validateContainerName(container);
+    const instance = findPostgresInstanceByContainer(container);
+    await validateRunningPostgresContainer(container);
+    validatePostgresDatabaseName(database);
+
+    return streamSse(req, res, "make", ["-e", `postgres-db-${action === "create" ? "create" : "drop"}`], {
+      ...runtimeEnv,
+      DATABASE: database,
+      POSTGRES_CONTAINER: container,
       POSTGRES_PASSWORD: instance.password,
       POSTGRES_USER: instance.user,
     });
