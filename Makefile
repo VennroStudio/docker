@@ -1,13 +1,17 @@
 -include .env
 export
 
-NPM_COMPOSE := docker compose -f docker-compose-npm.yml
-PHPMYADMIN_COMPOSE := docker compose -f docker-compose-phpmyadmin.yml
-PGADMIN_COMPOSE := docker compose -f docker-compose-pgadmin.yml
-REDIS_COMPOSE := docker compose -f docker-compose-redis.yml
-REDISINSIGHT_COMPOSE := docker compose -f docker-compose-redisinsight.yml
-REGISTRY_COMPOSE := docker compose -f docker-compose-registry.yml
-REGISTRY_UI_COMPOSE := docker compose -f docker-compose-registry-ui.yml
+COMPOSE_DIR := docker/compose
+COMPOSE_ENV := $(if $(wildcard .env),--env-file .env,)
+ANSIBLE_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-ansible.yml --profile deploy
+MINIO_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-minio.yml
+NPM_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-npm.yml
+PHPMYADMIN_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-phpmyadmin.yml
+PGADMIN_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-pgadmin.yml
+REDIS_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-redis.yml
+REDISINSIGHT_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-redisinsight.yml
+REGISTRY_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-registry.yml
+REGISTRY_UI_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-registry-ui.yml
 DATE := $(shell date +%d-%m-%Y)
 NODE = docker run --rm -v "$(PWD):/app" -w /app
 NODE_IMAGE ?= node:$(if $(NODE_LIBRARY),$(NODE_LIBRARY),24-bookworm)
@@ -24,7 +28,7 @@ help: ## Показать список команд
 ##@ Проект
 init: ## Первый запуск: создать локальные env/config файлы без перезаписи существующих
 	@cp -n .env.example .env 2>/dev/null || true
-	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres docker/services dumps/mariadb dumps/postgres
+	@mkdir -p docker/compose docker/mariadb docker/nginx docker/phpmyadmin docker/postgres docker/registry docker/services dumps/mariadb dumps/postgres
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE) $(NODE_IMAGE) node ./scripts/mariadb-instances.mjs generate
@@ -199,8 +203,8 @@ mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4 и
 
 ##@ Registry
 generate-user: ## Создание пользователя Registry
-	mkdir -p ./docker/server/registry/auth
-	htpasswd -Bbc ./docker/server/registry/auth/htpasswd ${REGISTRY_USER} ${REGISTRY_PASSWORD}
+	mkdir -p ./docker/registry/auth
+	htpasswd -Bbc ./docker/registry/auth/htpasswd ${REGISTRY_USER} ${REGISTRY_PASSWORD}
 
 registry-up: ## Запустить контейнер Registry
 	$(REGISTRY_COMPOSE) up -d
@@ -249,13 +253,13 @@ registry-ui-logs: ## Логи Registry UI
 
 ##@ Ansible и сервер
 ansible-build: ## Собрать контейнер Ansible
-	docker compose -f docker-compose-ansible.yml build
+	$(ANSIBLE_COMPOSE) build
 
 ansible-setup: ## Выполнить установку Ansible на сервере
-	docker compose -f docker-compose-ansible.yml run --rm ansible -i inventory.ini deploy.yml
+	$(ANSIBLE_COMPOSE) run --rm ansible -i inventory.ini deploy.yml
 
 ansible-clean: ## Удалить контейнер Ansible
-	docker compose -f docker-compose-ansible.yml down
+	$(ANSIBLE_COMPOSE) down
 	docker rmi vennro-ansible 2>/dev/null || true
 
 import-env: ## Импорт .env.server на сервер
@@ -263,26 +267,26 @@ import-env: ## Импорт .env.server на сервер
 
 ##@ S3 Minio
 minio-up: ## Запустить контейнер MinIO
-	docker compose -f docker-compose-minio.yml up -d
+	$(MINIO_COMPOSE) up -d
 
 minio-pull: ## Скачать/обновить образ MinIO
-	docker compose -f docker-compose-minio.yml pull
+	$(MINIO_COMPOSE) pull
 
 minio-start: ## Запустить существующий контейнер MinIO
-	docker compose -f docker-compose-minio.yml start
+	$(MINIO_COMPOSE) start
 
 minio-stop: ## Остановить контейнер MinIO
-	docker compose -f docker-compose-minio.yml stop
+	$(MINIO_COMPOSE) stop
 
 minio-down: ## Удалить контейнер MinIO
-	docker compose -f docker-compose-minio.yml down
+	$(MINIO_COMPOSE) down
 
 minio-clean: ## Удалить контейнер и образ MinIO
-	docker compose -f docker-compose-minio.yml down
+	$(MINIO_COMPOSE) down
 	docker rmi minio/minio 2>/dev/null || true
 
 minio-logs: ## Логи MinIO
-	docker compose -f docker-compose-minio.yml logs -f
+	$(MINIO_COMPOSE) logs -f
 
 ##@ Redis
 redis-up: ## Запустить контейнер Redis

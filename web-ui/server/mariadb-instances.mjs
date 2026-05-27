@@ -7,7 +7,10 @@ const instancesPath = path.join(projectRoot, "docker/mariadb/instances.json");
 const instanceActions = new Set(["clean", "down", "logs", "start", "stop", "up"]);
 
 export function readMariaDbInstances() {
-  return JSON.parse(readFileSync(instancesPath, "utf8"));
+  return JSON.parse(readFileSync(instancesPath, "utf8")).map((instance) => ({
+    ...instance,
+    composeFile: composeFileFor(instance.name),
+  }));
 }
 
 export function findMariaDbInstance(name) {
@@ -41,4 +44,8 @@ export function mariaDbInstanceCommand(name, action) {
 
 function shellQuote(value) {
   return `'${String(value).replaceAll("'", "'\\''")}'`;
+}
+
+function composeFileFor(name) {
+  return `docker/compose/docker-compose-mariadb-${name}.yml`;
 }

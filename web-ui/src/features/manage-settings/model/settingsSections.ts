@@ -22,7 +22,6 @@ export const settingsSections: SettingsSectionDefinition[] = [
   {
     id: "environment",
     fields: [
-      { env: "ENV", group: "environment", label: "Environment", name: "env", placeholder: "local" },
       {
         env: "NODE_LIBRARY",
         group: "environment",

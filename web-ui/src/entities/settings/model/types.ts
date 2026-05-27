@@ -1,6 +1,5 @@
 export type AppSettings = {
   environment: {
-    env: string;
     nodeLibrary: string;
   };
   proxy: {

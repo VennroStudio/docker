@@ -4,10 +4,10 @@ services:
   ansible:
     container_name: ansible-container
     build:
-      context: docker
+      context: ..
       dockerfile: ansible/Dockerfile
     volumes:
-      - ./docker/ansible:/ansible
+      - ../ansible:/ansible
       - ~/.ssh:/root/.ssh:ro
     working_dir: /ansible
     environment:

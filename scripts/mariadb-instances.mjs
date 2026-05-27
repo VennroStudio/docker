@@ -6,6 +6,7 @@ import path from "node:path";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
+const composeDir = "docker/compose";
 const phpmyadminPath = "docker/phpmyadmin";
 const defaultStartPort = 3307;
 const runActions = new Set([
@@ -76,7 +77,7 @@ async function addInstance(options) {
     name,
     version,
     container: `mariadb-${name}-container`,
-    composeFile: `docker-compose-mariadb-${name}.yml`,
+    composeFile: composeFileFor(name),
     volume: `mariadb-${name}-data`,
     hostPort,
     user,
@@ -88,6 +89,7 @@ async function addInstance(options) {
 
   instances.push(instance);
   writeInstances(instances);
+  mkdirSync(path.join(cwd, composeDir), { recursive: true });
   writeFileSync(path.join(cwd, instance.composeFile), composeFor(instance));
   await generate();
   console.log(
@@ -186,7 +188,18 @@ function findTargetInstance(options) {
 function readInstances() {
   ensureInstancesFile();
   if (!existsSync(instancesPath)) return [];
-  return JSON.parse(readFileSync(instancesPath, "utf8"));
+  const instances = JSON.parse(readFileSync(instancesPath, "utf8"));
+  const normalized = instances.map((instance) => ({
+    ...instance,
+    composeFile: composeFileFor(instance.name),
+  }));
+  if (
+    JSON.stringify(instances.map((instance) => instance.composeFile)) !==
+    JSON.stringify(normalized.map((instance) => instance.composeFile))
+  ) {
+    writeInstances(normalized);
+  }
+  return normalized;
 }
 
 function writeInstances(instances) {
@@ -216,7 +229,7 @@ services:
       - "${instance.hostPort}:3306"
     volumes:
       - ${instance.volume}:/var/lib/mysql
-      - ./docker/mariadb/config.cnf:/etc/mysql/conf.d/config.cnf
+      - ../mariadb/config.cnf:/etc/mysql/conf.d/config.cnf
     networks:
       - proxy
 
@@ -265,6 +278,10 @@ function findFreePort(instances) {
 
 function versionName(version) {
   return version.replaceAll(".", "-");
+}
+
+function composeFileFor(name) {
+  return `${composeDir}/docker-compose-mariadb-${name}.yml`;
 }
 
 function parseArgs(args) {

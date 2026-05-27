@@ -7,7 +7,7 @@ services:
     container_name: phpmyadmin-container
     restart: unless-stopped
     volumes:
-      - ./docker/phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
+      - ../phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
     networks:
       - proxy
 

@@ -1,10 +1,10 @@
 .env
 
 # Runtime data
-/docker/local/nginx/data
-/docker/local/nginx/letsencrypt
-/docker/server/nginx/data
-/docker/server/nginx/letsencrypt
+/docker/nginx/data
+/docker/nginx/letsencrypt
+/docker/registry/data
+/docker/registry/auth
 /certs
 
 # Generated MariaDB/phpMyAdmin local state
@@ -12,8 +12,8 @@
 /docker/services/settings.json
 /docker/mariadb/instances.json
 /docker/postgres/instances.json
-/docker-compose-mariadb-*.yml
-/docker-compose-postgres-*.yml
+/docker/compose/docker-compose-mariadb-*.yml
+/docker/compose/docker-compose-postgres-*.yml
 /docker/phpmyadmin/config.inc.php
 
 # Server-only secrets

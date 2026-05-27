@@ -8,8 +8,8 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./docker/${ENV}/registry/data:/var/lib/registry
-      - ./docker/${ENV}/registry/auth:/auth
+      - ../registry/data:/var/lib/registry
+      - ../registry/auth:/auth
     environment:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd

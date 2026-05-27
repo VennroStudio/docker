@@ -5,6 +5,7 @@ import path from "node:path";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/postgres/instances.json");
+const composeDir = "docker/compose";
 const defaultStartPort = 5433;
 const runActions = new Set([
   "clean",
@@ -67,7 +68,7 @@ function addInstance(options) {
     name,
     version,
     container: `postgres-${name}-container`,
-    composeFile: `docker-compose-postgres-${name}.yml`,
+    composeFile: composeFileFor(name),
     volume: `postgres-${name}-data`,
     hostPort,
     user,
@@ -78,6 +79,7 @@ function addInstance(options) {
 
   instances.push(instance);
   writeInstances(instances);
+  mkdirSync(path.join(cwd, composeDir), { recursive: true });
   writeFileSync(path.join(cwd, instance.composeFile), composeFor(instance));
   console.log(
     `Added Postgres ${version}: ${instance.composeFile} on port ${hostPort}`,
@@ -164,7 +166,18 @@ function findTargetInstance(options) {
 
 function readInstances() {
   ensureInstancesFile();
-  return JSON.parse(readFileSync(instancesPath, "utf8"));
+  const instances = JSON.parse(readFileSync(instancesPath, "utf8"));
+  const normalized = instances.map((instance) => ({
+    ...instance,
+    composeFile: composeFileFor(instance.name),
+  }));
+  if (
+    JSON.stringify(instances.map((instance) => instance.composeFile)) !==
+    JSON.stringify(normalized.map((instance) => instance.composeFile))
+  ) {
+    writeInstances(normalized);
+  }
+  return normalized;
 }
 
 function writeInstances(instances) {
@@ -217,6 +230,10 @@ function findFreePort(instances) {
 
 function versionName(version) {
   return version.replaceAll(".", "-");
+}
+
+function composeFileFor(name) {
+  return `${composeDir}/docker-compose-postgres-${name}.yml`;
 }
 
 function parseArgs(args) {

@@ -7,7 +7,11 @@ const instancesPath = path.join(projectRoot, "docker/postgres/instances.json");
 const instanceActions = new Set(["clean", "down", "logs", "start", "stop", "up"]);
 
 export function readPostgresInstances() {
-  return existsSync(instancesPath) ? JSON.parse(readFileSync(instancesPath, "utf8")) : [];
+  if (!existsSync(instancesPath)) return [];
+  return JSON.parse(readFileSync(instancesPath, "utf8")).map((instance) => ({
+    ...instance,
+    composeFile: composeFileFor(instance.name),
+  }));
 }
 
 export function findPostgresInstance(name) {
@@ -41,4 +45,8 @@ export function postgresInstanceCommand(name, action) {
 
 function shellQuote(value) {
   return `'${String(value).replaceAll("'", "'\\''")}'`;
+}
+
+function composeFileFor(name) {
+  return `docker/compose/docker-compose-postgres-${name}.yml`;
 }

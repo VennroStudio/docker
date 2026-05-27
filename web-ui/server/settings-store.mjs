@@ -10,7 +10,6 @@ const envFile = path.resolve(projectRoot, ".env");
 
 export const defaultSettings = {
   environment: {
-    env: "local",
     nodeLibrary: "24-bookworm",
   },
   proxy: {
@@ -94,7 +93,6 @@ export function settingsToEnv(settings) {
     DOCKERHUB_PASSWORD: value.registry.dockerhubPassword,
     DOCKERHUB_USERNAME: value.registry.dockerhubUsername,
     DUMP_NAME: value.mariadb.dumpName,
-    ENV: value.environment.env,
     HOME_DUMP_PATH: value.mariadb.homeDumpPath,
     MARIADB_VERSION: value.mariadb.defaultVersion,
     MINIO_ROOT_PASSWORD: value.storage.minioRootPassword,
@@ -179,7 +177,6 @@ function parseEnv(content) {
 function envToSettings(env) {
   return {
     environment: {
-      env: env.ENV,
       nodeLibrary: env.NODE_LIBRARY,
     },
     proxy: {
