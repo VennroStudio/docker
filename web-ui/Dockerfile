@@ -14,4 +14,10 @@ FROM docker:27-cli
 
 RUN apk add --no-cache make nodejs npm
 
-COPY --from=ui-build /build/dist /opt/infrastructure-ui/dist
+COPY --from=ui-build /build/dist /opt/web-ui/dist
+
+ENV HOSTS_FILE=/host/etc/hosts
+ENV UI_STATIC_DIR=/opt/web-ui/dist
+
+ENTRYPOINT ["node"]
+CMD ["./web-ui/server.mjs"]

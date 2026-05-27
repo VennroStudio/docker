@@ -1,0 +1,17 @@
+name: vennro
+
+services:
+  web-ui:
+    build:
+      context: ../..
+      dockerfile: web-ui/Dockerfile
+    image: web-ui
+    container_name: web-ui
+    restart: unless-stopped
+    working_dir: "${PWD}"
+    ports:
+      - "8088:8088"
+    volumes:
+      - "${PWD}:${PWD}"
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/hosts:/host/etc/hosts

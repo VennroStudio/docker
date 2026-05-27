@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Language } from "@/entities/infrastructure";
 
-const storageKey = "infrastructure-ui-language";
+const storageKey = "web-ui-language";
 const defaultLanguage: Language = "ru";
 
 export function useLanguage() {
