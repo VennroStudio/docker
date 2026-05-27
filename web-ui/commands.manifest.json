@@ -56,48 +56,6 @@
       "preview": "make npm-logs",
       "tone": "primary"
     },
-    "mariadb:up": {
-      "confirm": false,
-      "group": "mariadb",
-      "make": ["mariadb-up"],
-      "preview": "make mariadb-up",
-      "tone": "primary"
-    },
-    "mariadb:start": {
-      "confirm": false,
-      "group": "mariadb",
-      "make": ["mariadb-start"],
-      "preview": "make mariadb-start",
-      "tone": "default"
-    },
-    "mariadb:stop": {
-      "confirm": true,
-      "group": "mariadb",
-      "make": ["mariadb-stop"],
-      "preview": "make mariadb-stop",
-      "tone": "danger"
-    },
-    "mariadb:down": {
-      "confirm": true,
-      "group": "mariadb",
-      "make": ["mariadb-down"],
-      "preview": "make mariadb-down",
-      "tone": "danger"
-    },
-    "mariadb:clean": {
-      "confirm": true,
-      "group": "mariadb",
-      "make": ["mariadb-clean"],
-      "preview": "make mariadb-clean",
-      "tone": "danger"
-    },
-    "mariadb:logs": {
-      "confirm": false,
-      "group": "mariadb",
-      "make": ["mariadb-logs"],
-      "preview": "make mariadb-logs",
-      "tone": "primary"
-    },
     "phpmyadmin:up": {
       "confirm": false,
       "group": "phpmyadmin",
@@ -436,7 +394,7 @@
     }
   },
   "groups": {
-    "mariadb": ["mariadb:up", "mariadb:down", "mariadb:start", "mariadb:stop", "mariadb:logs", "mariadb:clean"],
+    "mariadb": [],
     "phpmyadmin": [
       "phpmyadmin:up",
       "phpmyadmin:down",
@@ -471,10 +429,6 @@
   },
   "shells": {
     "mariadb": [
-      {
-        "container": "mariadb-container",
-        "label": "MariaDB"
-      },
       {
         "container": "phpmyadmin-container",
         "label": "phpMyAdmin"
@@ -526,7 +480,7 @@
     ]
   },
   "services": {
-    "mariadb": ["mariadb-container", "phpmyadmin-container"],
+    "mariadb": ["phpmyadmin-container"],
     "minio": ["minio-container"],
     "nginx": ["nginx-container"],
     "proxy": ["nginx-container"],

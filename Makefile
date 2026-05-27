@@ -2,7 +2,6 @@
 export
 
 NPM_COMPOSE := docker compose -f docker-compose-npm.yml
-MARIADB_COMPOSE := docker compose -f docker-compose-mariadb.yml
 PHPMYADMIN_COMPOSE := docker compose -f docker-compose-phpmyadmin.yml
 PGADMIN_COMPOSE := docker compose -f docker-compose-pgadmin.yml
 REDIS_COMPOSE := docker compose -f docker-compose-redis.yml
@@ -109,29 +108,7 @@ npm-logs: ## Логи NPM
 	$(NPM_COMPOSE) logs -f nginx-proxy-manager
 
 ##@ MariaDB
-mariadb-up: ## Запустить контейнер MariaDB
-	$(MARIADB_COMPOSE) up -d
-
-mariadb-pull: ## Скачать/обновить образ MariaDB
-	$(MARIADB_COMPOSE) pull
-
-mariadb-start: ## Запустить существующий контейнер MariaDB
-	$(MARIADB_COMPOSE) start
-
-mariadb-stop: ## Остановить контейнер MariaDB
-	$(MARIADB_COMPOSE) stop
-
-mariadb-down: ## Удалить контейнер MariaDB
-	$(MARIADB_COMPOSE) down
-
-mariadb-clean: ## Удалить контейнер и образ MariaDB
-	$(MARIADB_COMPOSE) down
-	docker rmi mariadb:${MARIADB_VERSION} 2>/dev/null || true
-
-mariadb-logs: ## Логи MariaDB
-	$(MARIADB_COMPOSE) logs -f db
-
-mariadb-shell: ## Shell MariaDB instance, опционально NAME=10-6 или CONTAINER=container-name
+mariadb-shell: ## Shell MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
 	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action shell
 
 mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/mariadb/app.sql, опционально NAME=... или CONTAINER=...
@@ -153,11 +130,6 @@ mariadb-dump-upload: ## Загрузить дамп на сервер, пере�
 	@file="$${FILE:-$${DUMP_FILE:-$${HOME_DUMP_PATH}$${DUMP_NAME}}}"; \
 	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
 	scp "$$file" "$(SSH):$(SERVER_DUMP_PATH)"
-
-go-db: mariadb-shell
-import-db-h import-db-gz: mariadb-import
-export-db-h export-db-gz: mariadb-export
-upload-dump: mariadb-dump-upload
 
 ##@ phpMyAdmin
 phpmyadmin-up: ## Запустить контейнер phpMyAdmin
@@ -487,10 +459,9 @@ push: ## Auto save
 
 .PHONY: ui web-ui
 .PHONY: host-add host-remove app-proxy app-proxy-remove
-.PHONY: go-db import-db-h import-db-gz export-db-h export-db-gz upload-dump
 .PHONY: generate-user ansible-build ansible-setup ansible-clean
 .PHONY: npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
-.PHONY: mariadb-up mariadb-pull mariadb-start mariadb-stop mariadb-down mariadb-clean mariadb-logs mariadb-shell mariadb-import mariadb-export mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
+.PHONY: mariadb-shell mariadb-import mariadb-export mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
 .PHONY: phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs
 .PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
 .PHONY: phpmyadmin-config-generate phpmyadmin-reload

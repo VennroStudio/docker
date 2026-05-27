@@ -7,7 +7,6 @@ import path from "node:path";
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
 const phpmyadminPath = "docker/phpmyadmin";
-const phpmyadminCompatibilityPath = "docker/local/phpmyadmin";
 const defaultStartPort = 3307;
 const runActions = new Set([
   "clean",
@@ -102,13 +101,6 @@ async function generate() {
   await mkdir(path.join(cwd, phpmyadminPath), { recursive: true });
   const config = phpmyadminConfigFor(instances);
   writeFileSync(path.join(cwd, phpmyadminPath, "config.inc.php"), config);
-
-  if (existsSync(path.join(cwd, phpmyadminCompatibilityPath))) {
-    writeFileSync(
-      path.join(cwd, phpmyadminCompatibilityPath, "config.inc.php"),
-      config,
-    );
-  }
 
   console.log(
     `Generated phpMyAdmin config for ${instances.length} MariaDB instance(s)`,

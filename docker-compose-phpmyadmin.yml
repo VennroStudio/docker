@@ -6,8 +6,6 @@ services:
     platform: linux/amd64
     container_name: phpmyadmin-container
     restart: unless-stopped
-    environment:
-      - PMA_HOST=mariadb-container
     volumes:
       - ./docker/phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php
     networks:

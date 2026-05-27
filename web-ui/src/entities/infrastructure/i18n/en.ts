@@ -2,12 +2,6 @@ import type { AppText } from "./types";
 
 export const en: AppText = {
   actions: {
-    "mariadb:clean": { label: "MariaDB clean", detail: "remove image" },
-    "mariadb:down": { label: "MariaDB down", detail: "remove container" },
-    "mariadb:logs": { label: "MariaDB logs", detail: "database stream" },
-    "mariadb:start": { label: "MariaDB start", detail: "start existing container" },
-    "mariadb:stop": { label: "MariaDB stop", detail: "stop service" },
-    "mariadb:up": { label: "MariaDB up", detail: "docker compose up" },
     "minio:clean": { label: "MinIO clean", detail: "remove image" },
     "minio:down": { label: "MinIO down", detail: "remove container" },
     "minio:logs": { label: "MinIO logs", detail: "live stream" },

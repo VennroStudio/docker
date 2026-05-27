@@ -16,12 +16,6 @@
 /docker-compose-postgres-*.yml
 /docker/phpmyadmin/config.inc.php
 
-# Legacy compatibility mounts for already-created old containers
-/docker/local/mariadb/
-/docker/local/phpmyadmin/
-/docker/server/mariadb/
-/docker/server/phpmyadmin/
-
 # Server-only secrets
 docker/ansible/.env.server
 
