@@ -28,3 +28,6 @@ docker/ansible/.env.server
 # System / IDE
 .DS_Store
 .idea/
+
+/dumps/mariadb
+/dumps/postgres
