@@ -73,7 +73,7 @@ export function MariaDbInstancesPanel({
   text,
 }: MariaDbInstancesPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
-  const [mariadbOpen, setMariaDbOpen] = useState(true);
+  const [mariadbOpen, setMariaDbOpen] = useState(false);
   const copy = text.mariadbInstances;
   const runningInstances = instances.filter((instance) => instance.state === "running");
 

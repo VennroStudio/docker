@@ -73,7 +73,7 @@ export function PostgresInstancesPanel({
   text,
 }: PostgresInstancesPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
-  const [postgresOpen, setPostgresOpen] = useState(true);
+  const [postgresOpen, setPostgresOpen] = useState(false);
   const copy = text.postgresInstances;
   const actionLabels = text.mariadbInstances.actions;
   const runningInstances = instances.filter((instance) => instance.state === "running");

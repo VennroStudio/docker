@@ -50,7 +50,6 @@ export function ProxyRuntimeModules({
         actions={networkActions}
         activeOperationKey={activeOperationKey}
         eyebrow={text.panels.npm.networkEyebrow}
-        defaultOpen
         operationDisabled={operationDisabled}
         operationDisabledTitle={operationDisabledTitle}
         title={text.panels.npm.networkTitle}
