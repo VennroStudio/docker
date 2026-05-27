@@ -104,6 +104,17 @@ export function MariaDbInstancesPanel({
         onRun={onRun}
         onShellOpen={onShellOpen}
       >
+        <MariaDbDatabaseBlock
+          copy={copy.databaseManager}
+          disabled={operationDisabled}
+          disabledTitle={operationDisabledTitle}
+          instances={runningInstances}
+          loadingCreate={operationDisabled && activeOperationKey === "mariadb:database:create"}
+          loadingDrop={operationDisabled && activeOperationKey === "mariadb:database:drop"}
+          refreshSignal={databaseRefreshSignal}
+          onCreate={onDatabaseCreate}
+          onDrop={onDatabaseDrop}
+        />
         <div className="grid gap-3 min-[1280px]:grid-cols-2">
           <MariaDbImportBlock
             copy={copy.import}
@@ -128,17 +139,6 @@ export function MariaDbInstancesPanel({
             onExport={onExport}
           />
         </div>
-        <MariaDbDatabaseBlock
-          copy={copy.databaseManager}
-          disabled={operationDisabled}
-          disabledTitle={operationDisabledTitle}
-          instances={runningInstances}
-          loadingCreate={operationDisabled && activeOperationKey === "mariadb:database:create"}
-          loadingDrop={operationDisabled && activeOperationKey === "mariadb:database:drop"}
-          refreshSignal={databaseRefreshSignal}
-          onCreate={onDatabaseCreate}
-          onDrop={onDatabaseDrop}
-        />
       </DatabaseInstancesSection>
 
       {createOpen ? (

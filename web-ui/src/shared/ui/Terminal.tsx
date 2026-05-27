@@ -1,4 +1,4 @@
-import { Minimize2, Square, Trash2 } from "lucide-react";
+import { BrushCleaning, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { cn } from "@/shared/lib";
@@ -13,7 +13,6 @@ type TerminalProps = {
     inputPlaceholder: string;
     stop: string;
   };
-  collapsible?: boolean;
   cwd: string;
   inputEnabled?: boolean;
   output: string;
@@ -22,18 +21,15 @@ type TerminalProps = {
   stateLabels: Record<TerminalState, string>;
   title: string;
   onClear: () => void;
-  onCollapse?: () => void;
   onInput?: (input: string) => void;
   onStop: () => void;
 };
 
 export function Terminal({
   actionLabels,
-  collapsible = false,
   cwd,
   inputEnabled = false,
   onClear,
-  onCollapse,
   onInput,
   onStop,
   output,
@@ -81,17 +77,22 @@ export function Terminal({
           {stateLabels[state]}
         </span>
         <div className="flex flex-wrap gap-2">
-          {collapsible ? (
-            <Button icon={<Minimize2 size={15} />} onClick={onCollapse}>
-              {actionLabels.hide}
-            </Button>
-          ) : null}
-          <Button tone="danger" icon={<Square size={14} />} disabled={state !== "running"} onClick={onStop}>
-            {actionLabels.stop}
-          </Button>
-          <Button icon={<Trash2 size={15} />} onClick={onClear}>
-            {actionLabels.clear}
-          </Button>
+          <Button
+            aria-label={actionLabels.stop}
+            className="px-3"
+            disabled={state !== "running"}
+            icon={<Square size={14} />}
+            title={actionLabels.stop}
+            tone="danger"
+            onClick={onStop}
+          />
+          <Button
+            aria-label={actionLabels.clear}
+            className="px-3"
+            icon={<BrushCleaning size={16} />}
+            title={actionLabels.clear}
+            onClick={onClear}
+          />
         </div>
       </header>
       <pre

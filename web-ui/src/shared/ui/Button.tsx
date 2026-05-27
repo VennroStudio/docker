@@ -43,7 +43,7 @@ export function Button({
           {loading ? <LoaderCircle className="animate-spin" size={17} strokeWidth={2.4} /> : icon}
         </span>
       ) : null}
-      <span className="min-w-0 truncate">{children}</span>
+      {children ? <span className="min-w-0 truncate">{children}</span> : null}
     </button>
   );
 }

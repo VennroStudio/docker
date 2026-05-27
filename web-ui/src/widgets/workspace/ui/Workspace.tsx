@@ -67,7 +67,6 @@ export function Workspace({
         {showTerminal ? (
           <Terminal
             actionLabels={terminalActionLabels}
-            collapsible={Boolean(onToggleTerminal)}
             cwd={terminalCwd}
             output={output}
             state={streamState}
@@ -76,7 +75,6 @@ export function Workspace({
             prompt={terminalPrompt}
             title={terminalTitle}
             onClear={onClear}
-            onCollapse={onToggleTerminal}
             onInput={onInput}
             onStop={onStop}
           />

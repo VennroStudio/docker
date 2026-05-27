@@ -105,6 +105,17 @@ export function PostgresInstancesPanel({
         onRun={onRun}
         onShellOpen={onShellOpen}
       >
+        <PostgresDatabaseBlock
+          copy={copy.databaseManager}
+          disabled={operationDisabled}
+          disabledTitle={operationDisabledTitle}
+          instances={runningInstances}
+          loadingCreate={operationDisabled && activeOperationKey === "postgres:database:create"}
+          loadingDrop={operationDisabled && activeOperationKey === "postgres:database:drop"}
+          refreshSignal={databaseRefreshSignal}
+          onCreate={onDatabaseCreate}
+          onDrop={onDatabaseDrop}
+        />
         <div className="grid gap-3 min-[1280px]:grid-cols-2">
           <PostgresImportBlock
             copy={copy.import}
@@ -129,17 +140,6 @@ export function PostgresInstancesPanel({
             onExport={onExport}
           />
         </div>
-        <PostgresDatabaseBlock
-          copy={copy.databaseManager}
-          disabled={operationDisabled}
-          disabledTitle={operationDisabledTitle}
-          instances={runningInstances}
-          loadingCreate={operationDisabled && activeOperationKey === "postgres:database:create"}
-          loadingDrop={operationDisabled && activeOperationKey === "postgres:database:drop"}
-          refreshSignal={databaseRefreshSignal}
-          onCreate={onDatabaseCreate}
-          onDrop={onDatabaseDrop}
-        />
       </DatabaseInstancesSection>
 
       {createOpen ? (

@@ -203,7 +203,7 @@ export function MariaDbImportBlock({
           onChange={(event) => setForm((current) => ({ ...current, filePath: event.target.value }))}
         />
 
-        <div className="grid gap-3 min-[780px]:grid-cols-[minmax(0,1fr)_minmax(190px,240px)] min-[780px]:items-start">
+        <div className="grid gap-3">
           <label className="grid gap-2 text-sm">
             <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
             <select
@@ -226,7 +226,7 @@ export function MariaDbImportBlock({
             ) : null}
           </label>
           <Button
-            className="w-full min-[780px]:mt-6"
+            className="w-full"
             disabled={!formReady || disabled}
             icon={<Upload size={17} strokeWidth={2.4} />}
             loading={loading}
