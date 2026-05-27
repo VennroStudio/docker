@@ -122,10 +122,10 @@ npm-logs: ## Логи NPM
 mariadb-shell: ## Shell MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
 	@$(NODE_BIN) ./scripts/mariadb-instances.mjs run --action shell
 
-mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/mariadb/app.sql, опционально NAME=... или CONTAINER=...
+mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DATABASE=wp DUMP_FILE=dumps/mariadb/app.sql, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/mariadb-import.mjs
 
-mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DB_NAME=wp DUMP_FILE=dumps/mariadb/app.sql.gz, опционально NAME=... или CONTAINER=...
+mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DATABASE=wp DUMP_FILE=dumps/mariadb/app.sql.gz, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/mariadb-export.mjs
 
 mariadb-db-list: ## Показать базы MariaDB, опционально NAME=... или CONTAINER=...
@@ -137,10 +137,11 @@ mariadb-db-create: ## Создать базу MariaDB, передать DATABASE
 mariadb-db-drop: ## Удалить базу MariaDB, передать DATABASE=app, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/mariadb-databases.mjs drop --database "$(DATABASE)"
 
-mariadb-dump-upload: ## Загрузить дамп на сервер, передать FILE=dumps/mariadb/app.sql или DUMP_FILE=dumps/mariadb/app.sql
-	@file="$${FILE:-$${DUMP_FILE:-$${HOME_DUMP_PATH}$${DUMP_NAME}}}"; \
+mariadb-dump-upload: ## Загрузить дамп на сервер, передать FILE=dumps/mariadb/app.sql TARGET_PATH=/remote/path/
+	@file="$${FILE:-$${DUMP_FILE}}"; \
 	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
-	scp "$$file" "$(SSH):$(SERVER_DUMP_PATH)"
+	if [ -z "$(TARGET_PATH)" ]; then echo "TARGET_PATH is required"; exit 1; fi; \
+	scp "$$file" "$(SSH):$(TARGET_PATH)"
 
 ##@ phpMyAdmin
 phpmyadmin-up: ## Запустить контейнер phpMyAdmin
@@ -269,8 +270,9 @@ ansible-clean: ## Удалить контейнер Ansible
 	$(ANSIBLE_COMPOSE) down
 	docker rmi vennro-ansible 2>/dev/null || true
 
-import-env: ## Импорт .env.server на сервер
-	scp -P $(SERVER_PORT) docker/ansible/.env.server $(SSH):$(SERVER_DUMP_PATH).env
+import-env: ## Импорт .env.server на сервер, передать TARGET_PATH=/remote/project/.env
+	@if [ -z "$(TARGET_PATH)" ]; then echo "TARGET_PATH is required"; exit 1; fi
+	scp -P $(SERVER_PORT) docker/ansible/.env.server $(SSH):$(TARGET_PATH)
 
 ##@ S3 Minio
 minio-up: ## Запустить контейнер MinIO
@@ -378,19 +380,20 @@ postgres-db-create: ## Создать базу Postgres, передать DATABA
 postgres-db-drop: ## Удалить базу Postgres, передать DATABASE=app, опционально NAME=... или CONTAINER=...
 	@$(NODE_BIN) ./scripts/postgres-databases.mjs drop --database "$(DATABASE)"
 
-postgres-dump-upload: ## Загрузить Postgres dump на сервер, передать FILE=dumps/postgres/app.dump или DUMP_FILE=dumps/postgres/app.dump
+postgres-dump-upload: ## Загрузить Postgres dump на сервер, передать FILE=dumps/postgres/app.dump, опционально TARGET_PATH=/remote/path/
 	@file="$${FILE:-$${DUMP_FILE:-$${POSTGRES_HOME_DUMP_PATH}$${POSTGRES_DUMP_NAME}}}"; \
 	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
-	target_path="$${POSTGRES_SERVER_DUMP_PATH:-$(SERVER_DUMP_PATH)}"; \
+	target_path="$${TARGET_PATH:-$${POSTGRES_SERVER_DUMP_PATH}}"; \
+	if [ -z "$$target_path" ]; then echo "TARGET_PATH or POSTGRES_SERVER_DUMP_PATH is required"; exit 1; fi; \
 	scp "$$file" "$(SSH):$$target_path"
 
 ##@ Postgres instances
-postgres-instance-add: ## Создать Postgres instance, передать VERSION=17 DB_USER=admin PASSWORD=secret DB_NAME=app
+postgres-instance-add: ## Создать Postgres instance, передать VERSION=17 DB_USER=admin PASSWORD=secret DATABASE=app
 	@$(NODE) $(NODE_IMAGE) node ./scripts/postgres-instances.mjs add \
 		--version "$(VERSION)" \
 		--user "$(DB_USER)" \
 		--password "$(PASSWORD)" \
-		--database "$(DB_NAME)"
+		--database "$(DATABASE)"
 
 postgres-instance-list: ## Показать Postgres instances
 	@$(NODE) $(NODE_IMAGE) node ./scripts/postgres-instances.mjs list

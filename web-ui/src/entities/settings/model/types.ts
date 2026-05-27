@@ -8,12 +8,7 @@ export type AppSettings = {
     npmPassword: string;
   };
   mariadb: {
-    defaultVersion: string;
     rootPassword: string;
-    defaultDatabase: string;
-    dumpName: string;
-    homeDumpPath: string;
-    serverDumpPath: string;
   };
   deployment: {
     ssh: string;

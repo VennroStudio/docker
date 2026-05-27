@@ -22,8 +22,6 @@ type MariaDbInstancesPanelProps = {
   activeOperationKey?: null | string;
   databaseRefreshSignal?: number;
   defaultCreateForm?: Partial<MariaDbInstanceForm>;
-  defaultDatabase?: string;
-  defaultDumpPath?: string;
   error: string | null;
   instances: MariaDbInstance[];
   loading: boolean;
@@ -56,8 +54,6 @@ export function MariaDbInstancesPanel({
   activeOperationKey,
   databaseRefreshSignal = 0,
   defaultCreateForm,
-  defaultDatabase,
-  defaultDumpPath,
   error,
   instances,
   loading,
@@ -119,8 +115,6 @@ export function MariaDbInstancesPanel({
           <MariaDbImportBlock
             copy={copy.import}
             databaseRefreshSignal={databaseRefreshSignal}
-            defaultDatabase={defaultDatabase}
-            defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
             disabledTitle={operationDisabledTitle}
             instances={runningInstances}
@@ -130,8 +124,6 @@ export function MariaDbInstancesPanel({
           <MariaDbExportBlock
             copy={copy.export}
             databaseRefreshSignal={databaseRefreshSignal}
-            defaultDatabase={defaultDatabase}
-            defaultFilePath={defaultDumpPath}
             disabled={operationDisabled}
             disabledTitle={operationDisabledTitle}
             instances={runningInstances}

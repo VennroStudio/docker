@@ -123,7 +123,7 @@ export async function streamRoute(req, res) {
 
     return streamSse(req, res, "make", ["-e", "mariadb-import"], {
       ...runtimeEnv,
-      DB_NAME: database,
+      DATABASE: database,
       DUMP_FILE: filePath,
       MARIADB_CONTAINER: container,
       MARIADB_ROOT_PASSWORD: instance.rootPassword,
@@ -143,7 +143,7 @@ export async function streamRoute(req, res) {
 
     return streamSse(req, res, "make", ["-e", "mariadb-export"], {
       ...runtimeEnv,
-      DB_NAME: database,
+      DATABASE: database,
       DUMP_FILE: filePath,
       MARIADB_CONTAINER: container,
       MARIADB_ROOT_PASSWORD: instance.rootPassword,

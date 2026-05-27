@@ -65,7 +65,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.import.action,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => streamMariaDbImport(form, handlers),
-      preview: `make -e mariadb-import CONTAINER=${form.container} DB_NAME=${form.database} DUMP_FILE=${form.filePath}`,
+      preview: `make -e mariadb-import CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 
@@ -75,7 +75,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.export.action,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => streamMariaDbExport(form, handlers),
-      preview: `make -e mariadb-export CONTAINER=${form.container} DB_NAME=${form.database} DUMP_FILE=${form.filePath}`,
+      preview: `make -e mariadb-export CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 

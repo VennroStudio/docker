@@ -18,12 +18,7 @@ export const defaultSettings = {
     npmPassword: "",
   },
   mariadb: {
-    defaultVersion: "10.6",
     rootPassword: "root",
-    defaultDatabase: "app",
-    dumpName: "app.sql.gz",
-    homeDumpPath: "dumps/mariadb/",
-    serverDumpPath: "/home/vennro/infrastructure/",
   },
   deployment: {
     ssh: "",
@@ -89,12 +84,8 @@ export function settingsToEnv(settings) {
   const value = normalizeSettings(settings);
 
   return dropEmptyValues({
-    DB_NAME: value.mariadb.defaultDatabase,
     DOCKERHUB_PASSWORD: value.registry.dockerhubPassword,
     DOCKERHUB_USERNAME: value.registry.dockerhubUsername,
-    DUMP_NAME: value.mariadb.dumpName,
-    HOME_DUMP_PATH: value.mariadb.homeDumpPath,
-    MARIADB_VERSION: value.mariadb.defaultVersion,
     MINIO_ROOT_PASSWORD: value.storage.minioRootPassword,
     MINIO_ROOT_USER: value.storage.minioRootUser,
     MYSQL_ROOT_PASSWORD: value.mariadb.rootPassword,
@@ -113,7 +104,6 @@ export function settingsToEnv(settings) {
     REDIS_PASSWORD: value.storage.redisPassword,
     REGISTRY_PASSWORD: value.registry.registryPassword,
     REGISTRY_USER: value.registry.registryUser,
-    SERVER_DUMP_PATH: value.mariadb.serverDumpPath,
     SERVER_HOST: value.deployment.host,
     SERVER_PORT: value.deployment.port,
     SERVER_SSH_KEY: value.deployment.sshKey,
@@ -185,12 +175,7 @@ function envToSettings(env) {
       npmPassword: env.NPM_PASSWORD,
     },
     mariadb: {
-      defaultVersion: env.MARIADB_VERSION,
       rootPassword: env.MYSQL_ROOT_PASSWORD,
-      defaultDatabase: env.DB_NAME,
-      dumpName: env.DUMP_NAME,
-      homeDumpPath: env.HOME_DUMP_PATH,
-      serverDumpPath: env.SERVER_DUMP_PATH,
     },
     deployment: {
       ssh: env.SSH,

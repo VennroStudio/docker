@@ -56,8 +56,11 @@ export function DatabaseDumpExportForm<Instance extends DatabaseInstanceOption, 
   const containerValue = container ?? defaultContainer;
   const normalizedContainer = containerValue.trim();
   const databaseValue = database ?? defaultDatabase;
-  const filePathValue = filePath ?? defaultFilePath;
   const normalizedDatabase = databaseValue.trim();
+  const suggestedPath = useMemo(() => {
+    return getSuggestedFilePath(normalizedDatabase || initialDatabase);
+  }, [getSuggestedFilePath, initialDatabase, normalizedDatabase]);
+  const filePathValue = filePath ?? (defaultFilePath || (normalizedDatabase ? suggestedPath : ""));
   const normalizedFilePath = filePathValue.trim();
   const containerReady = instances.some((instance) => instance.container === normalizedContainer);
   const selectDefaultDatabase = useCallback(
@@ -81,10 +84,6 @@ export function DatabaseDumpExportForm<Instance extends DatabaseInstanceOption, 
   const selectedDatabase = databaseList.databases.includes(normalizedDatabase) ? normalizedDatabase : "";
   const databaseReady = isValidDatabaseName(normalizedDatabase) && databaseList.databases.includes(normalizedDatabase);
   const formReady = containerReady && fileReady && databaseReady;
-  const suggestedPath = useMemo(() => {
-    return getSuggestedFilePath(normalizedDatabase || initialDatabase);
-  }, [getSuggestedFilePath, initialDatabase, normalizedDatabase]);
-
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!formReady || disabled) return;

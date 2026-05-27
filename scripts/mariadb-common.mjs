@@ -30,16 +30,11 @@ export async function getRuntimeEnv() {
 }
 
 export function resolveDumpFilePath(args, env) {
-  return (
-    args.file ||
-    env.FILE ||
-    env.DUMP_FILE ||
-    joinDumpPath(env.HOME_DUMP_PATH, env.DUMP_NAME)
-  );
+  return args.file || env.FILE || env.DUMP_FILE;
 }
 
 export function resolveDatabaseName(args, env) {
-  return args.database || env.DATABASE || env.DB_NAME;
+  return args.database || env.DATABASE;
 }
 
 export async function resolveMariaDbTarget(args, env) {
@@ -148,12 +143,6 @@ async function readMariaDbInstances() {
   } catch {
     return [];
   }
-}
-
-function joinDumpPath(root, fileName) {
-  if (!root || !fileName) return undefined;
-  if (path.isAbsolute(fileName)) return fileName;
-  return path.join(root, fileName);
 }
 
 function collect(command, args) {

@@ -103,16 +103,12 @@ export function DatabasesPage({
   const postgresShells = translateShells(commandPageRegistry.postgres.shells || []);
   const mariaDbDefaults = settings?.mariadb;
   const postgresDefaults = settings?.postgres;
-  const defaultDumpPath = mariaDbDefaults
-    ? joinPath(mariaDbDefaults.homeDumpPath, mariaDbDefaults.dumpName)
-    : undefined;
   const defaultPostgresDumpPath = postgresDefaults
     ? joinPath(postgresDefaults.homeDumpPath, postgresDefaults.dumpName)
     : undefined;
   const defaultMariaDbCreateForm = mariaDbDefaults
     ? {
         rootPassword: mariaDbDefaults.rootPassword,
-        version: mariaDbDefaults.defaultVersion,
       }
     : undefined;
   const defaultPostgresCreateForm = postgresDefaults
@@ -130,8 +126,6 @@ export function DatabasesPage({
           activeOperationKey={activeOperationKey}
           databaseRefreshSignal={databaseRefreshSignal}
           defaultCreateForm={defaultMariaDbCreateForm}
-          defaultDatabase={mariaDbDefaults?.defaultDatabase}
-          defaultDumpPath={defaultDumpPath}
           error={mariaDb.error}
           instances={mariaDb.instances}
           loading={mariaDb.loading}
