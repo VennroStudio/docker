@@ -17,6 +17,9 @@ type MariaDbDatabaseBlockProps = {
   onDrop: (form: MariaDbDatabaseForm) => void;
 };
 
+const createFormId = "mariadb-database-create-form";
+const dropFormId = "mariadb-database-drop-form";
+
 export function MariaDbDatabaseBlock({
   copy,
   disabled = false,
@@ -144,41 +147,7 @@ export function MariaDbDatabaseBlock({
           ) : null}
         </label>
 
-        <div className="grid gap-2">
-          <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
-          <div className="grid gap-2 min-[720px]:grid-cols-[minmax(0,1fr)_auto]">
-            <select
-              className="h-10 min-w-0 rounded-lg border border-zinc-700/80 bg-zinc-950/72 px-3 text-sm text-zinc-100 outline-none transition focus:border-teal-300/70 focus:ring-2 focus:ring-teal-300/20 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={disabled || !containerReady || databasesLoading || databases.length === 0}
-              value={databaseToDrop}
-              onChange={(event) => setDatabaseToDrop(event.target.value)}
-            >
-              <option value="">{databasesLoading ? copy.refresh : copy.emptyDatabases}</option>
-              {databases.map((database) => (
-                <option key={database} value={database}>
-                  {database}
-                </option>
-              ))}
-            </select>
-            <Button
-              disabled={disabled || !containerReady || databasesLoading}
-              icon={<RefreshCw size={16} strokeWidth={2.4} />}
-              loading={databasesLoading}
-              type="button"
-              onClick={refreshDatabases}
-            >
-              {copy.refresh}
-            </Button>
-          </div>
-          {databasesError ? <span className="text-xs font-medium text-red-200">{databasesError}</span> : null}
-        </div>
-      </div>
-
-      <div className="mt-3 grid gap-3 min-[1180px]:grid-cols-2">
-        <form
-          className="grid gap-3 min-[720px]:grid-cols-[minmax(0,1fr)_auto] min-[720px]:items-start"
-          onSubmit={submitCreate}
-        >
+        <form id={createFormId} className="grid gap-2" onSubmit={submitCreate}>
           <Field
             disabled={disabled}
             error={
@@ -189,9 +158,43 @@ export function MariaDbDatabaseBlock({
             value={databaseToCreate}
             onChange={(event) => setDatabaseToCreate(event.target.value)}
           />
+        </form>
+      </div>
+
+      <div className="mt-3 grid gap-3 min-[1180px]:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] min-[1180px]:items-start">
+        <form id={dropFormId} className="grid gap-2" onSubmit={submitDrop}>
+          <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
+          <select
+            className="h-10 min-w-0 rounded-lg border border-zinc-700/80 bg-zinc-950/72 px-3 text-sm text-zinc-100 outline-none transition focus:border-teal-300/70 focus:ring-2 focus:ring-teal-300/20 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={disabled || !containerReady || databasesLoading || databases.length === 0}
+            value={databaseToDrop}
+            onChange={(event) => setDatabaseToDrop(event.target.value)}
+          >
+            <option value="">{databasesLoading ? copy.refresh : copy.emptyDatabases}</option>
+            {databases.map((database) => (
+              <option key={database} value={database}>
+                {database}
+              </option>
+            ))}
+          </select>
+          {databasesError ? <span className="text-xs font-medium text-red-200">{databasesError}</span> : null}
+        </form>
+
+        <div className="grid gap-2 min-[720px]:grid-cols-3 min-[1180px]:mt-6">
           <Button
-            className="w-full min-[720px]:mt-6"
+            className="w-full"
+            disabled={disabled || !containerReady || databasesLoading}
+            icon={<RefreshCw size={16} strokeWidth={2.4} />}
+            loading={databasesLoading}
+            type="button"
+            onClick={refreshDatabases}
+          >
+            {copy.refresh}
+          </Button>
+          <Button
+            className="w-full"
             disabled={!createReady || disabled}
+            form={createFormId}
             icon={<Plus size={17} strokeWidth={2.4} />}
             loading={loadingCreate}
             title={!createReady ? copy.validation.createDisabled : disabled ? disabledTitle : undefined}
@@ -200,12 +203,10 @@ export function MariaDbDatabaseBlock({
           >
             {copy.createAction}
           </Button>
-        </form>
-
-        <form className="flex min-w-0 items-end" onSubmit={submitDrop}>
           <Button
             className="w-full"
             disabled={!dropReady || disabled}
+            form={dropFormId}
             icon={<Trash2 size={17} strokeWidth={2.4} />}
             loading={loadingDrop}
             title={!dropReady ? copy.validation.deleteDisabled : disabled ? disabledTitle : undefined}
@@ -214,7 +215,7 @@ export function MariaDbDatabaseBlock({
           >
             {copy.deleteAction}
           </Button>
-        </form>
+        </div>
       </div>
     </section>
   );
