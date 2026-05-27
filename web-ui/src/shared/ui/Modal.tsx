@@ -10,21 +10,21 @@ type ModalProps = {
 export function Modal({ children, onClose, title }: ModalProps) {
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/62 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 grid place-items-center bg-slate-950/34 p-4 backdrop-blur-sm"
       role="presentation"
       onMouseDown={onClose}
     >
       <section
         aria-modal="true"
-        className="w-full max-w-2xl rounded-lg border border-zinc-700/80 bg-zinc-950 shadow-2xl shadow-black/50"
+        className="w-full max-w-2xl rounded-lg border border-sky-100 bg-white shadow-[0_24px_70px_rgba(14,165,233,0.16),0_12px_34px_rgba(168,85,247,0.12)] ring-1 ring-fuchsia-100/55"
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <header className="flex items-center justify-between gap-4 border-b border-zinc-800 px-5 py-4">
-          <h2 className="text-lg font-bold text-zinc-50">{title}</h2>
+        <header className="flex items-center justify-between gap-4 border-b border-sky-100 px-5 py-4">
+          <h2 className="text-lg font-bold text-slate-950">{title}</h2>
           <button
             aria-label="Close"
-            className="grid h-10 w-10 place-items-center rounded-lg border border-zinc-700/80 text-zinc-200 transition hover:border-zinc-500 hover:bg-white/[0.06]"
+            className="grid h-10 w-10 place-items-center rounded-lg border border-sky-100 text-slate-500 shadow-[0_5px_14px_rgba(14,165,233,0.10)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
             type="button"
             onClick={onClose}
           >

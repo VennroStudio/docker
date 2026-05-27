@@ -18,8 +18,8 @@ export function SettingsPage({ settingsState, text, view }: SettingsPageProps) {
       description={text.settings.description}
     >
       {settingsState.loading || !settingsState.settings ? (
-        <section className="rounded-lg border border-zinc-800/90 bg-zinc-950/58 p-4">
-          <p className="text-sm font-semibold text-zinc-400">{text.settings.loading}</p>
+        <section className="rounded-lg border border-sky-100/90 bg-white/76 p-4 shadow-[0_14px_34px_rgba(14,165,233,0.12)]">
+          <p className="text-sm font-semibold text-slate-500">{text.settings.loading}</p>
         </section>
       ) : (
         <SettingsForm
@@ -31,7 +31,7 @@ export function SettingsPage({ settingsState, text, view }: SettingsPageProps) {
           onSave={settingsState.save}
         />
       )}
-      {settingsState.error ? <p className="mt-3 text-sm font-semibold text-red-200">{settingsState.error}</p> : null}
+      {settingsState.error ? <p className="mt-3 text-sm font-semibold text-red-600">{settingsState.error}</p> : null}
     </ServicePageLayout>
   );
 }

@@ -16,9 +16,9 @@ type ToastViewportProps = {
 };
 
 const toneClass = {
-  danger: "border-red-300/25 bg-red-950/92 text-red-50",
-  info: "border-teal-300/25 bg-zinc-950/94 text-zinc-50",
-  success: "border-emerald-300/25 bg-emerald-950/92 text-emerald-50",
+  danger: "border-red-200 bg-red-50 text-red-800 shadow-[0_12px_30px_rgba(249,115,22,0.16)]",
+  info: "border-sky-100 bg-white text-slate-900 shadow-[0_12px_30px_rgba(14,165,233,0.14)]",
+  success: "border-emerald-200 bg-emerald-50 text-emerald-800 shadow-[0_12px_30px_rgba(34,197,94,0.14)]",
 };
 
 const toneIcon = {
@@ -36,7 +36,7 @@ export function ToastViewport({ onDismiss, toasts }: ToastViewportProps) {
         <article
           key={toast.id}
           className={cn(
-            "pointer-events-auto grid grid-cols-[auto_minmax(0,1fr)_auto] gap-3 rounded-lg border p-3 shadow-2xl shadow-black/35 backdrop-blur",
+            "pointer-events-auto grid grid-cols-[auto_minmax(0,1fr)_auto] gap-3 rounded-lg border p-3 backdrop-blur",
             toneClass[toast.tone],
           )}
         >

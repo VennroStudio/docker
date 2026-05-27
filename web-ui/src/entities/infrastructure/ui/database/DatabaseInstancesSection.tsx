@@ -29,7 +29,7 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
       title={copy.title}
       actions={
         <>
-          <span className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs font-bold text-zinc-400">
+          <span className="rounded-md border border-sky-100 bg-sky-50 px-2 py-1 text-xs font-bold text-slate-500 shadow-[0_4px_10px_rgba(14,165,233,0.10)]">
             {instances.length}
           </span>
           <Button
@@ -47,7 +47,7 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
       }
       onOpenChange={onOpenChange}
     >
-      <h3 className="mb-3 text-sm font-bold text-zinc-200">{copy.serversTitle}</h3>
+      <h3 className="mb-3 text-sm font-bold text-slate-800">{copy.serversTitle}</h3>
       <div className="grid gap-3">
         <DatabaseSectionState copy={copy} error={error} hasInstances={instances.length > 0} loading={loading} />
 

@@ -32,19 +32,19 @@ export function AccordionPanel({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-lg border border-zinc-800/90 bg-zinc-950/54 shadow-sm shadow-black/20",
+        "overflow-hidden rounded-lg border border-sky-100/90 bg-white/78 shadow-[0_14px_34px_rgba(14,165,233,0.12),0_6px_18px_rgba(168,85,247,0.07)] ring-1 ring-fuchsia-100/45 backdrop-blur",
         className,
       )}
     >
       <header
-        className="flex cursor-pointer items-center gap-4 px-4 py-3 transition hover:bg-white/[0.03]"
+        className="flex cursor-pointer items-center gap-4 px-4 py-3 transition hover:bg-sky-50/55"
         onClick={() => onOpenChange(!open)}
       >
         <span className="min-w-0 flex-1">
-          <span className="block text-xs font-semibold uppercase text-zinc-500">{eyebrow}</span>
+          <span className="block text-xs font-semibold uppercase text-slate-500">{eyebrow}</span>
           <span className="mt-1 flex min-w-0 items-center gap-2">
             {titlePrefix ? <span className="flex shrink-0">{titlePrefix}</span> : null}
-            <TitleElement className="block min-w-0 truncate text-base font-bold text-zinc-50">{title}</TitleElement>
+            <TitleElement className="block min-w-0 truncate text-base font-bold text-slate-950">{title}</TitleElement>
           </span>
         </span>
         {actions ? (
@@ -56,13 +56,13 @@ export function AccordionPanel({
           </span>
         ) : null}
         <ChevronDown
-          className={cn("shrink-0 text-zinc-500 transition", open && "rotate-180 text-zinc-200")}
+          className={cn("shrink-0 text-slate-500 transition", open && "rotate-180 text-slate-900")}
           size={18}
           strokeWidth={2.4}
         />
       </header>
 
-      {open ? <div className={cn("border-t border-zinc-800", contentClassName)}>{children}</div> : null}
+      {open ? <div className={cn("border-t border-sky-100", contentClassName)}>{children}</div> : null}
     </section>
   );
 }

@@ -15,7 +15,7 @@ type AppShellProps = {
 
 export function AppShell({ activeView, children, language, onSelectView, onToggleLanguage, text }: AppShellProps) {
   return (
-    <main className="grid min-h-screen grid-cols-[76px_minmax(0,1fr)] bg-transparent text-zinc-100 max-[760px]:grid-cols-1">
+    <main className="grid min-h-screen grid-cols-[76px_minmax(0,1fr)] bg-transparent text-slate-950 max-[760px]:grid-cols-1">
       <RailNav
         activeView={activeView}
         language={language}

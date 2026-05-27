@@ -32,7 +32,7 @@ export function DatabaseContainerSelect<Instance extends DatabaseInstanceOption>
 }: DatabaseContainerSelectProps<Instance>) {
   return (
     <label className="grid gap-2 text-sm">
-      <span className="text-xs font-semibold uppercase text-zinc-500">{copy.container}</span>
+      <span className="text-xs font-semibold uppercase text-slate-500">{copy.container}</span>
       <select
         className={selectClassName}
         disabled={disabled || instances.length === 0}
@@ -46,7 +46,7 @@ export function DatabaseContainerSelect<Instance extends DatabaseInstanceOption>
           </option>
         ))}
       </select>
-      {value && !ready ? <span className="text-xs font-medium text-red-200">{copy.validation.container}</span> : null}
+      {value && !ready ? <span className="text-xs font-medium text-red-600">{copy.validation.container}</span> : null}
     </label>
   );
 }

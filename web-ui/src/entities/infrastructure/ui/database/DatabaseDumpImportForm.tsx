@@ -98,7 +98,7 @@ export function DatabaseDumpImportForm<
 
   return (
     <form
-      className="flex h-full min-h-[430px] flex-col rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 shadow-sm shadow-black/15"
+      className="flex h-full min-h-[430px] flex-col rounded-lg border border-sky-100/90 bg-white/82 p-3 shadow-[0_14px_34px_rgba(14,165,233,0.11),0_6px_18px_rgba(249,115,22,0.08)] ring-1 ring-orange-100/45"
       onSubmit={submit}
     >
       <DatabaseBlockHeader eyebrow={copy.titleEyebrow} title={copy.title} />
@@ -118,7 +118,7 @@ export function DatabaseDumpImportForm<
 
         <div className="grid gap-3 min-[780px]:grid-cols-[minmax(0,1fr)_auto] min-[780px]:items-end">
           <label className="grid gap-2 text-sm">
-            <span className="text-xs font-semibold uppercase text-zinc-500">{copy.fileSelect}</span>
+            <span className="text-xs font-semibold uppercase text-slate-500">{copy.fileSelect}</span>
             <select
               className={selectClassName}
               disabled={disabled || dumpFiles.loading || dumpFiles.files.length === 0}
@@ -153,7 +153,7 @@ export function DatabaseDumpImportForm<
           </Button>
         </div>
 
-        {dumpFiles.error ? <p className="text-xs font-medium text-red-200">{dumpFiles.error}</p> : null}
+        {dumpFiles.error ? <p className="text-xs font-medium text-red-600">{dumpFiles.error}</p> : null}
 
         <Field
           disabled={disabled}
@@ -166,7 +166,7 @@ export function DatabaseDumpImportForm<
 
         <div className="grid gap-3">
           <label className="grid gap-2 text-sm">
-            <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
+            <span className="text-xs font-semibold uppercase text-slate-500">{copy.database}</span>
             <select
               className={selectClassName}
               disabled={disabled || !containerReady || databaseList.loading || databaseList.databases.length === 0}
@@ -181,9 +181,9 @@ export function DatabaseDumpImportForm<
               ))}
             </select>
             {databaseList.error ? (
-              <span className="text-xs font-medium text-red-200">{databaseList.error}</span>
+              <span className="text-xs font-medium text-red-600">{databaseList.error}</span>
             ) : database && !databaseReady ? (
-              <span className="text-xs font-medium text-red-200">{copy.validation.database}</span>
+              <span className="text-xs font-medium text-red-600">{copy.validation.database}</span>
             ) : null}
           </label>
           <Button

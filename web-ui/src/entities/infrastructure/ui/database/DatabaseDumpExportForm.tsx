@@ -93,7 +93,7 @@ export function DatabaseDumpExportForm<Instance extends DatabaseInstanceOption, 
 
   return (
     <form
-      className="flex h-full min-h-[430px] flex-col rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 shadow-sm shadow-black/15"
+      className="flex h-full min-h-[430px] flex-col rounded-lg border border-sky-100/90 bg-white/82 p-3 shadow-[0_14px_34px_rgba(14,165,233,0.11),0_6px_18px_rgba(168,85,247,0.09)] ring-1 ring-fuchsia-100/45"
       onSubmit={submit}
     >
       <DatabaseBlockHeader eyebrow={copy.titleEyebrow} title={copy.title} />
@@ -123,7 +123,7 @@ export function DatabaseDumpExportForm<Instance extends DatabaseInstanceOption, 
 
         <div className="grid gap-3">
           <label className="grid gap-2 text-sm">
-            <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
+            <span className="text-xs font-semibold uppercase text-slate-500">{copy.database}</span>
             <select
               className={selectClassName}
               disabled={disabled || !containerReady || databaseList.loading || databaseList.databases.length === 0}
@@ -144,9 +144,9 @@ export function DatabaseDumpExportForm<Instance extends DatabaseInstanceOption, 
               ))}
             </select>
             {databaseList.error ? (
-              <span className="text-xs font-medium text-red-200">{databaseList.error}</span>
+              <span className="text-xs font-medium text-red-600">{databaseList.error}</span>
             ) : normalizedDatabase && !databaseReady ? (
-              <span className="text-xs font-medium text-red-200">{copy.validation.database}</span>
+              <span className="text-xs font-medium text-red-600">{copy.validation.database}</span>
             ) : null}
           </label>
           <Button

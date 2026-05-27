@@ -4,6 +4,7 @@ WORKDIR /build
 COPY web-ui/package.json web-ui/package-lock.json web-ui/tsconfig.json web-ui/vite.config.ts ./
 COPY web-ui/commands.manifest.json ./commands.manifest.json
 COPY web-ui/index.html ./index.html
+COPY web-ui/logo.png ./logo.png
 COPY web-ui/src ./src
 
 RUN npm ci

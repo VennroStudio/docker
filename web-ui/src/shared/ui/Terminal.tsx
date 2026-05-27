@@ -56,7 +56,7 @@ export function Terminal({
   };
 
   return (
-    <section className="flex min-h-[320px] flex-col overflow-hidden rounded-lg border border-zinc-800 bg-[#070806] shadow-2xl shadow-black/35">
+    <section className="flex min-h-[320px] flex-col overflow-hidden rounded-lg border border-sky-900/70 bg-[#070806] shadow-[0_18px_50px_rgba(14,165,233,0.18),0_10px_30px_rgba(168,85,247,0.12)]">
       <header className="flex min-h-16 flex-wrap items-center gap-3 border-b border-zinc-800 bg-zinc-950/95 px-4 py-3">
         <div className="flex gap-1.5" aria-hidden="true">
           <span className="h-3 w-3 rounded-full bg-red-400/90" />
@@ -79,7 +79,7 @@ export function Terminal({
         <div className="flex flex-wrap gap-2">
           <Button
             aria-label={actionLabels.stop}
-            className="px-3"
+            className="border-red-400/35 bg-red-500/12 px-3 text-red-100 hover:border-red-300/60 hover:bg-red-500/20"
             disabled={state !== "running"}
             icon={<Square size={14} />}
             title={actionLabels.stop}
@@ -88,7 +88,7 @@ export function Terminal({
           />
           <Button
             aria-label={actionLabels.clear}
-            className="px-3"
+            className="border-zinc-700/80 bg-zinc-900 px-3 text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800 hover:text-zinc-50"
             icon={<BrushCleaning size={16} />}
             title={actionLabels.clear}
             onClick={onClear}

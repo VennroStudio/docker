@@ -63,8 +63,8 @@ export function SettingsForm({
 
   if (loading) {
     return (
-      <section className="rounded-lg border border-zinc-800/90 bg-zinc-950/58 p-4">
-        <p className="text-sm font-semibold text-zinc-400">{copy.loading}</p>
+      <section className="rounded-lg border border-sky-100/90 bg-white/76 p-4 shadow-[0_14px_34px_rgba(14,165,233,0.12)]">
+        <p className="text-sm font-semibold text-slate-500">{copy.loading}</p>
       </section>
     );
   }

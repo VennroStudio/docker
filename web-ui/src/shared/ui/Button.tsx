@@ -21,11 +21,11 @@ export function Button({
 }: ButtonProps) {
   const toneClass = {
     danger:
-      "border-red-400/35 bg-red-500/12 text-red-50 hover:border-red-300/60 hover:bg-red-500/20 disabled:hover:bg-red-500/12",
+      "border-red-300 bg-red-50 text-red-700 shadow-[0_8px_18px_rgba(249,115,22,0.16)] hover:border-red-400 hover:bg-red-100 disabled:hover:bg-red-50",
     default:
-      "border-zinc-700/80 bg-zinc-900/82 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-800 disabled:hover:bg-zinc-900/82",
+      "border-sky-100 bg-white text-slate-700 shadow-[0_6px_14px_rgba(14,165,233,0.10)] hover:border-sky-200 hover:bg-sky-50/50 disabled:hover:bg-white",
     primary:
-      "border-teal-300/40 bg-teal-400/14 text-teal-50 hover:border-teal-200/70 hover:bg-teal-400/22 disabled:hover:bg-teal-400/14",
+      "border-teal-400/70 bg-teal-50 text-teal-700 shadow-[0_8px_18px_rgba(20,184,166,0.18),0_4px_12px_rgba(168,85,247,0.08)] hover:border-teal-500 hover:bg-teal-100 disabled:hover:bg-teal-50",
   }[tone];
 
   return (

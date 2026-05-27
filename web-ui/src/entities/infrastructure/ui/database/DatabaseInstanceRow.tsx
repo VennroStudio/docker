@@ -32,12 +32,12 @@ export function DatabaseInstanceRow<Instance extends DatabaseInstanceRuntime>({
     operationDisabled && activeOperationKey !== operationKey ? operationDisabledTitle : label;
 
   return (
-    <article className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+    <article className="flex items-center gap-3 rounded-lg border border-sky-100 bg-white/84 p-3 shadow-[0_10px_24px_rgba(14,165,233,0.12),0_4px_14px_rgba(168,85,247,0.07)]">
       <StatusDot state={instance.state} />
       <div className="min-w-0 flex-1">
-        <h4 className="truncate text-sm font-bold text-zinc-50">{copy.instanceTitle(instance.version)}</h4>
-        <p className="truncate text-xs text-zinc-500">{instance.container}</p>
-        <span className="mt-1 inline-flex rounded-md border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[11px] font-semibold text-zinc-400">
+        <h4 className="truncate text-sm font-bold text-slate-950">{copy.instanceTitle(instance.version)}</h4>
+        <p className="truncate text-xs text-slate-500">{instance.container}</p>
+        <span className="mt-1 inline-flex rounded-md border border-sky-100 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
           {copy.portLabel}: {instance.hostPort}
         </span>
       </div>

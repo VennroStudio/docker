@@ -82,7 +82,7 @@ export function DatabaseCatalogBlock<Instance extends DatabaseInstanceOption, Fo
   };
 
   return (
-    <section className="rounded-lg border border-zinc-800 bg-zinc-950/60 p-3 shadow-sm shadow-black/15">
+    <section className="rounded-lg border border-sky-100/90 bg-white/82 p-3 shadow-[0_14px_34px_rgba(14,165,233,0.11),0_6px_18px_rgba(168,85,247,0.08)] ring-1 ring-fuchsia-100/45">
       <DatabaseBlockHeader eyebrow={copy.titleEyebrow} title={copy.title} />
 
       <div className="grid gap-3 min-[1180px]:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
@@ -115,7 +115,7 @@ export function DatabaseCatalogBlock<Instance extends DatabaseInstanceOption, Fo
 
       <div className="mt-3 grid gap-3 min-[1180px]:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] min-[1180px]:items-start">
         <form id={dropFormId} className="grid gap-2" onSubmit={submitDrop}>
-          <span className="text-xs font-semibold uppercase text-zinc-500">{copy.database}</span>
+          <span className="text-xs font-semibold uppercase text-slate-500">{copy.database}</span>
           <select
             className={selectClassName}
             disabled={disabled || !containerReady || databaseList.loading || databaseList.databases.length === 0}
@@ -129,7 +129,7 @@ export function DatabaseCatalogBlock<Instance extends DatabaseInstanceOption, Fo
               </option>
             ))}
           </select>
-          {databaseList.error ? <span className="text-xs font-medium text-red-200">{databaseList.error}</span> : null}
+          {databaseList.error ? <span className="text-xs font-medium text-red-600">{databaseList.error}</span> : null}
         </form>
 
         <div className="grid gap-2 min-[720px]:grid-cols-3 min-[1180px]:mt-6">

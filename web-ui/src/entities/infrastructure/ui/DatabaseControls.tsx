@@ -74,10 +74,10 @@ export function ShellIconButton({
 
 export function StatusDot({ state }: { state: ContainerRuntimeState }) {
   const stateClass = {
-    missing: "bg-zinc-500 text-zinc-500",
+    missing: "bg-slate-400 text-slate-400",
     running: "bg-[#52ff8f] text-[#52ff8f]",
     stopped: "bg-amber-300 text-amber-300",
-    unknown: "bg-zinc-400 text-zinc-400",
+    unknown: "bg-slate-400 text-slate-400",
   }[state];
 
   return (
@@ -90,11 +90,11 @@ export function StatusDot({ state }: { state: ContainerRuntimeState }) {
 
 export function InfoLine({ href, label, value }: { href?: string; label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-lg border border-zinc-800 bg-zinc-900/45 px-3 py-2">
-      <span className="block text-[11px] font-semibold uppercase text-zinc-500">{label}</span>
+    <div className="min-w-0 rounded-lg border border-sky-100 bg-white/80 px-3 py-2 shadow-[0_7px_16px_rgba(14,165,233,0.10)]">
+      <span className="block text-[11px] font-semibold uppercase text-slate-500">{label}</span>
       {href ? (
         <a
-          className="mt-1 block truncate text-sm font-semibold text-teal-200 hover:text-teal-100"
+          className="mt-1 block truncate text-sm font-semibold text-teal-700 hover:text-teal-800"
           href={href}
           rel="noreferrer"
           target="_blank"
@@ -102,7 +102,7 @@ export function InfoLine({ href, label, value }: { href?: string; label: string;
           {value}
         </a>
       ) : (
-        <strong className="mt-1 block truncate text-sm text-zinc-100">{value}</strong>
+        <strong className="mt-1 block truncate text-sm text-slate-950">{value}</strong>
       )}
     </div>
   );
