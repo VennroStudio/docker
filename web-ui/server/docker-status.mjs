@@ -1,12 +1,12 @@
 import { execFile } from "node:child_process";
 import { serviceContainers } from "./config.mjs";
 
-export async function getDockerStatuses() {
+export async function getDockerStatuses(services = serviceContainers) {
   const result = await listDockerContainers();
 
   return {
     error: result.error,
-    services: Object.entries(serviceContainers).map(([id, names]) => {
+    services: Object.entries(services).map(([id, names]) => {
       if (result.error) {
         return {
           error: result.error,
