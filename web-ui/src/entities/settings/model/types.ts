@@ -46,3 +46,9 @@ export type SettingsResponse = {
   path: string;
   settings: AppSettings;
 };
+
+export type GenerateEnvResponse = {
+  ok: boolean;
+  path: string;
+  settings: AppSettings;
+};

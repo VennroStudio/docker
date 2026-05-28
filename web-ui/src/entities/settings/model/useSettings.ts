@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fetchSettings, saveSettings } from "../api/settings";
+import { fetchSettings, generateEnvFromSettings, saveSettings } from "../api/settings";
 import type { AppSettings, SettingsResponse } from "./types";
 
 export function useSettings() {
@@ -7,6 +7,7 @@ export function useSettings() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generatingEnv, setGeneratingEnv] = useState(false);
 
   const refresh = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
@@ -38,6 +39,21 @@ export function useSettings() {
     }
   }, []);
 
+  const generateEnv = useCallback(async () => {
+    setGeneratingEnv(true);
+    setError(null);
+
+    try {
+      return await generateEnvFromSettings();
+    } catch (requestError) {
+      const message = requestError instanceof Error ? requestError.message : String(requestError);
+      setError(message);
+      throw requestError;
+    } finally {
+      setGeneratingEnv(false);
+    }
+  }, []);
+
   useEffect(() => {
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
@@ -54,6 +70,8 @@ export function useSettings() {
     () => ({
       error,
       exists: response?.exists ?? false,
+      generateEnv,
+      generatingEnv,
       loading,
       path: response?.path ?? "",
       refresh,
@@ -61,6 +79,6 @@ export function useSettings() {
       saving,
       settings: response?.settings ?? null,
     }),
-    [error, loading, refresh, response, save, saving],
+    [error, generateEnv, generatingEnv, loading, refresh, response, save, saving],
   );
 }

@@ -1,4 +1,4 @@
-import type { AppSettings, SettingsResponse } from "../model/types";
+import type { AppSettings, GenerateEnvResponse, SettingsResponse } from "../model/types";
 
 export async function fetchSettings(signal?: AbortSignal): Promise<SettingsResponse> {
   const response = await fetch("/api/settings", { signal });
@@ -22,4 +22,14 @@ export async function saveSettings(settings: AppSettings): Promise<SettingsRespo
   }
 
   return (await response.json()) as SettingsResponse;
+}
+
+export async function generateEnvFromSettings(): Promise<GenerateEnvResponse> {
+  const response = await fetch("/api/settings/env", { method: "POST" });
+
+  if (!response.ok) {
+    throw new Error((await response.text()) || `Env generation failed: ${response.status}`);
+  }
+
+  return (await response.json()) as GenerateEnvResponse;
 }

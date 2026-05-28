@@ -448,7 +448,9 @@ export const en: AppText = {
   settings: {
     clean: "Everything is saved",
     description: "Local values for commands, Docker Compose and UI defaults.",
+    envGenerated: ".env generated from settings.json",
     eyebrow: "Runtime config",
+    generateEnv: "Generate .env",
     loading: "Loading settings...",
     reset: "Reset",
     save: "Save",

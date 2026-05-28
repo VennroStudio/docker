@@ -71,6 +71,14 @@ export async function writeSettings(settings) {
   return { exists: true, path: settingsFile, settings: nextSettings };
 }
 
+export async function writeEnvFromSettings() {
+  const settings = readSettingsFileSync();
+  const env = settingsToEnv(settings);
+
+  await writeFile(envFile, serializeEnv(env), "utf8");
+  return { ok: true, path: envFile, settings };
+}
+
 export function getRuntimeEnv(overrides = {}) {
   const settings = mergeSettings(
     defaultSettings,
@@ -257,6 +265,18 @@ function cloneSettings(settings) {
 
 function dropEmptyValues(values) {
   return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== ""));
+}
+
+function serializeEnv(env) {
+  return `${Object.entries(env)
+    .map(([key, value]) => `${key}=${formatEnvValue(value)}`)
+    .join("\n")}\n`;
+}
+
+function formatEnvValue(value) {
+  const text = String(value);
+  if (!text || /^[A-Za-z0-9_./:@-]+$/.test(text)) return text;
+  return JSON.stringify(text);
 }
 
 function unquote(value) {

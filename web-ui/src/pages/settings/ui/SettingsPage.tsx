@@ -26,8 +26,10 @@ export function SettingsPage({ settingsState, text, view }: SettingsPageProps) {
           copy={text.settings}
           exists={settingsState.exists}
           path={settingsState.path}
+          generatingEnv={settingsState.generatingEnv}
           saving={settingsState.saving}
           settings={settingsState.settings}
+          onGenerateEnv={settingsState.generateEnv}
           onSave={settingsState.save}
         />
       )}

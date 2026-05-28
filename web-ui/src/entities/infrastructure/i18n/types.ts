@@ -294,7 +294,9 @@ export type AppText = {
   settings: {
     clean: string;
     description: string;
+    envGenerated: string;
     eyebrow: string;
+    generateEnv: string;
     loading: string;
     reset: string;
     save: string;

@@ -447,7 +447,9 @@ export const ru: AppText = {
   settings: {
     clean: "Все сохранено",
     description: "Локальные значения для команд, Docker Compose и UI по умолчанию.",
+    envGenerated: ".env сгенерирован из settings.json",
     eyebrow: "Runtime config",
+    generateEnv: "Сгенерировать .env",
     loading: "Загрузка настроек...",
     reset: "Сбросить",
     save: "Сохранить",

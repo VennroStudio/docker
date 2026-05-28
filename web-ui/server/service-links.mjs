@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { projectRoot } from "./config.mjs";
+import { readSettings } from "./settings-store.mjs";
 
 const linksFile = path.resolve(projectRoot, process.env.SERVICE_LINKS_FILE || "docker/services/links.json");
 
@@ -45,7 +46,10 @@ const defaultLinks = {
 
 export async function getServiceLinks() {
   const registry = await readServiceLinks();
-  const links = { ...defaultLinks };
+  const links = {
+    ...defaultLinks,
+    "nginx-container": npmLinkFromSettings((await readSettings()).settings.proxy.npmPublicUrl),
+  };
 
   for (const binding of registry.bindings) {
     if (!binding.container || !binding.domain) continue;
@@ -63,6 +67,24 @@ export async function getServiceLinks() {
     bindings: registry.bindings,
     links,
   };
+}
+
+function npmLinkFromSettings(url) {
+  return {
+    label: "NPM",
+    port: portFromUrl(url) || 81,
+    source: "local",
+    url: url || "http://localhost:81",
+  };
+}
+
+function portFromUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.port ? Number(parsed.port) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 async function readServiceLinks() {

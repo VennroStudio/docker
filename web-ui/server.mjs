@@ -10,7 +10,7 @@ import { links } from "./server/routes/links.mjs";
 import { mariadbInstances } from "./server/routes/mariadb.mjs";
 import { meta } from "./server/routes/meta.mjs";
 import { postgresInstances } from "./server/routes/postgres.mjs";
-import { settings } from "./server/routes/settings.mjs";
+import { generateEnv, settings } from "./server/routes/settings.mjs";
 import { shellInput, shellStop } from "./server/routes/shell.mjs";
 import { status } from "./server/routes/status.mjs";
 import { streamRoute } from "./server/routes/stream.mjs";
@@ -30,6 +30,7 @@ createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);
     if (req.method === "GET" && req.url === "/api/postgres/instances") return await postgresInstances(req, res);
     if ((req.method === "GET" || req.method === "PUT") && req.url === "/api/settings") return await settings(req, res);
+    if (req.method === "POST" && req.url === "/api/settings/env") return await generateEnv(req, res);
     if (req.method === "POST" && req.url === "/api/host/add") return await host(req, res, "add");
     if (req.method === "POST" && req.url === "/api/host/remove") return await host(req, res, "remove");
     if (req.method === "POST" && req.url === "/api/proxy") return await proxy(req, res);

@@ -1,7 +1,7 @@
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 import type { AppText } from "@/entities/infrastructure";
-import type { AppSettings, SettingsResponse } from "@/entities/settings";
+import type { AppSettings, GenerateEnvResponse, SettingsResponse } from "@/entities/settings";
 import { settingsSections, type SettingsFieldDefinition } from "../model/settingsSections";
 import { SettingsSectionCard } from "./SettingsSectionCard";
 import { SettingsSourceCard } from "./SettingsSourceCard";
@@ -11,16 +11,20 @@ type SettingsFormProps = {
   copy: AppText["settings"];
   exists: boolean;
   loading?: boolean;
+  generatingEnv?: boolean;
   path: string;
   saving?: boolean;
   settings: AppSettings;
+  onGenerateEnv: () => Promise<GenerateEnvResponse>;
   onSave: (settings: AppSettings) => Promise<SettingsResponse>;
 };
 
 export function SettingsForm({
   copy,
   exists,
+  generatingEnv = false,
   loading = false,
+  onGenerateEnv,
   onSave,
   path,
   saving = false,
@@ -29,6 +33,7 @@ export function SettingsForm({
   const [draft, setDraft] = useState<AppSettings>(settings);
   const [savedSettings, setSavedSettings] = useState<AppSettings>(settings);
   const [saved, setSaved] = useState(false);
+  const [envGenerated, setEnvGenerated] = useState(false);
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(savedSettings), [draft, savedSettings]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -47,6 +52,7 @@ export function SettingsForm({
 
   const updateField = (field: SettingsFieldDefinition, value: string) => {
     setSaved(false);
+    setEnvGenerated(false);
     setDraft((current) => {
       return {
         ...current,
@@ -71,7 +77,22 @@ export function SettingsForm({
 
   return (
     <form className="space-y-4" onSubmit={submit}>
-      <SettingsSourceCard copy={copy} exists={exists} path={path} />
+      <SettingsSourceCard
+        copy={copy}
+        envGenerated={envGenerated}
+        exists={exists}
+        generateDisabled={dirty}
+        generatingEnv={generatingEnv}
+        path={path}
+        onGenerateEnv={() => {
+          void onGenerateEnv()
+            .then(() => {
+              setEnvGenerated(true);
+              window.setTimeout(() => setEnvGenerated(false), 2200);
+            })
+            .catch(() => undefined);
+        }}
+      />
 
       <div className="grid gap-4 min-[1280px]:grid-cols-2">
         {settingsSections.map((section) => (

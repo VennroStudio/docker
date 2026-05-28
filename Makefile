@@ -47,6 +47,7 @@ delete-proxy: ## Удалить общую сеть
 
 ##@ Web UI
 ui: web-ui-up ## Запустить локальный web-интерфейс управления
+web-ui-init: web-ui-down web-ui-up
 
 web-ui-up: proxy-network-ensure ## Собрать и запустить Web UI
 	$(WEB_UI_COMPOSE) up -d --build
