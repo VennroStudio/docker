@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const serverDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(serverDir, "../..");
-const settingsFile = path.resolve(projectRoot, process.env.INFRA_SETTINGS_FILE || "docker/services/settings.json");
+const settingsFile = path.resolve(projectRoot, process.env.INFRA_SETTINGS_FILE || "config/settings.json");
 const envFile = path.resolve(projectRoot, ".env");
 
 export const defaultSettings = {

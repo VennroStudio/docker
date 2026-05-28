@@ -1,0 +1,39 @@
+{
+  "proxy": {
+    "npmPublicUrl": "http://npm.local",
+    "npmApiUrl": "http://nginx-container:81",
+    "npmEmail": "vennro@gmail.com",
+    "npmPassword": "040596Sasha"
+  },
+  "mariadb": {
+    "rootPassword": "root"
+  },
+  "deployment": {
+    "ssh": "vennro@84.22.144.239",
+    "host": "84.22.144.239",
+    "port": "22456",
+    "user": "vennro",
+    "sshKey": "/root/.ssh/id_rsa"
+  },
+  "registry": {
+    "registryUser": "test",
+    "registryPassword": "test",
+    "dockerhubUsername": "vennro",
+    "dockerhubPassword": "040596Sasha"
+  },
+  "storage": {
+    "minioRootUser": "vennro",
+    "minioRootPassword": "123456789",
+    "redisPassword": "rz7atwGRO3AHEQgEBQZCAznq0gHB4NXzobBaC4IqN4Vv3F1iMC"
+  },
+  "postgres": {
+    "user": "admin",
+    "password": "123456",
+    "database": "mydb",
+    "dumpName": "app.dump",
+    "homeDumpPath": "dumps/postgres/",
+    "serverDumpPath": "/home/vennro/infrastructure/",
+    "pgAdminEmail": "admin@admin.ru",
+    "pgAdminPassword": "123456"
+  }
+}
