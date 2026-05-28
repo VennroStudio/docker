@@ -23,6 +23,12 @@ export type AppSettings = {
     minioRootUser: string;
     minioRootPassword: string;
   };
+  registry: {
+    registryUrl: string;
+    registryUiUrl: string;
+    registryUser: string;
+    registryPassword: string;
+  };
 };
 
 export type SettingsResponse = {

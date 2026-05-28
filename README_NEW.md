@@ -43,6 +43,13 @@ make settings-set KEY=minio.minioRootUser VALUE=minio
 make settings-set KEY=minio.minioRootPassword VALUE=secret
 ```
 
+Изменить настройки Registry:
+
+```sh
+make settings-set KEY=registry.registryUser VALUE=admin
+make settings-set KEY=registry.registryPassword VALUE=secret
+```
+
 Сгенерировать `.env` для compose-файлов, которым нужны переменные окружения:
 
 ```sh
@@ -448,6 +455,59 @@ make app-proxy DOMAIN=minio.local TARGET=minio-container PORT=9001
 
 ```sh
 make app-proxy-remove DOMAIN=minio.local
+```
+
+### Пример: Registry и Registry UI
+
+Задать логин и пароль Registry в settings:
+
+```sh
+make settings-set KEY=registry.registryUser VALUE=admin
+make settings-set KEY=registry.registryPassword VALUE=secret
+```
+
+Сгенерировать `.env` и htpasswd:
+
+```sh
+make settings-env
+make registry-auth-generate
+```
+
+Запустить Registry и Registry UI:
+
+```sh
+make registry-up
+make registry-ui-up
+```
+
+Проверить статусы. URL возвращается в каждом status-ответе:
+
+```sh
+make registry-status
+make registry-ui-status
+```
+
+Если нужен локальный домен для Registry UI:
+
+```sh
+make host-add DOMAIN=registry.local
+make app-proxy DOMAIN=registry.local TARGET=registry-ui-container PORT=80
+```
+
+После создания proxy host скрипт обновит `config/settings.json`:
+
+```json
+{
+  "registry": {
+    "registryUiUrl": "http://registry.local"
+  }
+}
+```
+
+При удалении proxy host значение вернется на `http://localhost:5081`:
+
+```sh
+make app-proxy-remove DOMAIN=registry.local
 ```
 
 ## Сводка команд
@@ -1184,4 +1244,122 @@ make minio-logs
 
 ```sh
 make minio-shell
+```
+
+### Registry
+
+Показать статус Registry и URL:
+
+```sh
+make registry-status
+```
+
+Создать `docker/registry/auth/htpasswd` из настроек Registry:
+
+```sh
+make registry-auth-generate
+```
+
+Скачать или обновить Docker image Registry:
+
+```sh
+make registry-pull
+```
+
+Создать и запустить контейнер Registry:
+
+```sh
+make registry-up
+```
+
+Запустить уже созданный контейнер Registry:
+
+```sh
+make registry-start
+```
+
+Остановить контейнер Registry:
+
+```sh
+make registry-stop
+```
+
+Удалить контейнер Registry:
+
+```sh
+make registry-down
+```
+
+Удалить контейнер Registry и Docker image `registry:2`:
+
+```sh
+make registry-clean
+```
+
+Показать логи Registry:
+
+```sh
+make registry-logs
+```
+
+Зайти в shell контейнера Registry:
+
+```sh
+make registry-shell
+```
+
+### Registry UI
+
+Показать статус Registry UI и URL:
+
+```sh
+make registry-ui-status
+```
+
+Скачать или обновить Docker image Registry UI:
+
+```sh
+make registry-ui-pull
+```
+
+Создать и запустить контейнер Registry UI:
+
+```sh
+make registry-ui-up
+```
+
+Запустить уже созданный контейнер Registry UI:
+
+```sh
+make registry-ui-start
+```
+
+Остановить контейнер Registry UI:
+
+```sh
+make registry-ui-stop
+```
+
+Удалить контейнер Registry UI:
+
+```sh
+make registry-ui-down
+```
+
+Удалить контейнер Registry UI и Docker image `joxit/docker-registry-ui:latest`:
+
+```sh
+make registry-ui-clean
+```
+
+Показать логи Registry UI:
+
+```sh
+make registry-ui-logs
+```
+
+Зайти в shell контейнера Registry UI:
+
+```sh
+make registry-ui-shell
 ```

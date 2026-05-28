@@ -38,6 +38,16 @@ const publicTargets = {
     key: "minioUrl",
     name: "minio.minioUrl",
   },
+  "registry-container": {
+    group: "registry",
+    key: "registryUrl",
+    name: "registry.registryUrl",
+  },
+  "registry-ui-container": {
+    group: "registry",
+    key: "registryUiUrl",
+    name: "registry.registryUiUrl",
+  },
 };
 const config = {
   delete: deleting,

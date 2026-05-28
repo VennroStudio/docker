@@ -125,6 +125,12 @@ function normalizeSettings(settings = {}) {
       minioRootUser: source.minio?.minioRootUser || "minio",
       minioRootPassword: source.minio?.minioRootPassword || "minioadmin",
     },
+    registry: {
+      registryUrl: source.registry?.registryUrl || "http://localhost:5000",
+      registryUiUrl: source.registry?.registryUiUrl || "http://localhost:5081",
+      registryUser: source.registry?.registryUser || "",
+      registryPassword: source.registry?.registryPassword || "",
+    },
   };
 }
 
@@ -150,6 +156,8 @@ function envEntries(settings) {
     ["REDIS_PASSWORD", settings.redis?.redisPassword],
     ["MINIO_ROOT_USER", settings.minio?.minioRootUser],
     ["MINIO_ROOT_PASSWORD", settings.minio?.minioRootPassword],
+    ["REGISTRY_USER", settings.registry?.registryUser],
+    ["REGISTRY_PASSWORD", settings.registry?.registryPassword],
   ];
 }
 

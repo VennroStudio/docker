@@ -476,6 +476,67 @@ minio-logs: ## Логи MinIO
 minio-shell: ## Shell внутри контейнера MinIO
 	$(MAKE) compose-shell NAME=minio
 
+##@ Registry
+registry-status: ## Показать статус Registry
+	@$(NODE_RUN) ./scripts/registry/status.mjs registry
+
+registry-auth-generate: ## Создать htpasswd пользователя Registry из settings/.env
+	@$(NODE_RUN) ./scripts/registry/auth.mjs
+
+registry-up: registry-auth-generate ## Запустить контейнер Registry
+	$(MAKE) compose-up NAME=registry
+
+registry-pull: ## Скачать/обновить образ Registry
+	$(MAKE) compose-pull NAME=registry
+
+registry-start: ## Запустить существующий контейнер Registry
+	$(MAKE) compose-start NAME=registry
+
+registry-stop: ## Остановить контейнер Registry
+	$(MAKE) compose-stop NAME=registry
+
+registry-down: ## Удалить контейнер Registry
+	$(MAKE) compose-down NAME=registry
+
+registry-clean: ## Удалить контейнер и образ Registry
+	$(MAKE) compose-down NAME=registry
+	docker rmi registry:2 2>/dev/null || true
+
+registry-logs: ## Логи Registry
+	$(MAKE) compose-logs NAME=registry
+
+registry-shell: ## Shell внутри контейнера Registry
+	$(MAKE) compose-shell NAME=registry
+
+##@ Registry UI
+registry-ui-status: ## Показать статус Registry UI
+	@$(NODE_RUN) ./scripts/registry/status.mjs registry-ui
+
+registry-ui-up: ## Запустить контейнер Registry UI
+	$(MAKE) compose-up NAME=registry-ui
+
+registry-ui-pull: ## Скачать/обновить образ Registry UI
+	$(MAKE) compose-pull NAME=registry-ui
+
+registry-ui-start: ## Запустить существующий контейнер Registry UI
+	$(MAKE) compose-start NAME=registry-ui
+
+registry-ui-stop: ## Остановить контейнер Registry UI
+	$(MAKE) compose-stop NAME=registry-ui
+
+registry-ui-down: ## Удалить контейнер Registry UI
+	$(MAKE) compose-down NAME=registry-ui
+
+registry-ui-clean: ## Удалить контейнер и образ Registry UI
+	$(MAKE) compose-down NAME=registry-ui
+	docker rmi joxit/docker-registry-ui:latest 2>/dev/null || true
+
+registry-ui-logs: ## Логи Registry UI
+	$(MAKE) compose-logs NAME=registry-ui
+
+registry-ui-shell: ## Shell внутри контейнера Registry UI
+	$(MAKE) compose-shell NAME=registry-ui
+
 .PHONY: help init settings-show settings-set settings-env
 .PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
@@ -492,3 +553,5 @@ minio-shell: ## Shell внутри контейнера MinIO
 .PHONY: redis-status redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs redis-shell
 .PHONY: redisinsight-status redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs redisinsight-shell
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
+.PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell
+.PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell

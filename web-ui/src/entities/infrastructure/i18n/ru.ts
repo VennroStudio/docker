@@ -458,6 +458,7 @@ export const ru: AppText = {
       minio: "MinIO",
       proxy: "Nginx Proxy Manager",
       redis: "Redis",
+      registry: "Registry",
     },
     sourceLabel: "JSON файл",
     sourceMissing: "будет создан",

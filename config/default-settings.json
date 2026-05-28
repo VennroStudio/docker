@@ -22,5 +22,11 @@
     "minioUrl": "http://localhost:3901",
     "minioRootUser": "minio",
     "minioRootPassword": "minioadmin"
+  },
+  "registry": {
+    "registryUrl": "http://localhost:5000",
+    "registryUiUrl": "http://localhost:5081",
+    "registryUser": "",
+    "registryPassword": ""
   }
 }

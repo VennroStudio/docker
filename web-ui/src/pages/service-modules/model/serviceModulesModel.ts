@@ -10,6 +10,7 @@ import {
   type ContainerStateInfo,
   type MinioStatusResponse,
   type RedisStatusResponse,
+  type RegistryStatusResponse,
   type ServiceLink,
   type ShellAction,
   type ViewId,
@@ -43,11 +44,28 @@ const minioConfigFields = [
   },
 ] satisfies ServiceModuleConfigSection["fields"];
 
+const registryConfigFields = [
+  {
+    autocomplete: "username",
+    group: "registry",
+    label: "Registry user",
+    name: "registryUser",
+  },
+  {
+    autocomplete: "current-password",
+    group: "registry",
+    label: "Registry password",
+    name: "registryPassword",
+    type: "password",
+  },
+] satisfies ServiceModuleConfigSection["fields"];
+
 type ServiceModulesModelSource = {
   activeView: ViewId;
   containerStates: Record<string, ContainerStateInfo>;
   minioStatus: null | MinioStatusResponse;
   redisStatus: null | RedisStatusResponse;
+  registryStatus: null | RegistryStatusResponse;
   serviceLinks: Record<string, ServiceLink>;
   text: AppText;
   translateActions: (actions: CommandAction[]) => CommandAction[];
@@ -65,6 +83,7 @@ export function getServiceModulesPageModel({
   containerStates,
   minioStatus,
   redisStatus,
+  registryStatus,
   serviceLinks,
   text,
   translateActions,
@@ -167,6 +186,10 @@ export function getServiceModulesPageModel({
     const shells = translateShells(commandPageRegistry.registry.shells || []);
     const registryShell = findShell(shells, "registry-container");
     const registryUiShell = findShell(shells, "registry-ui-container");
+    const registry = registryStatus?.registry;
+    const registryUi = registryStatus?.registryUi;
+    const registryLink = registry?.url ? { label: "Registry", source: "settings" as const, url: registry.url } : undefined;
+    const registryUiLink = registryUi?.url ? { label: "Registry UI", source: "settings" as const, url: registryUi.url } : undefined;
 
     return {
       description: page.description,
@@ -174,20 +197,33 @@ export function getServiceModulesPageModel({
       modules: [
         {
           actions: translateActions(registryActions),
-          details: moduleDetails(registryShell?.container),
+          configSection: {
+            fields: registryConfigFields,
+            generateEnvAfterSave: true,
+          },
+          details: [
+            { label: containerLabel, value: registry?.container || registryShell?.container },
+            ...(registryLink ? [{ href: registryLink.url, label: text.common.link, value: registryLink.url }] : []),
+          ],
           eyebrow: page.panelEyebrow,
+          link: registryLink,
           shell: registryShell,
-          status: containerStates["registry-container"],
+          stateEyebrow: true,
+          status: registry,
           statusLabel,
           title: "Registry",
         },
         {
           actions: translateActions(registryUiActions),
-          details: moduleDetails(registryUiShell?.container),
+          details: [
+            { label: containerLabel, value: registryUi?.container || registryUiShell?.container },
+            ...(registryUiLink ? [{ href: registryUiLink.url, label: text.common.link, value: registryUiLink.url }] : []),
+          ],
           eyebrow: "Registry UI",
-          link: serviceLinks["registry-ui-container"],
+          link: registryUiLink,
           shell: registryUiShell,
-          status: containerStates["registry-ui-container"],
+          stateEyebrow: true,
+          status: registryUi,
           statusLabel,
           title: "Registry UI",
         },

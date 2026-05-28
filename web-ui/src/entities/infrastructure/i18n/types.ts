@@ -305,6 +305,7 @@ export type AppText = {
       minio: string;
       proxy: string;
       redis: string;
+      registry: string;
     };
     sourceLabel: string;
     sourceMissing: string;

@@ -459,6 +459,7 @@ export const en: AppText = {
       minio: "MinIO",
       proxy: "Nginx Proxy Manager",
       redis: "Redis",
+      registry: "Registry",
     },
     sourceLabel: "JSON file",
     sourceMissing: "will be created",

@@ -10,6 +10,7 @@ import {
   useMinioStatus,
   useNginxStatus,
   useRedisStatus,
+  useRegistryStatus,
   useServiceLinks,
   useServiceStatuses,
   type CommandAction,
@@ -58,19 +59,28 @@ export function useInfrastructureController() {
   const activeView = activeConfig.id;
   const redisView = activeView === "redis";
   const minioView = activeView === "minio";
-  const serviceModuleView = !["home", "mariadb", "minio", "proxy", "redis", "settings"].includes(activeView);
+  const registryView = activeView === "registry";
+  const serviceModuleView = !["home", "mariadb", "minio", "proxy", "redis", "registry", "settings"].includes(activeView);
   const activeShells =
     activeView === "mariadb"
         ? [...(commandPageRegistry.mariadb.shells || []), ...(commandPageRegistry.postgres.shells || [])]
         : commandPageRegistry[activeView as CommandPageId]?.shells || [];
   const containerStates = useContainerStates({
-    enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings" && activeView !== "proxy" && !redisView && !minioView,
+    enabled:
+      activeView !== "home" &&
+      activeView !== "mariadb" &&
+      activeView !== "settings" &&
+      activeView !== "proxy" &&
+      !redisView &&
+      !minioView &&
+      !registryView,
     names: activeShells.map((shell) => shell.container),
   });
   const serviceLinks = useServiceLinks(serviceModuleView);
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const redisStatus = useRedisStatus(redisView);
   const minioStatus = useMinioStatus(minioView);
+  const registryStatus = useRegistryStatus(registryView);
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const settings = useSettings();
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
@@ -86,7 +96,13 @@ export function useInfrastructureController() {
     terminalOpen,
     toggleTerminal,
   } = useTerminalOperations({
-    containerStatesRefresh: redisView ? redisStatus.refresh : minioView ? minioStatus.refresh : containerStates.refresh,
+    containerStatesRefresh: redisView
+      ? redisStatus.refresh
+      : minioView
+        ? minioStatus.refresh
+        : registryView
+          ? registryStatus.refresh
+          : containerStates.refresh,
     serviceLinksRefresh: serviceModuleView ? serviceLinks.refresh : undefined,
     serviceStatusesRefresh: serviceStatuses.refresh,
     text,
@@ -213,6 +229,7 @@ export function useInfrastructureController() {
     postgresInstances,
     proxyForm,
     redisStatus,
+    registryStatus,
     runCommand,
     runHost,
     ...databaseOperations,
@@ -244,6 +261,8 @@ function shellPreview(container: string) {
   if (container === "redis-container") return "make redis-shell";
   if (container === "redisinsight-container") return "make redisinsight-shell";
   if (container === "minio-container") return "make minio-shell";
+  if (container === "registry-container") return "make registry-shell";
+  if (container === "registry-ui-container") return "make registry-ui-shell";
   if (container.startsWith("mariadb-")) return `make mariadb-instance-shell CONTAINER=${container}`;
   if (container.startsWith("postgres-")) return `make postgres-instance-shell CONTAINER=${container}`;
   return `make compose-shell CONTAINER=${container}`;

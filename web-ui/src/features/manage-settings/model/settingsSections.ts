@@ -86,4 +86,24 @@ export const settingsSections: SettingsSectionDefinition[] = [
       },
     ],
   },
+  {
+    id: "registry",
+    fields: [
+      {
+        autocomplete: "username",
+        env: "REGISTRY_USER",
+        group: "registry",
+        label: "Registry user",
+        name: "registryUser",
+      },
+      {
+        autocomplete: "current-password",
+        env: "REGISTRY_PASSWORD",
+        group: "registry",
+        label: "Registry password",
+        name: "registryPassword",
+        type: "password",
+      },
+    ],
+  },
 ];
