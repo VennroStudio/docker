@@ -15,7 +15,7 @@ import {
   resolveDatabaseName,
   resolveDumpFilePath,
   resolveMariaDbTarget,
-} from "./mariadb-common.mjs";
+} from "./common.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const env = await getRuntimeEnv();

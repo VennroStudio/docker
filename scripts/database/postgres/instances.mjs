@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const cwd = process.cwd();
-const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
+const instancesPath = path.join(cwd, "docker/postgres/instances.json");
 const composeDir = "docker/compose";
-const phpmyadminPath = "docker/phpmyadmin";
-const defaultStartPort = 3307;
+const defaultStartPort = 5433;
 const runActions = new Set([
   "clean",
   "down",
@@ -28,32 +26,25 @@ async function main() {
   const [command, ...args] = process.argv.slice(2);
   const options = parseArgs(args);
 
-  if (command === "add") return await addInstance(options);
-  if (command === "generate") return await generate();
+  if (command === "add") return addInstance(options);
   if (command === "list") return list();
   if (command === "resolve") return resolveInstance(options);
   if (command === "run") return await runInstance(options);
 
   throw new Error(
-    "Usage: node scripts/mariadb-instances.mjs add|generate|list|resolve|run",
+    "Usage: node scripts/database/postgres/instances.mjs add|list|resolve|run",
   );
 }
 
-async function addInstance(options) {
+function addInstance(options) {
   const version = required(options.version, "VERSION is required");
-  const authMode = options["auth-mode"] || "config";
   const user = required(options.user, "USER is required");
   const password = required(options.password, "PASSWORD is required");
-  const rootPassword = required(
-    options["root-password"],
-    "ROOT_PASSWORD is required",
-  );
+  const database = required(options.database, "DATABASE is required");
 
-  assert(/^\d+(\.\d+){1,2}$/.test(version), "Invalid VERSION");
-  assert(
-    authMode === "config" || authMode === "cookie",
-    "AUTH_MODE must be config or cookie",
-  );
+  assert(/^\d+(\.\d+)?$/.test(version), "Invalid VERSION");
+  assert(/^[a-zA-Z0-9_]+$/.test(user), "Invalid USER");
+  assert(/^[a-zA-Z0-9_]+$/.test(database), "Invalid DATABASE");
 
   const instances = readInstances();
   const name = options.name || versionName(version);
@@ -76,14 +67,13 @@ async function addInstance(options) {
   const instance = {
     name,
     version,
-    container: `mariadb-${name}-container`,
+    container: `postgres-${name}-container`,
     composeFile: composeFileFor(name),
-    volume: `mariadb-${name}-data`,
+    volume: `postgres-${name}-data`,
     hostPort,
     user,
     password,
-    rootPassword,
-    authMode,
+    database,
     existing: false,
   };
 
@@ -91,21 +81,8 @@ async function addInstance(options) {
   writeInstances(instances);
   mkdirSync(path.join(cwd, composeDir), { recursive: true });
   writeFileSync(path.join(cwd, instance.composeFile), composeFor(instance));
-  await generate();
   console.log(
-    `Added MariaDB ${version}: ${instance.composeFile} on port ${hostPort}`,
-  );
-}
-
-async function generate() {
-  const instances = readInstances();
-
-  await mkdir(path.join(cwd, phpmyadminPath), { recursive: true });
-  const config = phpmyadminConfigFor(instances);
-  writeFileSync(path.join(cwd, phpmyadminPath, "config.inc.php"), config);
-
-  console.log(
-    `Generated phpMyAdmin config for ${instances.length} MariaDB instance(s)`,
+    `Added Postgres ${version}: ${instance.composeFile} on port ${hostPort}`,
   );
 }
 
@@ -124,7 +101,7 @@ function resolveInstance(options) {
 
   assert(
     Object.hasOwn(instance, field),
-    `Unknown MariaDB instance field: ${field}`,
+    `Unknown Postgres instance field: ${field}`,
   );
   console.log(instance[field]);
 }
@@ -145,9 +122,9 @@ async function runInstance(options) {
   if (action === "clean") {
     return await run("sh", [
       "-lc",
-      `docker compose -f ${quoteShell(instance.composeFile)} down && docker rmi mariadb:${quoteShell(
+      `docker compose -f ${quoteShell(instance.composeFile)} down && docker rmi postgres:${quoteShell(
         instance.version,
-      )} 2>/dev/null || true`,
+      )}-alpine 2>/dev/null || true`,
     ]);
   }
 
@@ -161,25 +138,27 @@ async function runInstance(options) {
 
 function findTargetInstance(options) {
   const instances = readInstances();
-  const name = options.name || process.env.MARIADB_NAME || process.env.NAME;
+  const name = options.name || process.env.POSTGRES_NAME || process.env.NAME;
   const container =
-    options.container || process.env.MARIADB_CONTAINER || process.env.CONTAINER;
+    options.container ||
+    process.env.POSTGRES_CONTAINER ||
+    process.env.CONTAINER;
 
   if (name) {
     const instance = instances.find((item) => item.name === name);
-    assert(instance, `MariaDB instance ${name} is not configured`);
+    assert(instance, `Postgres instance ${name} is not configured`);
     return instance;
   }
 
   if (container) {
     const instance = instances.find((item) => item.container === container);
-    assert(instance, `MariaDB container ${container} is not configured`);
+    assert(instance, `Postgres container ${container} is not configured`);
     return instance;
   }
 
   assert(
     instances.length === 1,
-    "MariaDB instance is required. Pass NAME=instance-name or CONTAINER=container-name",
+    "Postgres instance is required. Pass NAME=instance-name or CONTAINER=container-name",
   );
 
   return instances[0];
@@ -187,7 +166,6 @@ function findTargetInstance(options) {
 
 function readInstances() {
   ensureInstancesFile();
-  if (!existsSync(instancesPath)) return [];
   const instances = JSON.parse(readFileSync(instancesPath, "utf8"));
   const normalized = instances.map((instance) => ({
     ...instance,
@@ -216,20 +194,18 @@ function composeFor(instance) {
   return `name: vennro
 
 services:
-  mariadb-${instance.name}:
-    image: mariadb:${instance.version}
+  postgres-${instance.name}:
+    image: postgres:${instance.version}-alpine
     container_name: ${instance.container}
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${quoteYaml(instance.rootPassword)}
-      MYSQL_ROOT_HOST: "%"
-      MYSQL_USER: ${quoteYaml(instance.user)}
-      MYSQL_PASSWORD: ${quoteYaml(instance.password)}
+      POSTGRES_USER: ${quoteYaml(instance.user)}
+      POSTGRES_PASSWORD: ${quoteYaml(instance.password)}
+      POSTGRES_DB: ${quoteYaml(instance.database)}
     ports:
-      - "${instance.hostPort}:3306"
+      - "${instance.hostPort}:5432"
     volumes:
-      - ${instance.volume}:/var/lib/mysql
-      - ../mariadb/config.cnf:/etc/mysql/conf.d/config.cnf
+      - ${instance.volume}:/var/lib/postgresql/data
     networks:
       - proxy
 
@@ -242,35 +218,11 @@ networks:
 `;
 }
 
-function phpmyadminConfigFor(instances) {
-  return `<?php
-$i = 0;
-
-${instances.map((instance) => phpmyadminServerFor(instance)).join("\n")}`;
-}
-
-function phpmyadminServerFor(instance) {
-  const authMode = instance.authMode;
-  const rows = [
-    "$i++;",
-    `$cfg['Servers'][$i]['verbose'] = ${quotePhp(`MariaDB ${instance.version}`)};`,
-    `$cfg['Servers'][$i]['host'] = ${quotePhp(instance.container)};`,
-    "$cfg['Servers'][$i]['port'] = '3306';",
-    `$cfg['Servers'][$i]['auth_type'] = ${quotePhp(authMode)};`,
-  ];
-
-  if (authMode === "config") {
-    rows.push(`$cfg['Servers'][$i]['user'] = ${quotePhp(instance.user)};`);
-    rows.push(
-      `$cfg['Servers'][$i]['password'] = ${quotePhp(instance.password)};`,
-    );
-  }
-
-  return `${rows.join("\n")}\n`;
-}
-
 function findFreePort(instances) {
-  const used = new Set(instances.map((instance) => Number(instance.hostPort)));
+  const used = new Set([
+    5432,
+    ...instances.map((instance) => Number(instance.hostPort)),
+  ]);
   let port = defaultStartPort;
   while (used.has(port)) port += 1;
   return port;
@@ -281,7 +233,7 @@ function versionName(version) {
 }
 
 function composeFileFor(name) {
-  return `${composeDir}/docker-compose-mariadb-${name}.yml`;
+  return `${composeDir}/docker-compose-postgres-${name}.yml`;
 }
 
 function parseArgs(args) {
@@ -318,10 +270,6 @@ function run(command, args) {
         );
     });
   });
-}
-
-function quotePhp(value) {
-  return `'${String(value).replaceAll("\\", "\\\\").replaceAll("'", "\\'")}'`;
 }
 
 function quoteShell(value) {

@@ -6,8 +6,8 @@ import { readPostgresInstances } from "../postgres-instances.mjs";
 import { getRuntimeEnv } from "../settings-store.mjs";
 
 const engineScripts = {
-  mariadb: "./scripts/mariadb-databases.mjs",
-  postgres: "./scripts/postgres-databases.mjs",
+  mariadb: "./scripts/database/mariadb/databases.mjs",
+  postgres: "./scripts/database/postgres/databases.mjs",
 };
 
 export async function databases(req, res) {

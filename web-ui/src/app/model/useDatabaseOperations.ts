@@ -55,7 +55,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.create,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => streamMariaDbInstanceCreate(form, handlers),
-      preview: `node ./scripts/mariadb-instances.mjs add --version ${form.version}`,
+      preview: `node ./scripts/database/mariadb/instances.mjs add --version ${form.version}`,
     });
   };
 
@@ -144,7 +144,7 @@ export function useDatabaseOperations({
       label: text.postgresInstances.create,
       onSettled: refreshPostgresInstances,
       open: (handlers) => streamPostgresInstanceCreate(form, handlers),
-      preview: `node ./scripts/postgres-instances.mjs add --version ${form.version}`,
+      preview: `node ./scripts/database/postgres/instances.mjs add --version ${form.version}`,
     });
   };
 

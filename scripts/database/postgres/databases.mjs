@@ -10,7 +10,7 @@ import {
   parseArgs,
   resolveDatabaseName,
   resolvePostgresTarget,
-} from "./postgres-common.mjs";
+} from "./common.mjs";
 
 const systemDatabases = new Set(["postgres", "template0", "template1"]);
 const maintenanceDatabase = "postgres";
@@ -22,7 +22,7 @@ const env = await getRuntimeEnv();
 try {
   assert(
     ["create", "drop", "list"].includes(command),
-    "Usage: node scripts/postgres-databases.mjs list|create|drop",
+    "Usage: node scripts/database/postgres/databases.mjs list|create|drop",
   );
 
   const target = await resolvePostgresTarget(args, env);

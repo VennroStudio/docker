@@ -23,6 +23,10 @@ help: ## Показать список команд
 ##@ Project
 init: ## Создать settings.json из дефолтного шаблона
 	@$(NODE_RUN) ./scripts/config/settings.mjs init
+	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres dumps/mariadb dumps/postgres
+	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
+	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
 
 settings-show: ## Показать текущий settings.json
 	@$(NODE_RUN) ./scripts/config/settings.mjs show
@@ -84,6 +88,9 @@ compose-start: ## Запустить существующий compose service, �
 compose-stop: ## Остановить compose service, передать NAME=npm
 	$(call compose) stop
 
+compose-restart: ## Перезапустить compose service, передать NAME=npm
+	$(call compose) restart
+
 compose-down: ## Удалить compose service, передать NAME=npm
 	$(call compose) down
 
@@ -144,10 +151,207 @@ npm-logs: ## Логи NPM
 npm-shell: ## Shell внутри контейнера NPM
 	$(MAKE) compose-shell NAME=npm
 
+##@ MariaDB
+mariadb-shell: ## Shell MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action shell
+
+mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DATABASE=wp DUMP_FILE=dumps/mariadb/app.sql, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/mariadb/import.mjs
+
+mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DATABASE=wp DUMP_FILE=dumps/mariadb/app.sql.gz, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/mariadb/export.mjs
+
+mariadb-db-list: ## Показать базы MariaDB, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/mariadb/databases.mjs list
+
+mariadb-db-create: ## Создать базу MariaDB, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/mariadb/databases.mjs create --database "$(DATABASE)"
+
+mariadb-db-drop: ## Удалить базу MariaDB, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/mariadb/databases.mjs drop --database "$(DATABASE)"
+
+mariadb-dump-upload: ## Загрузить дамп на сервер, передать FILE=dumps/mariadb/app.sql TARGET_PATH=/remote/path/
+	@file="$${FILE:-$${DUMP_FILE}}"; \
+	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
+	if [ -z "$(TARGET_PATH)" ]; then echo "TARGET_PATH is required"; exit 1; fi; \
+	scp "$$file" "$(SSH):$(TARGET_PATH)"
+
+##@ MariaDB instances
+mariadb-instance-add: ## Создать MariaDB instance, передать VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWORD=root-secret, опционально PORT=3307 AUTH_MODE=config|cookie
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs add \
+		--version "$(VERSION)" \
+		--user "$(DB_USER)" \
+		--password "$(PASSWORD)" \
+		--root-password "$(ROOT_PASSWORD)" \
+		$(if $(PORT),--port "$(PORT)",) \
+		$(if $(AUTH_MODE),--auth-mode "$(AUTH_MODE)",)
+
+mariadb-instance-list: ## Показать MariaDB instances
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs list
+
+mariadb-instance-generate: ## Перегенерировать phpMyAdmin servers config
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
+
+mariadb-instance-up: ## Запустить MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action up
+
+mariadb-instance-start: ## Запустить существующий MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action start
+
+mariadb-instance-stop: ## Остановить MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action stop
+
+mariadb-instance-down: ## Удалить контейнер MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action down
+
+mariadb-instance-clean: ## Удалить контейнер и образ MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action clean
+
+mariadb-instance-logs: ## Логи MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action logs
+
+mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action shell
+
+##@ phpMyAdmin
+phpmyadmin-up: ## Запустить контейнер phpMyAdmin
+	$(MAKE) compose-up NAME=phpmyadmin
+
+phpmyadmin-pull: ## Скачать/обновить образ phpMyAdmin
+	$(MAKE) compose-pull NAME=phpmyadmin
+
+phpmyadmin-start: ## Запустить существующий контейнер phpMyAdmin
+	$(MAKE) compose-start NAME=phpmyadmin
+
+phpmyadmin-stop: ## Остановить контейнер phpMyAdmin
+	$(MAKE) compose-stop NAME=phpmyadmin
+
+phpmyadmin-down: ## Удалить контейнер phpMyAdmin
+	$(MAKE) compose-down NAME=phpmyadmin
+
+phpmyadmin-clean: ## Удалить контейнер и образ phpMyAdmin
+	$(MAKE) compose-down NAME=phpmyadmin
+	docker rmi phpmyadmin/phpmyadmin 2>/dev/null || true
+
+phpmyadmin-logs: ## Логи phpMyAdmin
+	$(MAKE) compose-logs NAME=phpmyadmin
+
+phpmyadmin-config-generate: ## Перегенерировать список серверов phpMyAdmin
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
+
+phpmyadmin-reload: ## Перезапустить phpMyAdmin после изменения списка серверов
+	$(MAKE) compose-restart NAME=phpmyadmin
+
+##@ Postgres
+postgres-up: ## Запустить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action up
+
+postgres-start: ## Запустить существующий Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action start
+
+postgres-stop: ## Остановить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action stop
+
+postgres-down: ## Удалить контейнер Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action down
+
+postgres-clean: ## Удалить контейнер и образ Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action clean
+
+postgres-logs: ## Логи Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action logs
+
+postgres-shell: ## Shell Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action shell
+
+postgres-import: ## Импорт .sql/.sql.gz/.dump дампа, передать POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.sql, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/postgres/import.mjs
+
+postgres-export: ## Экспорт .sql/.sql.gz/.dump дампа, передать POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.dump, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/postgres/export.mjs
+
+postgres-db-list: ## Показать базы Postgres, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/postgres/databases.mjs list
+
+postgres-db-create: ## Создать базу Postgres, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/postgres/databases.mjs create --database "$(DATABASE)"
+
+postgres-db-drop: ## Удалить базу Postgres, передать DATABASE=app, опционально NAME=... или CONTAINER=...
+	@$(NODE_RUN) ./scripts/database/postgres/databases.mjs drop --database "$(DATABASE)"
+
+postgres-dump-upload: ## Загрузить Postgres dump на сервер, передать FILE=dumps/postgres/app.dump, опционально TARGET_PATH=/remote/path/
+	@file="$${FILE:-$${DUMP_FILE:-$${POSTGRES_HOME_DUMP_PATH}$${POSTGRES_DUMP_NAME}}}"; \
+	if [ -z "$$file" ]; then echo "FILE or DUMP_FILE is required"; exit 1; fi; \
+	target_path="$${TARGET_PATH:-$${POSTGRES_SERVER_DUMP_PATH}}"; \
+	if [ -z "$$target_path" ]; then echo "TARGET_PATH or POSTGRES_SERVER_DUMP_PATH is required"; exit 1; fi; \
+	scp "$$file" "$(SSH):$$target_path"
+
+##@ Postgres instances
+postgres-instance-add: ## Создать Postgres instance, передать VERSION=17 DB_USER=admin PASSWORD=secret DATABASE=app
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs add \
+		--version "$(VERSION)" \
+		--user "$(DB_USER)" \
+		--password "$(PASSWORD)" \
+		--database "$(DATABASE)" \
+		$(if $(PORT),--port "$(PORT)",)
+
+postgres-instance-list: ## Показать Postgres instances
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs list
+
+postgres-instance-up: ## Запустить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action up
+
+postgres-instance-start: ## Запустить существующий Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action start
+
+postgres-instance-stop: ## Остановить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action stop
+
+postgres-instance-down: ## Удалить контейнер Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action down
+
+postgres-instance-clean: ## Удалить контейнер и образ Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action clean
+
+postgres-instance-logs: ## Логи Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action logs
+
+postgres-instance-shell: ## Shell Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action shell
+
+##@ pgAdmin
+pgadmin-up: ## Запустить контейнер pgAdmin
+	$(MAKE) compose-up NAME=pgadmin
+
+pgadmin-pull: ## Скачать/обновить образ pgAdmin
+	$(MAKE) compose-pull NAME=pgadmin
+
+pgadmin-start: ## Запустить существующий контейнер pgAdmin
+	$(MAKE) compose-start NAME=pgadmin
+
+pgadmin-stop: ## Остановить контейнер pgAdmin
+	$(MAKE) compose-stop NAME=pgadmin
+
+pgadmin-down: ## Удалить контейнер pgAdmin
+	$(MAKE) compose-down NAME=pgadmin
+
+pgadmin-clean: ## Удалить контейнер и образ pgAdmin
+	$(MAKE) compose-down NAME=pgadmin
+	docker rmi dpage/pgadmin4:latest 2>/dev/null || true
+
+pgadmin-logs: ## Логи pgAdmin
+	$(MAKE) compose-logs NAME=pgadmin
+
 .PHONY: help init settings-show settings-set
 .PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
-.PHONY: compose-up compose-pull compose-start compose-stop compose-down compose-logs compose-shell
+.PHONY: compose-up compose-pull compose-start compose-stop compose-restart compose-down compose-logs compose-shell
 .PHONY: host-add host-remove
 .PHONY: app-proxy app-proxy-remove
 .PHONY: npm-status npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs npm-shell
+.PHONY: mariadb-shell mariadb-import mariadb-export mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
+.PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
+.PHONY: phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs phpmyadmin-config-generate phpmyadmin-reload
+.PHONY: postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload
+.PHONY: postgres-instance-add postgres-instance-list postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
+.PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs

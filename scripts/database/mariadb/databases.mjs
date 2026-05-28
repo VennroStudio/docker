@@ -9,7 +9,7 @@ import {
   parseArgs,
   resolveDatabaseName,
   resolveMariaDbTarget,
-} from "./mariadb-common.mjs";
+} from "./common.mjs";
 
 const systemDatabases = new Set([
   "information_schema",
@@ -25,7 +25,7 @@ const env = await getRuntimeEnv();
 try {
   assert(
     ["create", "drop", "list"].includes(command),
-    "Usage: node scripts/mariadb-databases.mjs list|create|drop",
+    "Usage: node scripts/database/mariadb/databases.mjs list|create|drop",
   );
 
   const { container, password } = await resolveMariaDbTarget(args, env);

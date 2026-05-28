@@ -34,7 +34,7 @@ export async function streamRoute(req, res) {
     if (port) validatePort(port);
 
     const args = [
-      "./scripts/mariadb-instances.mjs",
+      "./scripts/database/mariadb/instances.mjs",
       "add",
       "--version",
       version,
@@ -131,7 +131,7 @@ export async function streamRoute(req, res) {
       res,
       "node",
       [
-        "./scripts/postgres-instances.mjs",
+        "./scripts/database/postgres/instances.mjs",
         "add",
         "--version",
         version,
