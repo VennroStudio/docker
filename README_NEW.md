@@ -1,11 +1,14 @@
 # Infrastructure by Vennro Studio
+
 ## Первый запуск
+
+Создать локальный `config/settings.json` из дефолтного шаблона:
 
 ```sh
 make init
 ```
 
-`make init` только создает `config/settings.json` из `config/default-settings.json`, если файла еще нет. Контейнеры не запускаются.
+Команда не запускает контейнеры. Если `config/settings.json` уже существует, файл не перезаписывается.
 
 Проверить настройки:
 
@@ -13,17 +16,18 @@ make init
 make settings-show
 ```
 
-Изменить настройку:
+Изменить настройки Nginx Proxy Manager:
 
 ```sh
 make settings-set KEY=proxy.npmEmail VALUE=user@example.com
 make settings-set KEY=proxy.npmPassword VALUE=secret
 ```
 
-# Флоу работы с проектом
-## Пример на установке Nginx Proxy Manager
+## Рабочий флоу
 
-Создать Docker network:
+### Пример: запуск Nginx Proxy Manager
+
+Создать общую Docker network:
 
 ```sh
 make proxy-network-ensure
@@ -41,7 +45,7 @@ make npm-up
 make npm-status
 ```
 
-Ответ:
+Пример ответа:
 
 ```json
 {
@@ -60,7 +64,7 @@ make settings-set KEY=proxy.npmEmail VALUE=user@example.com
 make settings-set KEY=proxy.npmPassword VALUE=secret
 ```
 
-## Локальный домен для NPM
+### Локальный домен для NPM
 
 Добавить домен в hosts:
 
@@ -74,13 +78,13 @@ make host-add DOMAIN=npm.local
 make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81
 ```
 
-Если нужен SSL:
+Создать proxy host с SSL:
 
 ```sh
 make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81 SSL=1
 ```
 
-Когда `TARGET=nginx-container`, скрипт обновит `config/settings.json`:
+Когда `TARGET=nginx-container`, скрипт обновляет `config/settings.json`:
 
 ```json
 {
@@ -90,7 +94,9 @@ make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81 SSL=1
 }
 ```
 
-Проверить, что URL изменился:
+С `SSL=1` значение будет `https://npm.local`.
+
+Проверить актуальный URL:
 
 ```sh
 make npm-status
@@ -123,86 +129,131 @@ make host-remove DOMAIN=npm.local
 ```sh
 make npm-status
 ```
-# Общая сводка команд для модулей
 
-## Docker Network
-Создать общую Docker network `proxy`, если ее еще нет.
+## Сводка команд
+
+### Project
+
+Показать все команды:
+
+```sh
+make help
+```
+
+Создать `config/settings.json` из `config/default-settings.json`:
+
+```sh
+make init
+```
+
+Показать текущий `config/settings.json`:
+
+```sh
+make settings-show
+```
+
+Изменить значение в `config/settings.json`:
+
+```sh
+make settings-set KEY=proxy.npmEmail VALUE=user@example.com
+```
+
+### Docker Network
+
+Создать общую Docker network `proxy`, если ее еще нет:
+
 ```sh
 make proxy-network-ensure
 ```
 
-Создать общую Docker network `proxy`.
+Создать общую Docker network `proxy`:
+
 ```sh
 make add-proxy
 ```
 
-Удалить общую Docker network `proxy`.
+Удалить общую Docker network `proxy`:
+
 ```sh
 make delete-proxy
 ```
 
-## NPM
-Добавить локальный домен в hosts.
+### Nginx Proxy Manager
+
+Добавить локальный домен в hosts:
+
 ```sh
 make host-add DOMAIN=npm.local
 ```
 
-Удалить локальный домен из hosts.
+Удалить локальный домен из hosts:
+
 ```sh
 make host-remove DOMAIN=npm.local
 ```
 
-Создать или обновить Proxy Host в NPM.
+Создать или обновить Proxy Host в NPM:
+
 ```sh
 make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81
 ```
 
-Создать или обновить Proxy Host в NPM с SSL.
+Создать или обновить Proxy Host в NPM с SSL:
+
 ```sh
 make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81 SSL=1
 ```
 
-Удалить Proxy Host и SSL из NPM.
+Удалить Proxy Host и SSL из NPM:
+
 ```sh
 make app-proxy-remove DOMAIN=npm.local
 ```
 
-Показать статус NPM: container, running, state, uptime, url.
+Показать статус NPM:
+
 ```sh
 make npm-status
 ```
 
-Скачать или обновить Docker image NPM.
+Скачать или обновить Docker image NPM:
+
 ```sh
 make npm-pull
 ```
 
-Создать и запустить контейнер NPM через `docker-compose-npm.yml`.
+Создать и запустить контейнер NPM через `docker-compose-npm.yml`:
+
 ```sh
 make npm-up
 ```
 
-Запустить уже созданный контейнер NPM.
+Запустить уже созданный контейнер NPM:
+
 ```sh
 make npm-start
 ```
 
-Остановить контейнер NPM.
+Остановить контейнер NPM:
+
 ```sh
 make npm-stop
 ```
 
-Удалить контейнер NPM, но не удалять image.
+Удалить контейнер NPM, но не удалять image:
+
 ```sh
 make npm-down
 ```
 
-Удалить контейнер NPM и Docker image `jc21/nginx-proxy-manager:latest`.
+Удалить контейнер NPM и Docker image `jc21/nginx-proxy-manager:latest`:
+
 ```sh
 make npm-clean
 ```
 
-Показать логи NPM.
+Показать логи NPM:
+
 ```sh
 make npm-logs
 ```
