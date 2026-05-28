@@ -1,4 +1,4 @@
-# Infrastructure Console Flow
+# Infrastructure by Vennro Studio
 ## Первый запуск
 
 ```sh
@@ -20,7 +20,8 @@ make settings-set KEY=proxy.npmEmail VALUE=user@example.com
 make settings-set KEY=proxy.npmPassword VALUE=secret
 ```
 
-## Nginx Proxy Manager
+# Флоу работы с проектом
+## Пример на установке Nginx Proxy Manager
 
 Создать Docker network:
 
@@ -122,32 +123,85 @@ make host-remove DOMAIN=npm.local
 ```sh
 make npm-status
 ```
+# Общая сводка команд для модулей
+
+## Docker Network
+Создать общую Docker network `proxy`, если ее еще нет.
+```sh
+make proxy-network-ensure
+```
+
+Создать общую Docker network `proxy`.
+```sh
+make add-proxy
+```
+
+Удалить общую Docker network `proxy`.
+```sh
+make delete-proxy
+```
 
 ## NPM
+Добавить локальный домен в hosts.
+```sh
+make host-add DOMAIN=npm.local
+```
+
+Удалить локальный домен из hosts.
+```sh
+make host-remove DOMAIN=npm.local
+```
+
+Создать или обновить Proxy Host в NPM.
+```sh
+make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81
+```
+
+Создать или обновить Proxy Host в NPM с SSL.
+```sh
+make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81 SSL=1
+```
+
+Удалить Proxy Host и SSL из NPM.
+```sh
+make app-proxy-remove DOMAIN=npm.local
+```
+
+Показать статус NPM: container, running, state, uptime, url.
+```sh
+make npm-status
+```
+
 Скачать или обновить Docker image NPM.
 ```sh
 make npm-pull
 ```
+
 Создать и запустить контейнер NPM через `docker-compose-npm.yml`.
 ```sh
 make npm-up
 ```
+
 Запустить уже созданный контейнер NPM.
 ```sh
 make npm-start
 ```
+
 Остановить контейнер NPM.
 ```sh
 make npm-stop
 ```
+
 Удалить контейнер NPM, но не удалять image.
 ```sh
 make npm-down
 ```
+
 Удалить контейнер NPM и Docker image `jc21/nginx-proxy-manager:latest`.
 ```sh
 make npm-clean
 ```
+
 Показать логи NPM.
 ```sh
 make npm-logs
