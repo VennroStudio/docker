@@ -67,6 +67,10 @@ compose-down: ## Удалить compose service, передать NAME=npm
 compose-logs: ## Логи compose service, передать NAME=npm
 	$(call compose) logs -f
 
+compose-shell: ## Shell внутри compose service, передать NAME=npm
+	@service="$$( $(call compose) config --services | head -n 1 )"; \
+	$(call compose) exec "$$service" sh
+
 ##@ Hosts
 host-add: ## Добавить локальный домен в /etc/hosts, передать DOMAIN=site.local
 	@./scripts/nginx/hosts.sh add "$(DOMAIN)"
@@ -116,9 +120,12 @@ npm-clean: ## Удалить контейнер и образ NPM
 npm-logs: ## Логи NPM
 	$(MAKE) compose-logs NAME=npm
 
+npm-shell: ## Shell внутри контейнера NPM
+	$(MAKE) compose-shell NAME=npm
+
 .PHONY: help init settings-show settings-set
 .PHONY: proxy-network-ensure add-proxy delete-proxy
-.PHONY: compose-up compose-pull compose-start compose-stop compose-down compose-logs
+.PHONY: compose-up compose-pull compose-start compose-stop compose-down compose-logs compose-shell
 .PHONY: host-add host-remove
 .PHONY: app-proxy app-proxy-remove
-.PHONY: npm-status npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
+.PHONY: npm-status npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs npm-shell

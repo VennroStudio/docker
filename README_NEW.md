@@ -257,3 +257,9 @@ make npm-clean
 ```sh
 make npm-logs
 ```
+
+Зайти в shell контейнера NPM:
+
+```sh
+make npm-shell
+```
