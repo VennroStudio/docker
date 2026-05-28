@@ -1,4 +1,5 @@
 import { ExternalLink } from "lucide-react";
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { ContainerStateBadge, InfoLine, StatusDot } from "@/entities/infrastructure";
 import type { ContainerStateInfo } from "@/entities/infrastructure";
@@ -12,6 +13,7 @@ import { moduleActionIcon } from "./moduleActionIcon";
 type ServiceModuleAccordionProps = {
   activeOperationKey?: null | string;
   actions: CommandAction[];
+  children?: ReactNode;
   defaultOpen?: boolean;
   details?: Array<{ href?: string; label: string; value?: string }>;
   eyebrow: string;
@@ -30,6 +32,7 @@ type ServiceModuleAccordionProps = {
 export function ServiceModuleAccordion({
   activeOperationKey = null,
   actions,
+  children,
   defaultOpen = false,
   details = [],
   eyebrow,
@@ -95,15 +98,18 @@ export function ServiceModuleAccordion({
       }
       onOpenChange={setOpen}
     >
-      {visibleDetails.length > 0 || status?.status || status?.error ? (
-        <div className="grid gap-2 sm:grid-cols-2">
-          {visibleDetails.map((detail) => (
-            <InfoLine key={detail.label} href={detail.href} label={detail.label} value={detail.value || ""} />
-          ))}
-          {status?.status ? <InfoLine label={statusLabel} value={status.status} /> : null}
-          {status?.error ? <InfoLine label="Docker" value={status.error} /> : null}
-        </div>
-      ) : null}
+      <div className="grid gap-4">
+        {visibleDetails.length > 0 || status?.status || status?.error ? (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {visibleDetails.map((detail) => (
+              <InfoLine key={detail.label} href={detail.href} label={detail.label} value={detail.value || ""} />
+            ))}
+            {status?.status ? <InfoLine label={statusLabel} value={status.status} /> : null}
+            {status?.error ? <InfoLine label="Docker" value={status.error} /> : null}
+          </div>
+        ) : null}
+        {children}
+      </div>
     </AccordionPanel>
   );
 }

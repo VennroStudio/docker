@@ -114,6 +114,12 @@ function normalizeSettings(settings = {}) {
       pgaEmail: source.pgadmin?.pgaEmail || "admin@example.com",
       pgaPassword: source.pgadmin?.pgaPassword || "admin",
     },
+    redis: {
+      redisPassword: source.redis?.redisPassword || "redis",
+    },
+    redisinsight: {
+      riUrl: source.redisinsight?.riUrl || "http://localhost:5540",
+    },
   };
 }
 
@@ -136,6 +142,7 @@ function envEntries(settings) {
   return [
     ["PGADMIN_EMAIL", settings.pgadmin?.pgaEmail],
     ["PGADMIN_PASSWORD", settings.pgadmin?.pgaPassword],
+    ["REDIS_PASSWORD", settings.redis?.redisPassword],
   ];
 }
 

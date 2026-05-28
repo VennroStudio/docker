@@ -30,7 +30,13 @@ make settings-set KEY=pgadmin.pgaEmail VALUE=admin@example.com
 make settings-set KEY=pgadmin.pgaPassword VALUE=secret
 ```
 
-Сгенерировать `.env` для `docker-compose-pgadmin.yml`:
+Изменить пароль Redis:
+
+```sh
+make settings-set KEY=redis.redisPassword VALUE=secret
+```
+
+Сгенерировать `.env` для compose-файлов, которым нужны переменные окружения:
 
 ```sh
 make settings-env
@@ -319,6 +325,74 @@ make postgres-instance-stop NAME=17
 make postgres-instance-down NAME=17
 ```
 
+### Пример: Redis и RedisInsight
+
+Задать пароль Redis в settings:
+
+```sh
+make settings-set KEY=redis.redisPassword VALUE=secret
+```
+
+Сгенерировать `.env`:
+
+```sh
+make settings-env
+```
+
+Запустить Redis:
+
+```sh
+make redis-up
+```
+
+Проверить статус Redis:
+
+```sh
+make redis-status
+```
+
+Запустить RedisInsight:
+
+```sh
+make redisinsight-up
+```
+
+Проверить статус RedisInsight. URL RedisInsight возвращается в этом же ответе:
+
+```sh
+make redisinsight-status
+```
+
+Если нужен локальный домен для RedisInsight:
+
+```sh
+make host-add DOMAIN=redis.local
+make app-proxy DOMAIN=redis.local TARGET=redisinsight-container PORT=5540
+```
+
+После создания proxy host скрипт обновит `config/settings.json`:
+
+```json
+{
+  "redisinsight": {
+    "riUrl": "http://redis.local"
+  }
+}
+```
+
+При удалении proxy host значение вернется на `http://localhost:5540`:
+
+```sh
+make app-proxy-remove DOMAIN=redis.local
+```
+
+Остановить Redis и RedisInsight:
+
+```sh
+make redis-stop
+make redisinsight-stop
+```
+
 ## Сводка команд
 
 ### Project
@@ -347,7 +421,7 @@ make settings-show
 make settings-set KEY=proxy.npmEmail VALUE=user@example.com
 ```
 
-Сгенерировать `.env` для `docker-compose-pgadmin.yml`:
+Сгенерировать `.env` из `config/settings.json`:
 
 ```sh
 make settings-env
@@ -885,4 +959,116 @@ make pgadmin-logs
 
 ```sh
 make pgadmin-shell
+```
+
+### Redis
+
+Показать статус Redis:
+
+```sh
+make redis-status
+```
+
+Скачать или обновить Docker image Redis:
+
+```sh
+make redis-pull
+```
+
+Создать и запустить контейнер Redis:
+
+```sh
+make redis-up
+```
+
+Запустить уже созданный контейнер Redis:
+
+```sh
+make redis-start
+```
+
+Остановить контейнер Redis:
+
+```sh
+make redis-stop
+```
+
+Удалить контейнер Redis:
+
+```sh
+make redis-down
+```
+
+Удалить контейнер Redis и Docker image `redis:7-alpine`:
+
+```sh
+make redis-clean
+```
+
+Показать логи Redis:
+
+```sh
+make redis-logs
+```
+
+Зайти в shell контейнера Redis:
+
+```sh
+make redis-shell
+```
+
+### RedisInsight
+
+Показать статус RedisInsight и URL:
+
+```sh
+make redisinsight-status
+```
+
+Скачать или обновить Docker image RedisInsight:
+
+```sh
+make redisinsight-pull
+```
+
+Создать и запустить контейнер RedisInsight:
+
+```sh
+make redisinsight-up
+```
+
+Запустить уже созданный контейнер RedisInsight:
+
+```sh
+make redisinsight-start
+```
+
+Остановить контейнер RedisInsight:
+
+```sh
+make redisinsight-stop
+```
+
+Удалить контейнер RedisInsight:
+
+```sh
+make redisinsight-down
+```
+
+Удалить контейнер RedisInsight и Docker image `redis/redisinsight:latest`:
+
+```sh
+make redisinsight-clean
+```
+
+Показать логи RedisInsight:
+
+```sh
+make redisinsight-logs
+```
+
+Зайти в shell контейнера RedisInsight:
+
+```sh
+make redisinsight-shell
 ```

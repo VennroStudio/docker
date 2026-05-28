@@ -28,6 +28,11 @@ const publicTargets = {
     key: "pgaUrl",
     name: "pgadmin.pgaUrl",
   },
+  "redisinsight-container": {
+    group: "redisinsight",
+    key: "riUrl",
+    name: "redisinsight.riUrl",
+  },
 };
 const config = {
   delete: deleting,

@@ -8,15 +8,28 @@ import {
   type CommandAction,
   type CommandPageId,
   type ContainerStateInfo,
+  type RedisStatusResponse,
   type ServiceLink,
   type ShellAction,
   type ViewId,
 } from "@/entities/infrastructure";
 import type { ServiceModuleDescriptor } from "./types";
+import type { ServiceModuleConfigSection } from "./types";
+
+const redisConfigFields = [
+  {
+    autocomplete: "current-password",
+    group: "redis",
+    label: "Redis password",
+    name: "redisPassword",
+    type: "password",
+  },
+] satisfies ServiceModuleConfigSection["fields"];
 
 type ServiceModulesModelSource = {
   activeView: ViewId;
   containerStates: Record<string, ContainerStateInfo>;
+  redisStatus: null | RedisStatusResponse;
   serviceLinks: Record<string, ServiceLink>;
   text: AppText;
   translateActions: (actions: CommandAction[]) => CommandAction[];
@@ -32,6 +45,7 @@ type ServiceModulesPageModel = {
 export function getServiceModulesPageModel({
   activeView,
   containerStates,
+  redisStatus,
   serviceLinks,
   text,
   translateActions,
@@ -54,6 +68,11 @@ export function getServiceModulesPageModel({
     const shells = translateShells(commandPageRegistry.redis.shells || []);
     const redisShell = findShell(shells, "redis-container");
     const redisInsightShell = findShell(shells, "redisinsight-container");
+    const redis = redisStatus?.redis;
+    const redisinsight = redisStatus?.redisinsight;
+    const redisInsightLink = redisinsight?.url
+      ? { label: "RedisInsight", source: "settings" as const, url: redisinsight.url }
+      : undefined;
 
     return {
       description: page.description,
@@ -61,20 +80,31 @@ export function getServiceModulesPageModel({
       modules: [
         {
           actions: translateActions(redisActions),
-          details: [{ label: containerLabel, value: redisShell?.container }],
+          configSection: {
+            fields: redisConfigFields,
+            generateEnvAfterSave: true,
+          },
+          details: [{ label: containerLabel, value: redis?.container || redisShell?.container }],
           eyebrow: text.panels.serviceControl.cache,
           shell: redisShell,
-          status: containerStates["redis-container"],
+          stateEyebrow: true,
+          status: redis,
           statusLabel,
           title: "Redis",
         },
         {
           actions: translateActions(redisinsightActions),
-          details: moduleDetails(redisInsightShell?.container),
+          details: [
+            { label: containerLabel, value: redisinsight?.container || redisInsightShell?.container },
+            ...(redisInsightLink
+              ? [{ href: redisInsightLink.url, label: text.common.link, value: redisInsightLink.url }]
+              : []),
+          ],
           eyebrow: text.panels.serviceControl.interface,
-          link: serviceLinks["redisinsight-container"],
+          link: redisInsightLink,
           shell: redisInsightShell,
-          status: containerStates["redisinsight-container"],
+          stateEyebrow: true,
+          status: redisinsight,
           statusLabel,
           title: "RedisInsight",
         },

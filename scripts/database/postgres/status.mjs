@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { containerStatus, parseArgs, printJson, settingsUrl } from "../status-common.mjs";
+import { containerStatus, parseArgs, printJson, settingsUrl } from "../../common/status.mjs";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/postgres/instances.json");

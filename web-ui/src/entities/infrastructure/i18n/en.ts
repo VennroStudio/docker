@@ -457,6 +457,7 @@ export const en: AppText = {
       pgadmin: "pgAdmin",
       phpmyadmin: "phpMyAdmin",
       proxy: "Nginx Proxy Manager",
+      redis: "Redis",
     },
     sourceLabel: "JSON file",
     sourceMissing: "will be created",

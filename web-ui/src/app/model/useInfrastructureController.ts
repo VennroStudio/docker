@@ -8,6 +8,7 @@ import {
   useAppMeta,
   useContainerStates,
   useNginxStatus,
+  useRedisStatus,
   useServiceLinks,
   useServiceStatuses,
   type CommandAction,
@@ -54,17 +55,19 @@ export function useInfrastructureController() {
   const navigate = useNavigate();
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
-  const serviceModuleView = !["home", "mariadb", "proxy", "settings"].includes(activeView);
+  const redisView = activeView === "redis";
+  const serviceModuleView = !["home", "mariadb", "proxy", "redis", "settings"].includes(activeView);
   const activeShells =
     activeView === "mariadb"
         ? [...(commandPageRegistry.mariadb.shells || []), ...(commandPageRegistry.postgres.shells || [])]
         : commandPageRegistry[activeView as CommandPageId]?.shells || [];
   const containerStates = useContainerStates({
-    enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings" && activeView !== "proxy",
+    enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings" && activeView !== "proxy" && !redisView,
     names: activeShells.map((shell) => shell.container),
   });
   const serviceLinks = useServiceLinks(serviceModuleView);
   const nginxStatus = useNginxStatus(activeView === "proxy");
+  const redisStatus = useRedisStatus(redisView);
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const settings = useSettings();
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
@@ -80,7 +83,7 @@ export function useInfrastructureController() {
     terminalOpen,
     toggleTerminal,
   } = useTerminalOperations({
-    containerStatesRefresh: containerStates.refresh,
+    containerStatesRefresh: redisView ? redisStatus.refresh : containerStates.refresh,
     serviceLinksRefresh: serviceModuleView ? serviceLinks.refresh : undefined,
     serviceStatusesRefresh: serviceStatuses.refresh,
     text,
@@ -205,6 +208,7 @@ export function useInfrastructureController() {
     operationRunning,
     postgresInstances,
     proxyForm,
+    redisStatus,
     runCommand,
     runHost,
     ...databaseOperations,
@@ -233,6 +237,8 @@ function shellPreview(container: string) {
   if (container === "nginx-container") return "make npm-shell";
   if (container === "phpmyadmin-container") return "make phpmyadmin-shell";
   if (container === "pgadmin-container") return "make pgadmin-shell";
+  if (container === "redis-container") return "make redis-shell";
+  if (container === "redisinsight-container") return "make redisinsight-shell";
   if (container.startsWith("mariadb-")) return `make mariadb-instance-shell CONTAINER=${container}`;
   if (container.startsWith("postgres-")) return `make postgres-instance-shell CONTAINER=${container}`;
   return `make compose-shell CONTAINER=${container}`;

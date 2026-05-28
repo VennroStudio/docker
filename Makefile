@@ -389,6 +389,64 @@ pgadmin-logs: ## Логи pgAdmin
 pgadmin-shell: ## Shell внутри контейнера pgAdmin
 	$(MAKE) compose-shell NAME=pgadmin
 
+##@ Redis
+redis-status: ## Показать статус Redis
+	@$(NODE_RUN) ./scripts/redis/status.mjs redis
+
+redis-up: ## Запустить контейнер Redis
+	$(MAKE) compose-up NAME=redis
+
+redis-pull: ## Скачать/обновить образ Redis
+	$(MAKE) compose-pull NAME=redis
+
+redis-start: ## Запустить существующий контейнер Redis
+	$(MAKE) compose-start NAME=redis
+
+redis-stop: ## Остановить контейнер Redis
+	$(MAKE) compose-stop NAME=redis
+
+redis-down: ## Удалить контейнер Redis
+	$(MAKE) compose-down NAME=redis
+
+redis-clean: ## Удалить контейнер и образ Redis
+	$(MAKE) compose-down NAME=redis
+	docker rmi redis:7-alpine 2>/dev/null || true
+
+redis-logs: ## Логи Redis
+	$(MAKE) compose-logs NAME=redis
+
+redis-shell: ## Shell внутри контейнера Redis
+	$(MAKE) compose-shell NAME=redis
+
+##@ RedisInsight
+redisinsight-status: ## Показать статус RedisInsight
+	@$(NODE_RUN) ./scripts/redis/status.mjs redisinsight
+
+redisinsight-up: ## Запустить контейнер RedisInsight
+	$(MAKE) compose-up NAME=redisinsight
+
+redisinsight-pull: ## Скачать/обновить образ RedisInsight
+	$(MAKE) compose-pull NAME=redisinsight
+
+redisinsight-start: ## Запустить существующий контейнер RedisInsight
+	$(MAKE) compose-start NAME=redisinsight
+
+redisinsight-stop: ## Остановить контейнер RedisInsight
+	$(MAKE) compose-stop NAME=redisinsight
+
+redisinsight-down: ## Удалить контейнер RedisInsight
+	$(MAKE) compose-down NAME=redisinsight
+
+redisinsight-clean: ## Удалить контейнер и образ RedisInsight
+	$(MAKE) compose-down NAME=redisinsight
+	docker rmi redis/redisinsight:latest 2>/dev/null || true
+
+redisinsight-logs: ## Логи RedisInsight
+	$(MAKE) compose-logs NAME=redisinsight
+
+redisinsight-shell: ## Shell внутри контейнера RedisInsight
+	$(MAKE) compose-shell NAME=redisinsight
+
 .PHONY: help init settings-show settings-set settings-env
 .PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
@@ -402,3 +460,5 @@ pgadmin-shell: ## Shell внутри контейнера pgAdmin
 .PHONY: postgres-status postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-dump-list postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload
 .PHONY: postgres-instance-add postgres-instance-list postgres-instance-resolve postgres-instance-status postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
 .PHONY: pgadmin-status pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell
+.PHONY: redis-status redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs redis-shell
+.PHONY: redisinsight-status redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs redisinsight-shell

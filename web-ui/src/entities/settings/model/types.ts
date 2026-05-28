@@ -12,6 +12,12 @@ export type AppSettings = {
     pgaEmail: string;
     pgaPassword: string;
   };
+  redis: {
+    redisPassword: string;
+  };
+  redisinsight: {
+    riUrl: string;
+  };
 };
 
 export type SettingsResponse = {

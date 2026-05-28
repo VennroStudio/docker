@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
-import { parseArgs, printJson } from "./status-common.mjs";
+import { parseArgs, printJson } from "../common/status.mjs";
 
 const dumpRoots = {
   mariadb: "dumps/mariadb",

@@ -53,4 +53,17 @@ export const settingsSections: SettingsSectionDefinition[] = [
       },
     ],
   },
+  {
+    id: "redis",
+    fields: [
+      {
+        autocomplete: "current-password",
+        env: "REDIS_PASSWORD",
+        group: "redis",
+        label: "Redis password",
+        name: "redisPassword",
+        type: "password",
+      },
+    ],
+  },
 ];

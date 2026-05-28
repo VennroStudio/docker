@@ -303,6 +303,7 @@ export type AppText = {
       pgadmin: string;
       phpmyadmin: string;
       proxy: string;
+      redis: string;
     };
     sourceLabel: string;
     sourceMissing: string;

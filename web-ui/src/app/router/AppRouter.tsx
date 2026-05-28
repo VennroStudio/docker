@@ -23,6 +23,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     operationRunning,
     postgresInstances,
     proxyForm,
+    redisStatus,
     runCommand,
     runHost,
     runMariaDbDatabaseCreate,
@@ -120,6 +121,7 @@ export function AppRouter({ controller }: AppRouterProps) {
   const serviceModulesPage = getServiceModulesPageModel({
     activeView,
     containerStates: containerStates.states,
+    redisStatus: redisStatus.status,
     serviceLinks: serviceLinks.links,
     text,
     translateActions,
@@ -135,6 +137,8 @@ export function AppRouter({ controller }: AppRouterProps) {
       modules={serviceModulesPage.modules}
       operationDisabled={operationRunning}
       operationDisabledTitle={operationBlockTitle}
+      settingsState={settings}
+      text={text}
       view={activeConfig}
       onRun={runCommand}
       onShellOpen={runShell}

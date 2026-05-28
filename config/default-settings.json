@@ -11,5 +11,11 @@
     "pgaUrl": "http://localhost:5050",
     "pgaEmail": "admin@example.com",
     "pgaPassword": "admin"
+  },
+  "redis": {
+    "redisPassword": "redis"
+  },
+  "redisinsight": {
+    "riUrl": "http://localhost:5540"
   }
 }
