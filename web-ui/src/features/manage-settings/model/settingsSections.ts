@@ -66,4 +66,24 @@ export const settingsSections: SettingsSectionDefinition[] = [
       },
     ],
   },
+  {
+    id: "minio",
+    fields: [
+      {
+        autocomplete: "username",
+        env: "MINIO_ROOT_USER",
+        group: "minio",
+        label: "MinIO root user",
+        name: "minioRootUser",
+      },
+      {
+        autocomplete: "current-password",
+        env: "MINIO_ROOT_PASSWORD",
+        group: "minio",
+        label: "MinIO root password",
+        name: "minioRootPassword",
+        type: "password",
+      },
+    ],
+  },
 ];

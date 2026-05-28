@@ -33,6 +33,11 @@ const publicTargets = {
     key: "riUrl",
     name: "redisinsight.riUrl",
   },
+  "minio-container": {
+    group: "minio",
+    key: "minioUrl",
+    name: "minio.minioUrl",
+  },
 };
 const config = {
   delete: deleting,

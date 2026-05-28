@@ -447,6 +447,35 @@ redisinsight-logs: ## Логи RedisInsight
 redisinsight-shell: ## Shell внутри контейнера RedisInsight
 	$(MAKE) compose-shell NAME=redisinsight
 
+##@ MinIO
+minio-status: ## Показать статус MinIO
+	@$(NODE_RUN) ./scripts/minio/status.mjs minio
+
+minio-up: ## Запустить контейнер MinIO
+	$(MAKE) compose-up NAME=minio
+
+minio-pull: ## Скачать/обновить образ MinIO
+	$(MAKE) compose-pull NAME=minio
+
+minio-start: ## Запустить существующий контейнер MinIO
+	$(MAKE) compose-start NAME=minio
+
+minio-stop: ## Остановить контейнер MinIO
+	$(MAKE) compose-stop NAME=minio
+
+minio-down: ## Удалить контейнер MinIO
+	$(MAKE) compose-down NAME=minio
+
+minio-clean: ## Удалить контейнер и образ MinIO
+	$(MAKE) compose-down NAME=minio
+	docker rmi minio/minio 2>/dev/null || true
+
+minio-logs: ## Логи MinIO
+	$(MAKE) compose-logs NAME=minio
+
+minio-shell: ## Shell внутри контейнера MinIO
+	$(MAKE) compose-shell NAME=minio
+
 .PHONY: help init settings-show settings-set settings-env
 .PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
@@ -462,3 +491,4 @@ redisinsight-shell: ## Shell внутри контейнера RedisInsight
 .PHONY: pgadmin-status pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell
 .PHONY: redis-status redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs redis-shell
 .PHONY: redisinsight-status redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs redisinsight-shell
+.PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell

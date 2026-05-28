@@ -18,6 +18,11 @@ export type AppSettings = {
   redisinsight: {
     riUrl: string;
   };
+  minio: {
+    minioUrl: string;
+    minioRootUser: string;
+    minioRootPassword: string;
+  };
 };
 
 export type SettingsResponse = {

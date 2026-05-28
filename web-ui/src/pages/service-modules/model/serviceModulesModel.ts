@@ -8,6 +8,7 @@ import {
   type CommandAction,
   type CommandPageId,
   type ContainerStateInfo,
+  type MinioStatusResponse,
   type RedisStatusResponse,
   type ServiceLink,
   type ShellAction,
@@ -26,9 +27,26 @@ const redisConfigFields = [
   },
 ] satisfies ServiceModuleConfigSection["fields"];
 
+const minioConfigFields = [
+  {
+    autocomplete: "username",
+    group: "minio",
+    label: "MinIO root user",
+    name: "minioRootUser",
+  },
+  {
+    autocomplete: "current-password",
+    group: "minio",
+    label: "MinIO root password",
+    name: "minioRootPassword",
+    type: "password",
+  },
+] satisfies ServiceModuleConfigSection["fields"];
+
 type ServiceModulesModelSource = {
   activeView: ViewId;
   containerStates: Record<string, ContainerStateInfo>;
+  minioStatus: null | MinioStatusResponse;
   redisStatus: null | RedisStatusResponse;
   serviceLinks: Record<string, ServiceLink>;
   text: AppText;
@@ -45,6 +63,7 @@ type ServiceModulesPageModel = {
 export function getServiceModulesPageModel({
   activeView,
   containerStates,
+  minioStatus,
   redisStatus,
   serviceLinks,
   text,
@@ -107,6 +126,37 @@ export function getServiceModulesPageModel({
           status: redisinsight,
           statusLabel,
           title: "RedisInsight",
+        },
+      ],
+    };
+  }
+
+  if (activeView === "minio") {
+    const page = text.servicePages.minio;
+    const shell = translateShells(commandPageRegistry.minio.shells || [])[0];
+    const link = minioStatus?.url ? { label: "MinIO", source: "settings" as const, url: minioStatus.url } : undefined;
+
+    return {
+      description: page.description,
+      eyebrow: page.eyebrow,
+      modules: [
+        {
+          actions: translateActions(commandPageRegistry.minio.actions),
+          configSection: {
+            fields: minioConfigFields,
+            generateEnvAfterSave: true,
+          },
+          details: [
+            { label: containerLabel, value: minioStatus?.container || shell?.container },
+            ...(link ? [{ href: link.url, label: text.common.link, value: link.url }] : []),
+          ],
+          eyebrow: page.panelEyebrow,
+          link,
+          shell,
+          stateEyebrow: true,
+          status: minioStatus || undefined,
+          statusLabel,
+          title: page.panelTitle,
         },
       ],
     };

@@ -455,6 +455,7 @@ export const ru: AppText = {
     sections: {
       pgadmin: "pgAdmin",
       phpmyadmin: "phpMyAdmin",
+      minio: "MinIO",
       proxy: "Nginx Proxy Manager",
       redis: "Redis",
     },

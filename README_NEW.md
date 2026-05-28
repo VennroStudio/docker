@@ -36,6 +36,13 @@ make settings-set KEY=pgadmin.pgaPassword VALUE=secret
 make settings-set KEY=redis.redisPassword VALUE=secret
 ```
 
+Изменить настройки MinIO:
+
+```sh
+make settings-set KEY=minio.minioRootUser VALUE=minio
+make settings-set KEY=minio.minioRootPassword VALUE=secret
+```
+
 Сгенерировать `.env` для compose-файлов, которым нужны переменные окружения:
 
 ```sh
@@ -391,6 +398,56 @@ make app-proxy-remove DOMAIN=redis.local
 ```sh
 make redis-stop
 make redisinsight-stop
+```
+
+### Пример: MinIO
+
+Задать логин и пароль MinIO в settings:
+
+```sh
+make settings-set KEY=minio.minioRootUser VALUE=minio
+make settings-set KEY=minio.minioRootPassword VALUE=secret
+```
+
+Сгенерировать `.env`:
+
+```sh
+make settings-env
+```
+
+Запустить MinIO:
+
+```sh
+make minio-up
+```
+
+Проверить статус MinIO. URL консоли возвращается в этом же ответе:
+
+```sh
+make minio-status
+```
+
+Если нужен локальный домен для MinIO console:
+
+```sh
+make host-add DOMAIN=minio.local
+make app-proxy DOMAIN=minio.local TARGET=minio-container PORT=9001
+```
+
+После создания proxy host скрипт обновит `config/settings.json`:
+
+```json
+{
+  "minio": {
+    "minioUrl": "http://minio.local"
+  }
+}
+```
+
+При удалении proxy host значение вернется на `http://localhost:3901`:
+
+```sh
+make app-proxy-remove DOMAIN=minio.local
 ```
 
 ## Сводка команд
@@ -1071,4 +1128,60 @@ make redisinsight-logs
 
 ```sh
 make redisinsight-shell
+```
+
+### MinIO
+
+Показать статус MinIO и URL консоли:
+
+```sh
+make minio-status
+```
+
+Скачать или обновить Docker image MinIO:
+
+```sh
+make minio-pull
+```
+
+Создать и запустить контейнер MinIO:
+
+```sh
+make minio-up
+```
+
+Запустить уже созданный контейнер MinIO:
+
+```sh
+make minio-start
+```
+
+Остановить контейнер MinIO:
+
+```sh
+make minio-stop
+```
+
+Удалить контейнер MinIO:
+
+```sh
+make minio-down
+```
+
+Удалить контейнер MinIO и Docker image `minio/minio`:
+
+```sh
+make minio-clean
+```
+
+Показать логи MinIO:
+
+```sh
+make minio-logs
+```
+
+Зайти в shell контейнера MinIO:
+
+```sh
+make minio-shell
 ```

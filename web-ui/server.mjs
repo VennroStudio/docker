@@ -13,6 +13,7 @@ import {
 } from "./server-new/modules/database/routes.mjs";
 import { host, proxy, nginxStatus, isNginxStreamRoute, nginxStreamRoute } from "./server-new/modules/nginx/routes.mjs";
 import { isRedisStreamRoute, redisStatus, redisStreamRoute } from "./server-new/modules/redis/routes.mjs";
+import { isMinioStreamRoute, minioStatus, minioStreamRoute } from "./server-new/modules/minio/routes.mjs";
 import { runCommand } from "./server-new/run-route.mjs";
 import { generateEnv, settings } from "./server-new/settings-route.mjs";
 import { shellInput, shellStop } from "./server-new/shell-router.mjs";
@@ -30,6 +31,7 @@ createServer(async (req, res) => {
       if (isNginxStreamRoute(req)) return await nginxStreamRoute(req, res);
       if (isDatabaseStreamRoute(req)) return await databaseStreamRoute(req, res);
       if (isRedisStreamRoute(req)) return await redisStreamRoute(req, res);
+      if (isMinioStreamRoute(req)) return await minioStreamRoute(req, res);
       return await streamRoute(req, res);
     }
     if (req.method === "GET" && req.url === "/api/status") return await status(req, res);
@@ -38,6 +40,7 @@ createServer(async (req, res) => {
     if (req.method === "GET" && req.url.startsWith("/api/databases")) return await databases(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/dumps")) return await dumps(req, res);
     if (req.method === "GET" && req.url === "/api/redis/status") return await redisStatus(req, res);
+    if (req.method === "GET" && req.url === "/api/minio/status") return await minioStatus(req, res);
     if (req.method === "GET" && req.url === "/api/links") return await links(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);

@@ -7,6 +7,7 @@ import {
   writeDatabaseShellInput,
 } from "./modules/database/shell.mjs";
 import { isRedisShellSession, stopRedisShell, writeRedisShellInput } from "./modules/redis/shell.mjs";
+import { isMinioShellSession, stopMinioShell, writeMinioShellInput } from "./modules/minio/shell.mjs";
 
 export async function shellInput(req, res) {
   const payload = await body(req);
@@ -16,10 +17,12 @@ export async function shellInput(req, res) {
     isNginxShellSession(sessionId)
       || isDatabaseShellSession(sessionId)
       || isRedisShellSession(sessionId)
+      || isMinioShellSession(sessionId)
       || isCommandSession(sessionId),
     "Unknown shell session",
   );
   if (isCommandSession(sessionId)) writeCommandInput(sessionId, String(payload.input || ""));
+  else if (isMinioShellSession(sessionId)) writeMinioShellInput(sessionId, String(payload.input || ""));
   else if (isRedisShellSession(sessionId)) writeRedisShellInput(sessionId, String(payload.input || ""));
   else if (isDatabaseShellSession(sessionId)) writeDatabaseShellInput(sessionId, String(payload.input || ""));
   else writeNginxShellInput(sessionId, String(payload.input || ""));
@@ -34,10 +37,12 @@ export async function shellStop(req, res) {
     isNginxShellSession(sessionId)
       || isDatabaseShellSession(sessionId)
       || isRedisShellSession(sessionId)
+      || isMinioShellSession(sessionId)
       || isCommandSession(sessionId),
     "Unknown shell session",
   );
   if (isCommandSession(sessionId)) stopCommandSession(sessionId);
+  else if (isMinioShellSession(sessionId)) stopMinioShell(sessionId);
   else if (isRedisShellSession(sessionId)) stopRedisShell(sessionId);
   else if (isDatabaseShellSession(sessionId)) stopDatabaseShell(sessionId);
   else stopNginxShell(sessionId);

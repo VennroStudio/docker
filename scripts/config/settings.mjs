@@ -120,6 +120,11 @@ function normalizeSettings(settings = {}) {
     redisinsight: {
       riUrl: source.redisinsight?.riUrl || "http://localhost:5540",
     },
+    minio: {
+      minioUrl: source.minio?.minioUrl || "http://localhost:3901",
+      minioRootUser: source.minio?.minioRootUser || "minio",
+      minioRootPassword: source.minio?.minioRootPassword || "minioadmin",
+    },
   };
 }
 
@@ -143,6 +148,8 @@ function envEntries(settings) {
     ["PGADMIN_EMAIL", settings.pgadmin?.pgaEmail],
     ["PGADMIN_PASSWORD", settings.pgadmin?.pgaPassword],
     ["REDIS_PASSWORD", settings.redis?.redisPassword],
+    ["MINIO_ROOT_USER", settings.minio?.minioRootUser],
+    ["MINIO_ROOT_PASSWORD", settings.minio?.minioRootPassword],
   ];
 }
 

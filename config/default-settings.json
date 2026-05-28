@@ -17,5 +17,10 @@
   },
   "redisinsight": {
     "riUrl": "http://localhost:5540"
+  },
+  "minio": {
+    "minioUrl": "http://localhost:3901",
+    "minioRootUser": "minio",
+    "minioRootPassword": "minioadmin"
   }
 }

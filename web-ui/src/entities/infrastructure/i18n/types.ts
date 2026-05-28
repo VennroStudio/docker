@@ -302,6 +302,7 @@ export type AppText = {
     sections: {
       pgadmin: string;
       phpmyadmin: string;
+      minio: string;
       proxy: string;
       redis: string;
     };
