@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { createServer } from "node:http";
-import { port } from "./server-new/config.mjs";
-import { getErrorMessage, sendJson } from "./server-new/http.mjs";
-import { meta } from "./server-new/meta-route.mjs";
+import { port } from "./server/config.mjs";
+import { getErrorMessage, sendJson } from "./server/http.mjs";
+import { meta } from "./server/meta-route.mjs";
 import {
   databases,
   databaseStreamRoute,
@@ -10,16 +10,16 @@ import {
   isDatabaseStreamRoute,
   mariadbInstances,
   postgresInstances,
-} from "./server-new/modules/database/routes.mjs";
-import { homeStatus } from "./server-new/modules/home/routes.mjs";
-import { host, proxy, nginxStatus, isNginxStreamRoute, nginxStreamRoute } from "./server-new/modules/nginx/routes.mjs";
-import { isRedisStreamRoute, redisStatus, redisStreamRoute } from "./server-new/modules/redis/routes.mjs";
-import { isMinioStreamRoute, minioStatus, minioStreamRoute } from "./server-new/modules/minio/routes.mjs";
-import { isRegistryStreamRoute, registryStatus, registryStreamRoute } from "./server-new/modules/registry/routes.mjs";
-import { runCommand } from "./server-new/run-route.mjs";
-import { generateEnv, settings } from "./server-new/settings-route.mjs";
-import { shellInput, shellStop } from "./server-new/shell-router.mjs";
-import { serveStatic } from "./server-new/static.mjs";
+} from "./server/modules/database/routes.mjs";
+import { homeStatus } from "./server/modules/home/routes.mjs";
+import { host, proxy, nginxStatus, isNginxStreamRoute, nginxStreamRoute } from "./server/modules/nginx/routes.mjs";
+import { isRedisStreamRoute, redisStatus, redisStreamRoute } from "./server/modules/redis/routes.mjs";
+import { isMinioStreamRoute, minioStatus, minioStreamRoute } from "./server/modules/minio/routes.mjs";
+import { isRegistryStreamRoute, registryStatus, registryStreamRoute } from "./server/modules/registry/routes.mjs";
+import { runCommand } from "./server/run-route.mjs";
+import { generateEnv, settings } from "./server/settings-route.mjs";
+import { shellInput, shellStop } from "./server/shell-router.mjs";
+import { serveStatic } from "./server/static.mjs";
 
 createServer(async (req, res) => {
   try {

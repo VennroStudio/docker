@@ -57,7 +57,7 @@ web-ui-build: ## Собрать frontend dist через Docker
 		docker rm "$$container" >/dev/null; \
 		cp web-ui/server.mjs "$(WEB_UI_RUNTIME_DIR)/server.mjs"; \
 		cp web-ui/commands.manifest.json "$(WEB_UI_RUNTIME_DIR)/commands.manifest.json"; \
-		cp -R web-ui/server-new "$(WEB_UI_RUNTIME_DIR)/server-new"
+		cp -R web-ui/server "$(WEB_UI_RUNTIME_DIR)/server"
 
 web-ui-dist: ## Создать build/web-ui, если его нет
 	@if [ ! -f "$(WEB_UI_STATIC_DIR)/index.html" ] || [ ! -f "$(WEB_UI_RUNTIME_DIR)/server.mjs" ]; then \
