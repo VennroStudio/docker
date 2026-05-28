@@ -15,7 +15,6 @@ export function AppRouter({ controller }: AppRouterProps) {
     activeConfig,
     activeOperationKey,
     activeView,
-    containerStates,
     databaseRefreshSignal,
     mariaDbInstances,
     minioStatus,
@@ -46,7 +45,6 @@ export function AppRouter({ controller }: AppRouterProps) {
     runProxyDelete,
     runShell,
     selectView,
-    serviceLinks,
     serviceStatuses,
     settings,
     setProxyForm,
@@ -122,11 +120,9 @@ export function AppRouter({ controller }: AppRouterProps) {
 
   const serviceModulesPage = getServiceModulesPageModel({
     activeView,
-    containerStates: containerStates.states,
     minioStatus: minioStatus.status,
     redisStatus: redisStatus.status,
     registryStatus: registryStatus.status,
-    serviceLinks: serviceLinks.links,
     text,
     translateActions,
     translateShells,

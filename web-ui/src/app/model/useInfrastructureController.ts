@@ -6,15 +6,12 @@ import {
   getViewById,
   getViewByPath,
   useAppMeta,
-  useContainerStates,
   useMinioStatus,
   useNginxStatus,
   useRedisStatus,
   useRegistryStatus,
-  useServiceLinks,
   useServiceStatuses,
   type CommandAction,
-  type CommandPageId,
   type ProxyFormState,
   type ShellAction,
   type ViewId,
@@ -60,28 +57,18 @@ export function useInfrastructureController() {
   const redisView = activeView === "redis";
   const minioView = activeView === "minio";
   const registryView = activeView === "registry";
-  const serviceModuleView = !["home", "mariadb", "minio", "proxy", "redis", "registry", "settings"].includes(activeView);
-  const activeShells =
-    activeView === "mariadb"
-        ? [...(commandPageRegistry.mariadb.shells || []), ...(commandPageRegistry.postgres.shells || [])]
-        : commandPageRegistry[activeView as CommandPageId]?.shells || [];
-  const containerStates = useContainerStates({
-    enabled:
-      activeView !== "home" &&
-      activeView !== "mariadb" &&
-      activeView !== "settings" &&
-      activeView !== "proxy" &&
-      !redisView &&
-      !minioView &&
-      !registryView,
-    names: activeShells.map((shell) => shell.container),
-  });
-  const serviceLinks = useServiceLinks(serviceModuleView);
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const redisStatus = useRedisStatus(redisView);
   const minioStatus = useMinioStatus(minioView);
   const registryStatus = useRegistryStatus(registryView);
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
+  const statusRefresh = redisView
+    ? redisStatus.refresh
+    : minioView
+      ? minioStatus.refresh
+      : registryView
+        ? registryStatus.refresh
+        : nginxStatus.refresh;
   const settings = useSettings();
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const postgresInstances = usePostgresInstances(activeView === "mariadb");
@@ -96,14 +83,7 @@ export function useInfrastructureController() {
     terminalOpen,
     toggleTerminal,
   } = useTerminalOperations({
-    containerStatesRefresh: redisView
-      ? redisStatus.refresh
-      : minioView
-        ? minioStatus.refresh
-        : registryView
-          ? registryStatus.refresh
-          : containerStates.refresh,
-    serviceLinksRefresh: serviceModuleView ? serviceLinks.refresh : undefined,
+    statusRefresh,
     serviceStatusesRefresh: serviceStatuses.refresh,
     text,
     toast,
@@ -218,7 +198,6 @@ export function useInfrastructureController() {
     appMeta,
     commandStream,
     confirmDialog,
-    containerStates,
     databaseRefreshSignal,
     language,
     mariaDbInstances,
@@ -237,7 +216,6 @@ export function useInfrastructureController() {
     runProxyDelete,
     runShell,
     selectView,
-    serviceLinks,
     serviceStatuses,
     settings,
     setProxyForm,

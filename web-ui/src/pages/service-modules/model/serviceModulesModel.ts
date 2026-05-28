@@ -6,12 +6,9 @@ import {
   registryUiActions,
   type AppText,
   type CommandAction,
-  type CommandPageId,
-  type ContainerStateInfo,
   type MinioStatusResponse,
   type RedisStatusResponse,
   type RegistryStatusResponse,
-  type ServiceLink,
   type ShellAction,
   type ViewId,
 } from "@/entities/infrastructure";
@@ -62,11 +59,9 @@ const registryConfigFields = [
 
 type ServiceModulesModelSource = {
   activeView: ViewId;
-  containerStates: Record<string, ContainerStateInfo>;
   minioStatus: null | MinioStatusResponse;
   redisStatus: null | RedisStatusResponse;
   registryStatus: null | RegistryStatusResponse;
-  serviceLinks: Record<string, ServiceLink>;
   text: AppText;
   translateActions: (actions: CommandAction[]) => CommandAction[];
   translateShells: (actions: ShellAction[]) => ShellAction[];
@@ -80,26 +75,15 @@ type ServiceModulesPageModel = {
 
 export function getServiceModulesPageModel({
   activeView,
-  containerStates,
   minioStatus,
   redisStatus,
   registryStatus,
-  serviceLinks,
   text,
   translateActions,
   translateShells,
 }: ServiceModulesModelSource): ServiceModulesPageModel | null {
   const statusLabel = text.mariadbInstances.statusLabel;
   const containerLabel = text.mariadbInstances.containerLabel;
-  const moduleDetails = (container: string | undefined) => {
-    const details: Array<{ href?: string; label: string; value?: string }> = [
-      { label: containerLabel, value: container },
-    ];
-    const link = container ? serviceLinks[container] : undefined;
-
-    if (link) details.push({ href: link.url, label: text.common.link, value: link.url });
-    return details;
-  };
 
   if (activeView === "redis") {
     const page = text.servicePages.redis;
@@ -231,28 +215,7 @@ export function getServiceModulesPageModel({
     };
   }
 
-  const commandPage = commandPageRegistry[activeView as CommandPageId];
-  const page = text.servicePages[activeView as CommandPageId];
-  if (!commandPage || !page) return null;
-
-  const shell = translateShells(commandPage.shells || [])[0];
-
-  return {
-    description: page.description,
-    eyebrow: page.eyebrow,
-    modules: [
-      {
-        actions: translateActions(commandPage.actions),
-        details: moduleDetails(shell?.container),
-        eyebrow: page.panelEyebrow,
-        link: shell ? serviceLinks[shell.container] : undefined,
-        shell,
-        status: shell ? containerStates[shell.container] : undefined,
-        statusLabel,
-        title: page.panelTitle,
-      },
-    ],
-  };
+  return null;
 }
 
 function findShell(shells: ShellAction[], container: string) {

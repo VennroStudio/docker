@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import type { ServiceLink } from "../../api/links";
-import type { CommandAction, ContainerRuntimeState, MariaDbInstanceAction, ShellAction } from "../../model/types";
+import type { CommandAction, ContainerRuntimeState, MariaDbInstanceAction, ServiceLink, ShellAction } from "../../model/types";
 
 export type DatabaseRuntimeAction = MariaDbInstanceAction;
 

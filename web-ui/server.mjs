@@ -20,9 +20,6 @@ import { runCommand } from "./server-new/run-route.mjs";
 import { generateEnv, settings } from "./server-new/settings-route.mjs";
 import { shellInput, shellStop } from "./server-new/shell-router.mjs";
 import { serveStatic } from "./server-new/static.mjs";
-import { containers } from "./server/routes/containers.mjs";
-import { links } from "./server/routes/links.mjs";
-import { streamRoute } from "./server/routes/stream.mjs";
 
 createServer(async (req, res) => {
   try {
@@ -34,17 +31,15 @@ createServer(async (req, res) => {
       if (isRedisStreamRoute(req)) return await redisStreamRoute(req, res);
       if (isMinioStreamRoute(req)) return await minioStreamRoute(req, res);
       if (isRegistryStreamRoute(req)) return await registryStreamRoute(req, res);
-      return await streamRoute(req, res);
+      return sendJson(res, 404, { ok: false, output: "Unknown stream route" });
     }
     if (req.method === "GET" && req.url === "/api/status") return await homeStatus(req, res);
-    if (req.method === "GET" && req.url.startsWith("/api/containers")) return await containers(req, res);
     if (req.method === "GET" && req.url === "/api/nginx/status") return await nginxStatus(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/databases")) return await databases(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/dumps")) return await dumps(req, res);
     if (req.method === "GET" && req.url === "/api/redis/status") return await redisStatus(req, res);
     if (req.method === "GET" && req.url === "/api/minio/status") return await minioStatus(req, res);
     if (req.method === "GET" && req.url === "/api/registry/status") return await registryStatus(req, res);
-    if (req.method === "GET" && req.url === "/api/links") return await links(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);
     if (req.method === "GET" && req.url === "/api/postgres/instances") return await postgresInstances(req, res);

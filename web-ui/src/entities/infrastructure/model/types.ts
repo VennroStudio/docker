@@ -62,6 +62,20 @@ export type ContainerRuntimeState =
   | "stopped"
   | "unknown";
 
+export type ContainerStateInfo = {
+  error?: string;
+  state: ContainerRuntimeState;
+  status?: string;
+};
+
+export type ServiceLink = {
+  domain?: string;
+  label: string;
+  port?: number;
+  source: string;
+  url: string;
+};
+
 export type MariaDbInstance = {
   authMode: MariaDbAuthMode;
   composeFile: string;
