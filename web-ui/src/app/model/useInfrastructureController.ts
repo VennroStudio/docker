@@ -37,10 +37,10 @@ import { useLanguage } from "./useLanguage";
 import { useTerminalOperations } from "./useTerminalOperations";
 
 const initialProxyForm: ProxyFormState = {
-  domain: "pma.local",
-  port: "80",
+  domain: "",
+  port: "",
   ssl: false,
-  target: "phpmyadmin-container",
+  target: "",
 };
 
 export function useInfrastructureController() {

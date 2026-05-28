@@ -15,23 +15,23 @@ export function ProxyFormFields({ copy, onChange, value }: ProxyFormFieldsProps)
     <div className="grid gap-3">
       <Field
         error={value.domain.trim() && !validity.domain ? copy.validation.domain : undefined}
-        hint={copy.hints.domain}
         label={copy.domain}
+        placeholder="pma.local"
         value={value.domain}
         onChange={(event) => onChange({ domain: event.target.value })}
       />
       <Field
         error={value.target.trim() && !validity.target ? copy.validation.target : undefined}
-        hint={copy.hints.target}
         label={copy.target}
+        placeholder="phpmyadmin-container"
         value={value.target}
         onChange={(event) => onChange({ target: event.target.value })}
       />
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <Field
           error={value.port.trim() && !validity.port ? copy.validation.port : undefined}
-          hint={copy.hints.port}
           label="Port"
+          placeholder="1-65535"
           value={value.port}
           inputMode="numeric"
           onChange={(event) => onChange({ port: event.target.value })}

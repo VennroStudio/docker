@@ -19,6 +19,7 @@ const config = {
   scheme: args.scheme || process.env.SCHEME || "http",
   ssl: bool(args.ssl ?? process.env.SSL),
   npmUrl: trimSlash(need(settings.proxy?.npmUrl, "proxy.npmUrl")),
+  npmApiUrl: trimSlash(process.env.INFRA_NPM_API_URL || "http://localhost:81"),
   npmEmail: need(settings.proxy?.npmEmail, "proxy.npmEmail"),
   npmPassword: need(settings.proxy?.npmPassword, "proxy.npmPassword"),
   certDir: process.env.CERT_DIR || "certs",
@@ -358,7 +359,7 @@ async function api(apiPath, { auth = true, method = "GET", data, form } = {}) {
   if (auth) headers.Authorization = `Bearer ${await getToken()}`;
   if (data) headers["Content-Type"] = "application/json";
 
-  const response = await fetch(`${config.npmUrl}/api${apiPath}`, {
+  const response = await fetch(`${config.npmApiUrl}/api${apiPath}`, {
     method,
     headers,
     body: form || (data ? JSON.stringify(data) : undefined),
