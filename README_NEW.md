@@ -176,16 +176,10 @@ make mariadb-instance-up NAME=11-4
 make phpmyadmin-up
 ```
 
-Проверить статус MariaDB instances и phpMyAdmin:
+Проверить статус MariaDB instances и phpMyAdmin. URL phpMyAdmin возвращается в этом же ответе:
 
 ```sh
 make mariadb-status
-```
-
-Показать URL phpMyAdmin:
-
-```sh
-make phpmyadmin-link
 ```
 
 Если нужен локальный домен для phpMyAdmin:
@@ -270,16 +264,10 @@ make postgres-instance-up NAME=17
 make pgadmin-up
 ```
 
-Проверить статус Postgres instances и pgAdmin:
+Проверить статус Postgres instances и pgAdmin. URL pgAdmin возвращается в этом же ответе:
 
 ```sh
 make postgres-status
-```
-
-Показать URL pgAdmin:
-
-```sh
-make pgadmin-link
 ```
 
 Если нужен локальный домен для pgAdmin:
@@ -610,16 +598,10 @@ make mariadb-instance-shell NAME=11-4
 
 ### phpMyAdmin
 
-Показать статус phpMyAdmin:
+Показать статус phpMyAdmin и URL:
 
 ```sh
 make phpmyadmin-status
-```
-
-Показать URL phpMyAdmin:
-
-```sh
-make phpmyadmin-link
 ```
 
 Скачать или обновить Docker image phpMyAdmin:
@@ -851,16 +833,10 @@ make postgres-instance-shell NAME=17
 
 ### pgAdmin
 
-Показать статус pgAdmin:
+Показать статус pgAdmin и URL:
 
 ```sh
 make pgadmin-status
-```
-
-Показать URL pgAdmin:
-
-```sh
-make pgadmin-link
 ```
 
 Скачать или обновить Docker image pgAdmin:

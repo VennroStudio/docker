@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { containerStatus, parseArgs, printJson, settingsLink } from "../status-common.mjs";
+import { containerStatus, parseArgs, printJson, settingsUrl } from "../status-common.mjs";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/postgres/instances.json");
@@ -19,9 +19,8 @@ async function main() {
   if (command === "overview") return printJson(await overview());
   if (command === "instance") return printJson(await instanceStatus(options));
   if (command === "pgadmin") return printJson(await pgAdminStatus());
-  if (command === "pgadmin-link") return printJson(await pgAdminLink());
 
-  throw new Error("Usage: node scripts/database/postgres/status.mjs overview|instance|pgadmin|pgadmin-link");
+  throw new Error("Usage: node scripts/database/postgres/status.mjs overview|instance|pgadmin");
 }
 
 async function overview() {
@@ -36,12 +35,8 @@ async function overview() {
 async function pgAdminStatus() {
   return {
     ...(await containerStatus(pgAdminContainer)),
-    link: await pgAdminLink(),
+    url: await settingsUrl("pgadmin.pgaUrl"),
   };
-}
-
-async function pgAdminLink() {
-  return settingsLink("pgadmin.pgaUrl", "pgAdmin");
 }
 
 async function instanceStatus(options) {

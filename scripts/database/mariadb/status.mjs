@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { containerStatus, parseArgs, printJson, settingsLink } from "../status-common.mjs";
+import { containerStatus, parseArgs, printJson, settingsUrl } from "../status-common.mjs";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
@@ -19,9 +19,8 @@ async function main() {
   if (command === "overview") return printJson(await overview());
   if (command === "instance") return printJson(await instanceStatus(options));
   if (command === "phpmyadmin") return printJson(await phpMyAdminStatus());
-  if (command === "phpmyadmin-link") return printJson(await phpMyAdminLink());
 
-  throw new Error("Usage: node scripts/database/mariadb/status.mjs overview|instance|phpmyadmin|phpmyadmin-link");
+  throw new Error("Usage: node scripts/database/mariadb/status.mjs overview|instance|phpmyadmin");
 }
 
 async function overview() {
@@ -36,12 +35,8 @@ async function overview() {
 async function phpMyAdminStatus() {
   return {
     ...(await containerStatus(phpMyAdminContainer)),
-    link: await phpMyAdminLink(),
+    url: await settingsUrl("phpmyadmin.pmaUrl"),
   };
-}
-
-async function phpMyAdminLink() {
-  return settingsLink("phpmyadmin.pmaUrl", "phpMyAdmin");
 }
 
 async function instanceStatus(options) {

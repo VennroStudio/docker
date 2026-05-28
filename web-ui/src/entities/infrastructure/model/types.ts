@@ -1,7 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import commandManifest from "../../../../commands.manifest.json";
-import type { ServiceLink } from "../api/links";
-
 export type ViewId =
   | "home"
   | "proxy"
@@ -79,9 +77,9 @@ export type MariaDbInstance = {
 
 export type PhpMyAdminOverview = {
   container: string;
-  link?: ServiceLink;
   state: ContainerRuntimeState;
   status?: string;
+  url?: string;
 };
 
 export type MariaDbInstanceForm = {
@@ -126,9 +124,9 @@ export type PostgresInstance = {
 
 export type PgAdminOverview = {
   container: string;
-  link?: ServiceLink;
   state: ContainerRuntimeState;
   status?: string;
+  url?: string;
 };
 
 export type PostgresInstanceForm = {

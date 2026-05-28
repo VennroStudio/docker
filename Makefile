@@ -236,9 +236,6 @@ mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4 и
 phpmyadmin-status: ## Показать статус phpMyAdmin
 	@$(NODE_RUN) ./scripts/database/mariadb/status.mjs phpmyadmin
 
-phpmyadmin-link: ## Показать URL phpMyAdmin
-	@$(NODE_RUN) ./scripts/database/mariadb/status.mjs phpmyadmin-link
-
 phpmyadmin-up: ## Запустить контейнер phpMyAdmin
 	$(MAKE) compose-up NAME=phpmyadmin
 
@@ -367,9 +364,6 @@ postgres-instance-shell: ## Shell Postgres instance, передать NAME=17 и
 pgadmin-status: ## Показать статус pgAdmin
 	@$(NODE_RUN) ./scripts/database/postgres/status.mjs pgadmin
 
-pgadmin-link: ## Показать URL pgAdmin
-	@$(NODE_RUN) ./scripts/database/postgres/status.mjs pgadmin-link
-
 pgadmin-up: ## Запустить контейнер pgAdmin
 	$(MAKE) compose-up NAME=pgadmin
 
@@ -404,7 +398,7 @@ pgadmin-shell: ## Shell внутри контейнера pgAdmin
 .PHONY: npm-status npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs npm-shell
 .PHONY: mariadb-status mariadb-shell mariadb-import mariadb-export mariadb-dump-list mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
 .PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-resolve mariadb-instance-status mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
-.PHONY: phpmyadmin-status phpmyadmin-link phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs phpmyadmin-shell phpmyadmin-config-generate phpmyadmin-reload
+.PHONY: phpmyadmin-status phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs phpmyadmin-shell phpmyadmin-config-generate phpmyadmin-reload
 .PHONY: postgres-status postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-dump-list postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload
 .PHONY: postgres-instance-add postgres-instance-list postgres-instance-resolve postgres-instance-status postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
-.PHONY: pgadmin-status pgadmin-link pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell
+.PHONY: pgadmin-status pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell

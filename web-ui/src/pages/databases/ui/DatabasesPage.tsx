@@ -134,7 +134,7 @@ export function DatabasesPage({
         <PhpMyAdminPanel
           actions={translateActions(phpmyadminActions)}
           activeOperationKey={activeOperationKey}
-          link={mariaDb.phpmyadmin.link}
+          link={serviceLink(mariaDb.phpmyadmin.url, "phpMyAdmin")}
           operationDisabled={operationDisabled}
           operationDisabledTitle={operationDisabledTitle}
           overview={mariaDb.phpmyadmin}
@@ -146,7 +146,7 @@ export function DatabasesPage({
         <PgAdminPanel
           actions={translateActions(pgadminActions)}
           activeOperationKey={activeOperationKey}
-          link={postgres.pgadmin.link}
+          link={serviceLink(postgres.pgadmin.url, "pgAdmin")}
           operationDisabled={operationDisabled}
           operationDisabledTitle={operationDisabledTitle}
           overview={postgres.pgadmin}
@@ -168,4 +168,8 @@ function shellAction(container: string, label: string, text: AppText): ShellActi
     detail: text.shell.detail(container),
     label: text.shell.openLabel(label),
   };
+}
+
+function serviceLink(url: string | undefined, label: string) {
+  return url ? { label, source: "settings" as const, url } : undefined;
 }

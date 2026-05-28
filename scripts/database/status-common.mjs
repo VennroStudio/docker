@@ -52,13 +52,8 @@ export function printJson(value) {
   console.log(JSON.stringify(value, null, 2));
 }
 
-export async function settingsLink(path, label) {
-  const url = getByPath(await readSettings(), path);
-  return {
-    label,
-    source: "settings",
-    url,
-  };
+export async function settingsUrl(path) {
+  return getByPath(await readSettings(), path);
 }
 
 async function dockerContainer(container) {

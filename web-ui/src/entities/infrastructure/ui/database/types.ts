@@ -33,9 +33,9 @@ export type DatabaseAdminCopy = {
 
 export type DatabaseAdminOverview = {
   container: string;
-  link?: ServiceLink;
   state: ContainerRuntimeState;
   status?: string;
+  url?: string;
 };
 
 export type DatabaseAdminSectionProps = {
