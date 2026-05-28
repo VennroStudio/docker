@@ -1,0 +1,32 @@
+name: vennro
+
+services:
+  web-ui-dev:
+    build:
+      context: ../..
+      dockerfile: web-ui/Dockerfile
+      target: runtime
+    image: web-ui-dev
+    container_name: web-ui-dev
+    working_dir: "${PWD}"
+    ports:
+      - "5173:5173"
+      - "8088:8088"
+    volumes:
+      - "${PWD}:${PWD}"
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/hosts:/host/etc/hosts
+    command:
+      - sh
+      - -lc
+      - |
+        cd web-ui
+        npm ci
+        (cd .. && UI_STATIC_DIR=web-ui/dist node --watch ./web-ui/server.mjs) &
+        npm run dev -- --host 0.0.0.0
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

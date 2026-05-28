@@ -13,6 +13,7 @@ REDISINSIGHT_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-c
 REGISTRY_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-registry.yml
 REGISTRY_UI_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-registry-ui.yml
 WEB_UI_COMPOSE = PWD="$(CURDIR)" docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-web-ui.yml
+WEB_UI_DEV_COMPOSE = PWD="$(CURDIR)" docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-web-ui-dev.yml
 DATE := $(shell date +%d-%m-%Y)
 NODE = docker run --rm -v "$(PWD):/app" -w /app
 NODE_IMAGE ?= node:$(if $(NODE_LIBRARY),$(NODE_LIBRARY),24-bookworm)
@@ -48,9 +49,19 @@ delete-proxy: ## Удалить общую сеть
 ##@ Web UI
 ui: web-ui-up ## Запустить локальный web-интерфейс управления
 web-ui-init: web-ui-down web-ui-up
+ui-dev: web-ui-dev-up ## Запустить Web UI в dev-режиме с hot reload
 
-web-ui-up: proxy-network-ensure ## Собрать и запустить Web UI
+web-ui-up: web-ui-dev-down proxy-network-ensure ## Собрать и запустить Web UI
 	$(WEB_UI_COMPOSE) up -d --build
+
+web-ui-dev-up: web-ui-down proxy-network-ensure ## Запустить Web UI dev server с hot reload
+	$(WEB_UI_DEV_COMPOSE) up --build
+
+web-ui-dev-down: ## Остановить Web UI dev server
+	$(WEB_UI_DEV_COMPOSE) down
+
+web-ui-dev-logs: ## Логи Web UI dev server
+	$(WEB_UI_DEV_COMPOSE) logs -f web-ui-dev
 
 web-ui-build: ## Собрать образ Web UI
 	$(WEB_UI_COMPOSE) build
@@ -475,7 +486,7 @@ push: ## Auto save
 	git commit -m "update"
 	git push
 
-.PHONY: ui web-ui web-ui-up web-ui-build web-ui-start web-ui-stop web-ui-down web-ui-clean web-ui-logs
+.PHONY: ui ui-dev web-ui web-ui-up web-ui-dev-up web-ui-dev-down web-ui-dev-logs web-ui-build web-ui-start web-ui-stop web-ui-down web-ui-clean web-ui-logs
 .PHONY: host-add host-remove app-proxy app-proxy-remove
 .PHONY: generate-user ansible-build ansible-setup ansible-clean
 .PHONY: npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs
