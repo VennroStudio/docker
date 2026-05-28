@@ -35,11 +35,18 @@ export const settingsSections: SettingsSectionDefinition[] = [
     id: "proxy",
     fields: [
       {
-        env: "NPM_URL",
+        env: "NPM_PUBLIC_URL",
         group: "proxy",
-        label: "NPM URL",
-        name: "npmUrl",
-        placeholder: "http://host.docker.internal:81",
+        label: "NPM public URL",
+        name: "npmPublicUrl",
+        placeholder: "http://localhost:81",
+      },
+      {
+        env: "NPM_API_URL",
+        group: "proxy",
+        label: "NPM API URL",
+        name: "npmApiUrl",
+        placeholder: "http://nginx-container:81",
       },
       { autocomplete: "username", env: "NPM_EMAIL", group: "proxy", label: "NPM email", name: "npmEmail" },
       {

@@ -15,3 +15,9 @@ services:
       - "${PWD}:${PWD}"
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/hosts:/host/etc/hosts
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

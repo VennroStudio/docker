@@ -13,7 +13,8 @@ export const defaultSettings = {
     nodeLibrary: "24-bookworm",
   },
   proxy: {
-    npmUrl: "http://host.docker.internal:81",
+    npmPublicUrl: "http://localhost:81",
+    npmApiUrl: "http://nginx-container:81",
     npmEmail: "",
     npmPassword: "",
   },
@@ -92,7 +93,9 @@ export function settingsToEnv(settings) {
     NODE_LIBRARY: value.environment.nodeLibrary,
     NPM_EMAIL: value.proxy.npmEmail,
     NPM_PASSWORD: value.proxy.npmPassword,
-    NPM_URL: value.proxy.npmUrl,
+    NPM_PUBLIC_URL: value.proxy.npmPublicUrl,
+    NPM_API_URL: value.proxy.npmApiUrl,
+    NPM_URL: value.proxy.npmApiUrl,
     PGADMIN_EMAIL: value.postgres.pgAdminEmail,
     PGADMIN_PASSWORD: value.postgres.pgAdminPassword,
     POSTGRES_DB: value.postgres.database,
@@ -170,7 +173,8 @@ function envToSettings(env) {
       nodeLibrary: env.NODE_LIBRARY,
     },
     proxy: {
-      npmUrl: env.NPM_URL,
+      npmPublicUrl: env.NPM_PUBLIC_URL || env.NPM_URL,
+      npmApiUrl: env.NPM_API_URL || env.NPM_URL,
       npmEmail: env.NPM_EMAIL,
       npmPassword: env.NPM_PASSWORD,
     },
@@ -209,7 +213,22 @@ function envToSettings(env) {
 }
 
 function normalizeSettings(settings = {}) {
-  return mergeSettings(defaultSettings, settings);
+  return mergeSettings(defaultSettings, migrateLegacySettings(settings));
+}
+
+function migrateLegacySettings(settings = {}) {
+  if (!settings || typeof settings !== "object") return settings;
+  if (!settings.proxy || typeof settings.proxy !== "object") return settings;
+  if (!settings.proxy.npmUrl) return settings;
+
+  return {
+    ...settings,
+    proxy: {
+      ...settings.proxy,
+      npmPublicUrl: settings.proxy.npmPublicUrl || settings.proxy.npmUrl,
+      npmApiUrl: settings.proxy.npmApiUrl || settings.proxy.npmUrl,
+    },
+  };
 }
 
 function mergeSettings(...sources) {

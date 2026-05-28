@@ -36,6 +36,9 @@ init: ## Первый запуск: создать локальные env/config
 	@echo "Init complete. Check .env and run make ui"
 
 ##@ Docker network
+proxy-network-ensure: ## Создать общую сеть proxy, если ее еще нет
+	@docker network inspect proxy >/dev/null 2>&1 || docker network create proxy
+
 add-proxy: ## Создать общую сеть
 	docker network create proxy
 
@@ -45,7 +48,7 @@ delete-proxy: ## Удалить общую сеть
 ##@ Web UI
 ui: web-ui-up ## Запустить локальный web-интерфейс управления
 
-web-ui-up: ## Собрать и запустить Web UI
+web-ui-up: proxy-network-ensure ## Собрать и запустить Web UI
 	$(WEB_UI_COMPOSE) up -d --build
 
 web-ui-build: ## Собрать образ Web UI
@@ -488,6 +491,6 @@ push: ## Auto save
 .PHONY: postgres-instance-add postgres-instance-list postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
 .PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs
 .PHONY: rclone-install rclone-config rclone-test rclone-backup-s3
-.PHONY: init add-proxy delete-proxy
+.PHONY: init proxy-network-ensure add-proxy delete-proxy
 .PHONY: archive unarchive
 .PHONY: push help

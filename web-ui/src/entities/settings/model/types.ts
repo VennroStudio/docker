@@ -3,7 +3,8 @@ export type AppSettings = {
     nodeLibrary: string;
   };
   proxy: {
-    npmUrl: string;
+    npmPublicUrl: string;
+    npmApiUrl: string;
     npmEmail: string;
     npmPassword: string;
   };
