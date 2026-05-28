@@ -3,8 +3,15 @@ export
 
 COMPOSE_DIR := docker/compose
 COMPOSE_ENV := $(if $(wildcard .env),--env-file .env,)
-NODE := docker run --rm -v "$(PWD):/app" -w /app
+ROOT_DIR := $(CURDIR)
+NODE := docker run --rm -v "$(ROOT_DIR):/app" -w /app
 NODE_IMAGE := node:24-bookworm
+HOST_BRIDGE_HOST ?= 0.0.0.0
+HOST_BRIDGE_PORT ?= 8099
+HOST_BRIDGE_URL ?= http://host.docker.internal:$(HOST_BRIDGE_PORT)
+HOST_BRIDGE_PID := .tmp/host-bridge.pid
+HOST_BRIDGE_LOG := .tmp/host-bridge.log
+WEB_UI_COMPOSE := PWD="$(ROOT_DIR)" HOST_BRIDGE_URL="$(HOST_BRIDGE_URL)" docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-web-ui.yml
 
 compose-file = $(COMPOSE_DIR)/docker-compose-$(NAME).yml
 compose = docker compose $(COMPOSE_ENV) -f $(call compose-file)
@@ -37,6 +44,43 @@ settings-set: ## Изменить settings.json, передать KEY=proxy.npmE
 		-e KEY \
 		-e VALUE \
 		$(NODE_IMAGE) node ./scripts/config/settings.mjs set
+
+##@ Web UI
+ui-bridge: ## Запустить host bridge для выполнения make-команд на хосте
+	@HOST_BRIDGE_HOST="$(HOST_BRIDGE_HOST)" HOST_BRIDGE_PORT="$(HOST_BRIDGE_PORT)" node ./web-ui/server-new/host-bridge.mjs
+
+ui-bridge-start: ## Запустить host bridge в фоне
+	@mkdir -p .tmp
+	@if [ -f "$(HOST_BRIDGE_PID)" ] && kill -0 "$$(cat "$(HOST_BRIDGE_PID)")" 2>/dev/null; then \
+		echo "Host bridge already running: $$(cat "$(HOST_BRIDGE_PID)")"; \
+	else \
+		HOST_BRIDGE_HOST="$(HOST_BRIDGE_HOST)" HOST_BRIDGE_PORT="$(HOST_BRIDGE_PORT)" \
+			nohup node ./web-ui/server-new/host-bridge.mjs > "$(HOST_BRIDGE_LOG)" 2>&1 & \
+		echo "$$!" > "$(HOST_BRIDGE_PID)"; \
+		echo "Host bridge started: $$(cat "$(HOST_BRIDGE_PID)")"; \
+		echo "Logs: $(HOST_BRIDGE_LOG)"; \
+	fi
+
+ui-bridge-stop: ## Остановить host bridge
+	@if [ -f "$(HOST_BRIDGE_PID)" ] && kill -0 "$$(cat "$(HOST_BRIDGE_PID)")" 2>/dev/null; then \
+		kill "$$(cat "$(HOST_BRIDGE_PID)")"; \
+		rm -f "$(HOST_BRIDGE_PID)"; \
+		echo "Host bridge stopped"; \
+	else \
+		rm -f "$(HOST_BRIDGE_PID)"; \
+		echo "Host bridge is not running"; \
+	fi
+
+ui: ui-bridge-start web-ui-up ## Запустить host bridge и Web UI контейнер
+
+web-ui-up: proxy-network-ensure ## Собрать и запустить Web UI
+	$(WEB_UI_COMPOSE) up -d --build
+
+web-ui-down: ## Удалить Web UI контейнер
+	$(WEB_UI_COMPOSE) down
+
+web-ui-logs: ## Показать логи Web UI
+	$(WEB_UI_COMPOSE) logs -f web-ui
 
 ##@ Docker network
 proxy-network-ensure: ## Создать общую сеть proxy, если ее еще нет
@@ -124,6 +168,8 @@ npm-shell: ## Shell внутри контейнера NPM
 	$(MAKE) compose-shell NAME=npm
 
 .PHONY: help init settings-show settings-set
+.PHONY: ui-bridge ui-bridge-start ui-bridge-stop ui
+.PHONY: web-ui-up web-ui-down web-ui-logs
 .PHONY: proxy-network-ensure add-proxy delete-proxy
 .PHONY: compose-up compose-pull compose-start compose-stop compose-down compose-logs compose-shell
 .PHONY: host-add host-remove

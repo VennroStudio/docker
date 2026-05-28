@@ -9,12 +9,15 @@ services:
     container_name: web-ui
     restart: unless-stopped
     working_dir: "${PWD}"
+    environment:
+      HOST_BRIDGE_URL: "${HOST_BRIDGE_URL:-http://host.docker.internal:8099}"
     ports:
       - "8088:8088"
     volumes:
       - "${PWD}:${PWD}"
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/hosts:/host/etc/hosts
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - proxy
 

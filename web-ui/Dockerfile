@@ -14,7 +14,6 @@ FROM docker:27-cli AS runtime
 
 RUN apk add --no-cache make nodejs npm
 
-ENV HOSTS_FILE=/host/etc/hosts
 ENV UI_STATIC_DIR=/opt/web-ui/dist
 
 FROM runtime

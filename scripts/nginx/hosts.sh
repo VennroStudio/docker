@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env sh
+set -eu
 
 ACTION="${1:-}"
 DOMAIN="${2:-}"
@@ -17,6 +17,10 @@ fail() {
   exit 1
 }
 
+sudo_run() {
+  sudo -S -p "[sudo] password: " "$@"
+}
+
 domain_exists() {
   awk -v domain="$DOMAIN" '
     $1 !~ /^#/ {
@@ -29,18 +33,18 @@ domain_exists() {
 }
 
 write_hosts() {
-  if [[ -w "$HOSTS_FILE" ]]; then
+  if [ -w "$HOSTS_FILE" ]; then
     cp "$1" "$HOSTS_FILE"
   else
-    sudo cp "$1" "$HOSTS_FILE"
+    sudo_run cp "$1" "$HOSTS_FILE"
   fi
 }
 
 backup_hosts() {
-  if [[ -w "$HOSTS_FILE" ]]; then
+  if [ -w "$HOSTS_FILE" ]; then
     cp "$HOSTS_FILE" "$HOSTS_FILE.infrastructure.bak"
   else
-    sudo cp "$HOSTS_FILE" "$HOSTS_FILE.infrastructure.bak"
+    sudo_run cp "$HOSTS_FILE" "$HOSTS_FILE.infrastructure.bak"
   fi
 }
 
@@ -50,10 +54,13 @@ add_domain() {
     return
   fi
 
-  if [[ -w "$HOSTS_FILE" ]]; then
+  if [ -w "$HOSTS_FILE" ]; then
     printf "%s\t%s %s\n" "$HOST_IP" "$DOMAIN" "$MARKER" >> "$HOSTS_FILE"
   else
-    printf "%s\t%s %s\n" "$HOST_IP" "$DOMAIN" "$MARKER" | sudo tee -a "$HOSTS_FILE" >/dev/null
+    tmp_file="$(mktemp)"
+    printf "%s\t%s %s\n" "$HOST_IP" "$DOMAIN" "$MARKER" > "$tmp_file"
+    sudo_run sh -c 'cat "$1" >> "$2"' sh "$tmp_file" "$HOSTS_FILE"
+    rm -f "$tmp_file"
   fi
 
   echo "Added $DOMAIN -> $HOST_IP to $HOSTS_FILE"
@@ -84,8 +91,12 @@ remove_domain() {
   echo "Removed $DOMAIN from $HOSTS_FILE"
 }
 
-[[ -n "$ACTION" && -n "$DOMAIN" ]] || { usage; exit 1; }
-[[ "$DOMAIN" =~ ^[a-zA-Z0-9.-]+$ ]] || fail "Invalid DOMAIN: $DOMAIN"
+[ -n "$ACTION" ] && [ -n "$DOMAIN" ] || { usage; exit 1; }
+case "$DOMAIN" in
+  *[!a-zA-Z0-9.-]*)
+    fail "Invalid DOMAIN: $DOMAIN"
+    ;;
+esac
 
 case "$ACTION" in
   add) add_domain ;;

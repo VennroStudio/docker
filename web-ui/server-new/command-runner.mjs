@@ -1,6 +1,9 @@
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 
 const sensitiveFlags = new Set(["--password", "--root-password", "--secret", "--token", "--npm-password", "--api-key"]);
+const commandSessions = new Map();
+const commandSessionPrefix = "cmd:";
 
 export function stream(res, command, args, env = process.env) {
   let child;
@@ -31,7 +34,7 @@ export function stream(res, command, args, env = process.env) {
   });
 }
 
-export function streamSse(req, res, command, args, env = process.env) {
+export function streamSse(req, res, command, args, env = process.env, options = {}) {
   let child;
 
   res.writeHead(200, {
@@ -43,17 +46,25 @@ export function streamSse(req, res, command, args, env = process.env) {
 
   sse(res, `$ ${formatCommandForDisplay(command, args)}\n\n`);
   child = spawn(command, args, { env });
+  const sessionId = options.interactive ? `${commandSessionPrefix}${randomUUID()}` : null;
+
+  if (sessionId) {
+    commandSessions.set(sessionId, child);
+    sse(res, sessionId, "session");
+  }
 
   child.stdout.on("data", (data) => sse(res, data));
   child.stderr.on("data", (data) => sse(res, data));
 
   child.on("error", (error) => {
+    if (sessionId) commandSessions.delete(sessionId);
     sse(res, `${error.message}\n`);
     sse(res, "\n[exit 1]\n", "done");
     res.end();
   });
 
   child.on("close", (code) => {
+    if (sessionId) commandSessions.delete(sessionId);
     if (!res.writableEnded) {
       sse(res, `\n[exit ${code}]\n`, "done");
       res.end();
@@ -63,6 +74,25 @@ export function streamSse(req, res, command, args, env = process.env) {
   res.on("close", () => {
     if (child && !child.killed) child.kill("SIGTERM");
   });
+}
+
+export function isCommandSession(sessionId) {
+  return typeof sessionId === "string" && sessionId.startsWith(commandSessionPrefix) && commandSessions.has(sessionId);
+}
+
+export function writeCommandInput(sessionId, input) {
+  const child = commandSessions.get(sessionId);
+  if (!child || child.killed || !child.stdin.writable) throw new Error("Command session is not running");
+  child.stdin.write(input);
+}
+
+export function stopCommandSession(sessionId) {
+  const child = commandSessions.get(sessionId);
+  if (!child) return;
+
+  commandSessions.delete(sessionId);
+  if (child.stdin.writable) child.stdin.end();
+  if (!child.killed) child.kill("SIGTERM");
 }
 
 export function formatCommandForDisplay(command, args) {

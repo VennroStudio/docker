@@ -34,7 +34,7 @@ export async function nginxStreamRoute(req, res) {
     assert(action === "add" || action === "remove", "Invalid host action");
     validateDomain(domain);
     const [command, args] = hostCommand(action, domain);
-    return streamSse(req, res, command, args, process.env);
+    return streamSse(req, res, command, args, process.env, { interactive: true });
   }
 
   if (url.pathname === "/api/stream/proxy") {

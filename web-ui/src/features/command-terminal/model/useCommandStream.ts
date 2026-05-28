@@ -40,7 +40,10 @@ export function useCommandStream() {
     setStreamState("running");
     const handlers: StreamHandlers = {
       onPrompt: setShellPrompt,
-      onSession: setShellSessionId,
+      onSession: (sessionId) => {
+        setShellSessionId(sessionId);
+        setShellPrompt(sessionId.startsWith("cmd:") ? "" : "$");
+      },
       onMessage: append,
       onDone: (text, ok) => {
         append(text);
@@ -85,7 +88,7 @@ export function useCommandStream() {
 
   const sendInput = (input: string) => {
     if (!shellSessionId) return;
-    append(`${shellPrompt}${input}\n`);
+    append(shellSessionId.startsWith("cmd:") ? "[input sent]\n" : `${shellPrompt}${input}\n`);
     void sendShellInput(shellSessionId, `${input}\n`).catch((error: unknown) => {
       append(`\n${error instanceof Error ? error.message : String(error)}\n`);
       setStreamState("error");

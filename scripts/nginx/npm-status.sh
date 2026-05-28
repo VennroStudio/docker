@@ -1,16 +1,16 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env sh
+set -eu
 
 COMPOSE_DIR="${COMPOSE_DIR:-docker/compose}"
 SETTINGS_FILE="${INFRA_SETTINGS_FILE:-config/settings.json}"
-COMPOSE_ENV_ARGS=()
-if [[ -f .env ]]; then
-  COMPOSE_ENV_ARGS=(--env-file .env)
+COMPOSE_ENV_ARGS=""
+if [ -f .env ]; then
+  COMPOSE_ENV_ARGS="--env-file .env"
 fi
 
 COMPOSE_FILE="${COMPOSE_DIR}/docker-compose-npm.yml"
 CONTAINER="$(
-  docker compose "${COMPOSE_ENV_ARGS[@]}" -f "$COMPOSE_FILE" config --format json |
+  docker compose $COMPOSE_ENV_ARGS -f "$COMPOSE_FILE" config --format json |
     sed -n 's/.*"container_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' |
     head -n 1
 )"
@@ -32,10 +32,10 @@ URL="$(
     head -n 1
 )"
 
-if [[ -n "$STATUS" ]]; then
+if [ -n "$STATUS" ]; then
   UPTIME="$STATUS"
   STATE="${DOCKER_STATE:-unknown}"
-  if [[ "$STATE" == "running" ]]; then
+  if [ "$STATE" = "running" ]; then
     RUNNING=true
   fi
 fi
