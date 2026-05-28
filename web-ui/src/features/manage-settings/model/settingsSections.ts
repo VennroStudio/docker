@@ -22,13 +22,6 @@ export const settingsSections: SettingsSectionDefinition[] = [
   {
     id: "proxy",
     fields: [
-      {
-        env: "NPM_URL",
-        group: "proxy",
-        label: "NPM URL",
-        name: "npmUrl",
-        placeholder: "http://localhost:81",
-      },
       { autocomplete: "username", env: "NPM_EMAIL", group: "proxy", label: "NPM email", name: "npmEmail" },
       {
         autocomplete: "current-password",
