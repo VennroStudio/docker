@@ -11,6 +11,7 @@ import {
   mariadbInstances,
   postgresInstances,
 } from "./server-new/modules/database/routes.mjs";
+import { homeStatus } from "./server-new/modules/home/routes.mjs";
 import { host, proxy, nginxStatus, isNginxStreamRoute, nginxStreamRoute } from "./server-new/modules/nginx/routes.mjs";
 import { isRedisStreamRoute, redisStatus, redisStreamRoute } from "./server-new/modules/redis/routes.mjs";
 import { isMinioStreamRoute, minioStatus, minioStreamRoute } from "./server-new/modules/minio/routes.mjs";
@@ -20,7 +21,6 @@ import { generateEnv, settings } from "./server-new/settings-route.mjs";
 import { shellInput, shellStop } from "./server-new/shell-router.mjs";
 import { serveStatic } from "./server-new/static.mjs";
 import { containers } from "./server/routes/containers.mjs";
-import { status } from "./server/routes/status.mjs";
 import { links } from "./server/routes/links.mjs";
 import { streamRoute } from "./server/routes/stream.mjs";
 
@@ -36,7 +36,7 @@ createServer(async (req, res) => {
       if (isRegistryStreamRoute(req)) return await registryStreamRoute(req, res);
       return await streamRoute(req, res);
     }
-    if (req.method === "GET" && req.url === "/api/status") return await status(req, res);
+    if (req.method === "GET" && req.url === "/api/status") return await homeStatus(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/containers")) return await containers(req, res);
     if (req.method === "GET" && req.url === "/api/nginx/status") return await nginxStatus(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/databases")) return await databases(req, res);
