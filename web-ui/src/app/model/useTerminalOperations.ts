@@ -21,7 +21,7 @@ export type RunWithTerminalConfig = {
 
 type UseTerminalOperationsConfig = {
   containerStatesRefresh: () => Promise<void> | void;
-  serviceLinksRefresh: () => Promise<void> | void;
+  serviceLinksRefresh?: () => Promise<void> | void;
   serviceStatusesRefresh: () => void;
   text: AppText;
   toast: ToastApi;
@@ -62,7 +62,7 @@ export function useTerminalOperations({
         onSettled: ({ ok }) => {
           serviceStatusesRefresh();
           void containerStatesRefresh();
-          void serviceLinksRefresh();
+          void serviceLinksRefresh?.();
           toast.show({
             title: ok ? text.operationToast.success(label) : text.operationToast.error(label),
             tone: ok ? "success" : "danger",

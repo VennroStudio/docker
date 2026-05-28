@@ -43,7 +43,6 @@ export type DatabaseAdminSectionProps = {
   actions: CommandAction[];
   children?: ReactNode;
   copy: DatabaseAdminCopy;
-  eyebrow: string;
   link?: ServiceLink;
   open: boolean;
   operationDisabled?: boolean;

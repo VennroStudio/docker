@@ -41,27 +41,8 @@ export const settingsSections: SettingsSectionDefinition[] = [
     ],
   },
   {
-    id: "phpmyadmin",
-    fields: [
-      {
-        env: "PMA_URL",
-        group: "phpmyadmin",
-        label: "phpMyAdmin URL",
-        name: "pmaUrl",
-        placeholder: "http://localhost:8080",
-      },
-    ],
-  },
-  {
     id: "pgadmin",
     fields: [
-      {
-        env: "PGA_URL",
-        group: "pgadmin",
-        label: "pgAdmin URL",
-        name: "pgaUrl",
-        placeholder: "http://localhost:5050",
-      },
       {
         autocomplete: "username",
         env: "PGADMIN_EMAIL",

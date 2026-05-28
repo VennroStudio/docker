@@ -152,7 +152,6 @@ export type AppText = {
     };
     instanceTitle: (version: string) => string;
     loading: string;
-    phpmyadminEyebrow: string;
     portAuto: string;
     portLabel: string;
     serversTitle: string;
@@ -236,7 +235,6 @@ export type AppText = {
     instanceTitle: (version: string) => string;
     loading: string;
     pgadminConfigTitle: string;
-    pgadminEyebrow: string;
     portLabel: string;
     serversTitle: string;
     statusLabel: string;

@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { useMemo } from "react";
+import { ContainerStateBadge } from "@/entities/infrastructure";
 import { AccordionPanel, IconLink } from "@/shared/ui";
 import { DatabaseAction, InfoLine, ShellIconButton, StatusDot } from "../DatabaseControls";
 import { commandActionsBySuffix, databaseActionOrder } from "./types";
@@ -10,7 +11,6 @@ export function DatabaseAdminSection({
   actions,
   children,
   copy,
-  eyebrow,
   link,
   onOpenChange,
   onRun,
@@ -29,7 +29,7 @@ export function DatabaseAdminSection({
 
   return (
     <AccordionPanel
-      eyebrow={eyebrow}
+      eyebrow={<ContainerStateBadge state={overview.state} />}
       open={open}
       title={title}
       titlePrefix={<StatusDot state={overview.state} />}

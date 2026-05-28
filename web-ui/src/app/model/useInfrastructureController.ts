@@ -54,6 +54,7 @@ export function useInfrastructureController() {
   const navigate = useNavigate();
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
+  const serviceModuleView = !["home", "mariadb", "proxy", "settings"].includes(activeView);
   const activeShells =
     activeView === "mariadb"
         ? [...(commandPageRegistry.mariadb.shells || []), ...(commandPageRegistry.postgres.shells || [])]
@@ -62,7 +63,7 @@ export function useInfrastructureController() {
     enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings" && activeView !== "proxy",
     names: activeShells.map((shell) => shell.container),
   });
-  const serviceLinks = useServiceLinks(activeView !== "proxy" && activeView !== "mariadb");
+  const serviceLinks = useServiceLinks(serviceModuleView);
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const settings = useSettings();
@@ -80,7 +81,7 @@ export function useInfrastructureController() {
     toggleTerminal,
   } = useTerminalOperations({
     containerStatesRefresh: containerStates.refresh,
-    serviceLinksRefresh: serviceLinks.refresh,
+    serviceLinksRefresh: serviceModuleView ? serviceLinks.refresh : undefined,
     serviceStatusesRefresh: serviceStatuses.refresh,
     text,
     toast,

@@ -56,7 +56,6 @@ type PgAdminPanelProps = {
 };
 
 const pgAdminConfigFields: SettingsConfigField[] = [
-  { group: "pgadmin", label: "pgAdmin URL", name: "pgaUrl" },
   { autocomplete: "username", group: "pgadmin", label: "pgAdmin email", name: "pgaEmail" },
   {
     autocomplete: "current-password",
@@ -196,7 +195,6 @@ export function PgAdminPanel({
         shellLabel: actionLabels.shell.label,
         statusLabel: copy.statusLabel,
       }}
-      eyebrow={copy.pgadminEyebrow}
       link={link}
       open={open}
       operationDisabled={operationDisabled}

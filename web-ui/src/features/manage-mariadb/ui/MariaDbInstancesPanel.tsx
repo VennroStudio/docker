@@ -170,7 +170,6 @@ export function PhpMyAdminPanel({
         shellLabel: copy.actions.shell.label,
         statusLabel: copy.statusLabel,
       }}
-      eyebrow={copy.phpmyadminEyebrow}
       link={link}
       open={open}
       operationDisabled={operationDisabled}
