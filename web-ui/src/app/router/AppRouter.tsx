@@ -89,11 +89,9 @@ export function AppRouter({ controller }: AppRouterProps) {
         operationDisabled={operationRunning}
         operationDisabledTitle={operationBlockTitle}
         postgres={postgresInstances}
-        serviceLinks={serviceLinks.links}
         settings={settings.settings}
         text={text}
         translateActions={translateActions}
-        translateShells={translateShells}
         view={activeConfig}
         onCommandRun={runCommand}
         onMariaDbCreate={runMariaDbInstanceCreate}

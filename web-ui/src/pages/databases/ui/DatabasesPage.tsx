@@ -1,5 +1,4 @@
 import {
-  commandPageRegistry,
   pgadminActions,
   phpmyadminActions,
   type AppText,
@@ -18,7 +17,6 @@ import {
   type PostgresInstance,
   type PostgresInstanceAction,
   type PostgresInstanceForm,
-  type ServiceLink,
   type ShellAction,
   type ViewConfig,
 } from "@/entities/infrastructure";
@@ -44,12 +42,10 @@ type DatabasesPageProps = {
     loading: boolean;
     pgadmin: PgAdminOverview;
   };
-  serviceLinks: Record<string, ServiceLink>;
   settings?: AppSettings | null;
   text: AppText;
   view: ViewConfig;
   translateActions: (actions: CommandAction[]) => CommandAction[];
-  translateShells: (actions: ShellAction[]) => ShellAction[];
   onCommandRun: (action: CommandAction) => void;
   onMariaDbCreate: (form: MariaDbInstanceForm) => void;
   onMariaDbDatabaseCreate: (form: MariaDbDatabaseForm) => void;
@@ -91,16 +87,12 @@ export function DatabasesPage({
   operationDisabled,
   operationDisabledTitle,
   postgres,
-  serviceLinks,
   settings,
   text,
   translateActions,
-  translateShells,
   view,
 }: DatabasesPageProps) {
   const page = text.servicePages.mariadb;
-  const mariaShells = translateShells(commandPageRegistry.mariadb.shells || []);
-  const postgresShells = translateShells(commandPageRegistry.postgres.shells || []);
   const mariaDbDefaults = settings?.mariadb;
   const postgresDefaults = settings?.postgres;
   const defaultPostgresDumpPath = postgresDefaults
@@ -163,11 +155,11 @@ export function DatabasesPage({
         <PhpMyAdminPanel
           actions={translateActions(phpmyadminActions)}
           activeOperationKey={activeOperationKey}
-          link={serviceLinks["phpmyadmin-container"]}
+          link={mariaDb.phpmyadmin.link}
           operationDisabled={operationDisabled}
           operationDisabledTitle={operationDisabledTitle}
           overview={mariaDb.phpmyadmin}
-          shell={mariaShells.find((shell) => shell.container === "phpmyadmin-container")}
+          shell={shellAction(mariaDb.phpmyadmin.container, "phpMyAdmin", text)}
           text={text}
           onRun={onCommandRun}
           onShellOpen={onShellOpen}
@@ -175,11 +167,11 @@ export function DatabasesPage({
         <PgAdminPanel
           actions={translateActions(pgadminActions)}
           activeOperationKey={activeOperationKey}
-          link={serviceLinks["pgadmin-container"]}
+          link={postgres.pgadmin.link}
           operationDisabled={operationDisabled}
           operationDisabledTitle={operationDisabledTitle}
           overview={postgres.pgadmin}
-          shell={postgresShells.find((shell) => shell.container === "pgadmin-container")}
+          shell={shellAction(postgres.pgadmin.container, "pgAdmin", text)}
           text={text}
           onRun={onCommandRun}
           onShellOpen={onShellOpen}
@@ -193,4 +185,13 @@ function joinPath(base: string, name: string) {
   if (!base) return name;
   if (!name) return base;
   return `${base.replace(/\/+$/, "")}/${name.replace(/^\/+/, "")}`;
+}
+
+function shellAction(container: string, label: string, text: AppText): ShellAction | undefined {
+  if (!container) return undefined;
+  return {
+    container,
+    detail: text.shell.detail(container),
+    label: text.shell.openLabel(label),
+  };
 }

@@ -3,6 +3,14 @@ import { createServer } from "node:http";
 import { port } from "./server-new/config.mjs";
 import { getErrorMessage, sendJson } from "./server-new/http.mjs";
 import { meta } from "./server-new/meta-route.mjs";
+import {
+  databases,
+  databaseStreamRoute,
+  dumps,
+  isDatabaseStreamRoute,
+  mariadbInstances,
+  postgresInstances,
+} from "./server-new/modules/database/routes.mjs";
 import { host, proxy, nginxStatus, isNginxStreamRoute, nginxStreamRoute } from "./server-new/modules/nginx/routes.mjs";
 import { runCommand } from "./server-new/run-route.mjs";
 import { generateEnv, settings } from "./server-new/settings-route.mjs";
@@ -10,11 +18,7 @@ import { shellInput, shellStop } from "./server-new/shell-router.mjs";
 import { serveStatic } from "./server-new/static.mjs";
 import { containers } from "./server/routes/containers.mjs";
 import { status } from "./server/routes/status.mjs";
-import { databases } from "./server/routes/databases.mjs";
-import { dumps } from "./server/routes/dumps.mjs";
 import { links } from "./server/routes/links.mjs";
-import { mariadbInstances } from "./server/routes/mariadb.mjs";
-import { postgresInstances } from "./server/routes/postgres.mjs";
 import { streamRoute } from "./server/routes/stream.mjs";
 
 createServer(async (req, res) => {
@@ -23,6 +27,7 @@ createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/stream/shell/stop") return await shellStop(req, res);
     if ((req.method === "GET" || req.method === "POST") && req.url.startsWith("/api/stream/")) {
       if (isNginxStreamRoute(req)) return await nginxStreamRoute(req, res);
+      if (isDatabaseStreamRoute(req)) return await databaseStreamRoute(req, res);
       return await streamRoute(req, res);
     }
     if (req.method === "GET" && req.url === "/api/status") return await status(req, res);

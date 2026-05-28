@@ -139,7 +139,7 @@ async function runInstance(options) {
   const instance = findTargetInstance(options);
 
   if (action === "shell") {
-    return await run("docker", ["exec", "-it", instance.container, "sh"]);
+    return await run("docker", ["exec", ...shellFlags(), instance.container, "sh"]);
   }
 
   if (action === "clean") {
@@ -318,6 +318,13 @@ function run(command, args) {
         );
     });
   });
+}
+
+function shellFlags() {
+  return (process.env.SHELL_FLAGS || "-it")
+    .split(/\s+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
 }
 
 function quotePhp(value) {

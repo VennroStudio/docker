@@ -62,7 +62,7 @@ export function useInfrastructureController() {
     enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings" && activeView !== "proxy",
     names: activeShells.map((shell) => shell.container),
   });
-  const serviceLinks = useServiceLinks(activeView !== "proxy");
+  const serviceLinks = useServiceLinks(activeView !== "proxy" && activeView !== "mariadb");
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const settings = useSettings();
@@ -229,5 +229,10 @@ export function useInfrastructureController() {
 export type InfrastructureController = ReturnType<typeof useInfrastructureController>;
 
 function shellPreview(container: string) {
-  return container === "nginx-container" ? "make npm-shell" : `docker exec -i ${container} sh`;
+  if (container === "nginx-container") return "make npm-shell";
+  if (container === "phpmyadmin-container") return "make phpmyadmin-shell";
+  if (container === "pgadmin-container") return "make pgadmin-shell";
+  if (container.startsWith("mariadb-")) return `make mariadb-instance-shell CONTAINER=${container}`;
+  if (container.startsWith("postgres-")) return `make postgres-instance-shell CONTAINER=${container}`;
+  return `make compose-shell CONTAINER=${container}`;
 }

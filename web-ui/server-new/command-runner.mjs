@@ -1,7 +1,17 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 
-const sensitiveFlags = new Set(["--password", "--root-password", "--secret", "--token", "--npm-password", "--api-key"]);
+const sensitiveFlags = new Set([
+  "--api-key",
+  "--npm-password",
+  "--password",
+  "--root-password",
+  "--secret",
+  "--token",
+  "PASSWORD",
+  "POSTGRES_PASSWORD",
+  "ROOT_PASSWORD",
+]);
 const commandSessions = new Map();
 const commandSessionPrefix = "cmd:";
 

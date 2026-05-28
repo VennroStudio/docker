@@ -152,6 +152,9 @@ npm-shell: ## Shell внутри контейнера NPM
 	$(MAKE) compose-shell NAME=npm
 
 ##@ MariaDB
+mariadb-status: ## Показать статус MariaDB instances и phpMyAdmin
+	@$(NODE_RUN) ./scripts/database/mariadb/status.mjs overview
+
 mariadb-shell: ## Shell MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action shell
 
@@ -160,6 +163,9 @@ mariadb-import: ## Импорт .sql/.sql.gz дампа, передать DATABA
 
 mariadb-export: ## Экспорт .sql/.sql.gz дампа, передать DATABASE=wp DUMP_FILE=dumps/mariadb/app.sql.gz, опционально NAME=... или CONTAINER=...
 	@$(NODE_RUN) ./scripts/database/mariadb/export.mjs
+
+mariadb-dump-list: ## Показать локальные MariaDB dump файлы
+	@$(NODE_RUN) ./scripts/database/dumps.mjs list --engine mariadb
 
 mariadb-db-list: ## Показать базы MariaDB, опционально NAME=... или CONTAINER=...
 	@$(NODE_RUN) ./scripts/database/mariadb/databases.mjs list
@@ -189,6 +195,16 @@ mariadb-instance-add: ## Создать MariaDB instance, передать VERSI
 mariadb-instance-list: ## Показать MariaDB instances
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs list
 
+mariadb-instance-resolve: ## Найти MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs resolve \
+		$(if $(NAME),--name "$(NAME)",) \
+		$(if $(CONTAINER),--container "$(CONTAINER)",)
+
+mariadb-instance-status: ## Показать статус MariaDB instance, передать NAME=11-4 или CONTAINER=mariadb-11-4-container
+	@$(NODE_RUN) ./scripts/database/mariadb/status.mjs instance \
+		$(if $(NAME),--name "$(NAME)",) \
+		$(if $(CONTAINER),--container "$(CONTAINER)",)
+
 mariadb-instance-generate: ## Перегенерировать phpMyAdmin servers config
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
 
@@ -214,6 +230,12 @@ mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4 и
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs run --action shell
 
 ##@ phpMyAdmin
+phpmyadmin-status: ## Показать статус phpMyAdmin
+	@$(NODE_RUN) ./scripts/database/mariadb/status.mjs phpmyadmin
+
+phpmyadmin-link: ## Показать URL phpMyAdmin
+	@$(NODE_RUN) ./scripts/database/mariadb/status.mjs phpmyadmin-link
+
 phpmyadmin-up: ## Запустить контейнер phpMyAdmin
 	$(MAKE) compose-up NAME=phpmyadmin
 
@@ -236,6 +258,9 @@ phpmyadmin-clean: ## Удалить контейнер и образ phpMyAdmin
 phpmyadmin-logs: ## Логи phpMyAdmin
 	$(MAKE) compose-logs NAME=phpmyadmin
 
+phpmyadmin-shell: ## Shell внутри контейнера phpMyAdmin
+	$(MAKE) compose-shell NAME=phpmyadmin
+
 phpmyadmin-config-generate: ## Перегенерировать список серверов phpMyAdmin
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
 
@@ -243,6 +268,9 @@ phpmyadmin-reload: ## Перезапустить phpMyAdmin после изме�
 	$(MAKE) compose-restart NAME=phpmyadmin
 
 ##@ Postgres
+postgres-status: ## Показать статус Postgres instances и pgAdmin
+	@$(NODE_RUN) ./scripts/database/postgres/status.mjs overview
+
 postgres-up: ## Запустить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
 	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action up
 
@@ -269,6 +297,9 @@ postgres-import: ## Импорт .sql/.sql.gz/.dump дампа, передать
 
 postgres-export: ## Экспорт .sql/.sql.gz/.dump дампа, передать POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.dump, опционально NAME=... или CONTAINER=...
 	@$(NODE_RUN) ./scripts/database/postgres/export.mjs
+
+postgres-dump-list: ## Показать локальные Postgres dump файлы
+	@$(NODE_RUN) ./scripts/database/dumps.mjs list --engine postgres
 
 postgres-db-list: ## Показать базы Postgres, опционально NAME=... или CONTAINER=...
 	@$(NODE_RUN) ./scripts/database/postgres/databases.mjs list
@@ -298,6 +329,16 @@ postgres-instance-add: ## Создать Postgres instance, передать VER
 postgres-instance-list: ## Показать Postgres instances
 	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs list
 
+postgres-instance-resolve: ## Найти Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs resolve \
+		$(if $(NAME),--name "$(NAME)",) \
+		$(if $(CONTAINER),--container "$(CONTAINER)",)
+
+postgres-instance-status: ## Показать статус Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
+	@$(NODE_RUN) ./scripts/database/postgres/status.mjs instance \
+		$(if $(NAME),--name "$(NAME)",) \
+		$(if $(CONTAINER),--container "$(CONTAINER)",)
+
 postgres-instance-up: ## Запустить Postgres instance, передать NAME=17 или CONTAINER=postgres-17-container
 	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action up
 
@@ -320,6 +361,12 @@ postgres-instance-shell: ## Shell Postgres instance, передать NAME=17 и
 	@$(NODE_RUN) ./scripts/database/postgres/instances.mjs run --action shell
 
 ##@ pgAdmin
+pgadmin-status: ## Показать статус pgAdmin
+	@$(NODE_RUN) ./scripts/database/postgres/status.mjs pgadmin
+
+pgadmin-link: ## Показать URL pgAdmin
+	@$(NODE_RUN) ./scripts/database/postgres/status.mjs pgadmin-link
+
 pgadmin-up: ## Запустить контейнер pgAdmin
 	$(MAKE) compose-up NAME=pgadmin
 
@@ -342,6 +389,9 @@ pgadmin-clean: ## Удалить контейнер и образ pgAdmin
 pgadmin-logs: ## Логи pgAdmin
 	$(MAKE) compose-logs NAME=pgadmin
 
+pgadmin-shell: ## Shell внутри контейнера pgAdmin
+	$(MAKE) compose-shell NAME=pgadmin
+
 .PHONY: help init settings-show settings-set
 .PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
@@ -349,9 +399,9 @@ pgadmin-logs: ## Логи pgAdmin
 .PHONY: host-add host-remove
 .PHONY: app-proxy app-proxy-remove
 .PHONY: npm-status npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs npm-shell
-.PHONY: mariadb-shell mariadb-import mariadb-export mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
-.PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
-.PHONY: phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs phpmyadmin-config-generate phpmyadmin-reload
-.PHONY: postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload
-.PHONY: postgres-instance-add postgres-instance-list postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
-.PHONY: pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs
+.PHONY: mariadb-status mariadb-shell mariadb-import mariadb-export mariadb-dump-list mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
+.PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-resolve mariadb-instance-status mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
+.PHONY: phpmyadmin-status phpmyadmin-link phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs phpmyadmin-shell phpmyadmin-config-generate phpmyadmin-reload
+.PHONY: postgres-status postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-dump-list postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload
+.PHONY: postgres-instance-add postgres-instance-list postgres-instance-resolve postgres-instance-status postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
+.PHONY: pgadmin-status pgadmin-link pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell

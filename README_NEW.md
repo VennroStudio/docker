@@ -144,6 +144,13 @@ make mariadb-instance-add VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWO
 make mariadb-instance-list
 ```
 
+Проверить конкретный MariaDB instance:
+
+```sh
+make mariadb-instance-resolve NAME=11-4
+make mariadb-instance-status NAME=11-4
+```
+
 Запустить MariaDB instance:
 
 ```sh
@@ -154,6 +161,18 @@ make mariadb-instance-up NAME=11-4
 
 ```sh
 make phpmyadmin-up
+```
+
+Проверить статус MariaDB instances и phpMyAdmin:
+
+```sh
+make mariadb-status
+```
+
+Показать URL phpMyAdmin:
+
+```sh
+make phpmyadmin-link
 ```
 
 Если нужен локальный домен для phpMyAdmin:
@@ -167,6 +186,12 @@ make app-proxy DOMAIN=pma.local TARGET=phpmyadmin-container PORT=80
 
 ```sh
 make mariadb-db-list NAME=11-4
+```
+
+Показать локальные dump файлы:
+
+```sh
+make mariadb-dump-list
 ```
 
 Создать базу данных:
@@ -213,6 +238,13 @@ make postgres-instance-add VERSION=17 DB_USER=admin PASSWORD=secret DATABASE=app
 make postgres-instance-list
 ```
 
+Проверить конкретный Postgres instance:
+
+```sh
+make postgres-instance-resolve NAME=17
+make postgres-instance-status NAME=17
+```
+
 Запустить Postgres instance:
 
 ```sh
@@ -223,6 +255,18 @@ make postgres-instance-up NAME=17
 
 ```sh
 make pgadmin-up
+```
+
+Проверить статус Postgres instances и pgAdmin:
+
+```sh
+make postgres-status
+```
+
+Показать URL pgAdmin:
+
+```sh
+make pgadmin-link
 ```
 
 Если нужен локальный домен для pgAdmin:
@@ -236,6 +280,12 @@ make app-proxy DOMAIN=pgadmin.local TARGET=pgadmin-container PORT=80
 
 ```sh
 make postgres-db-list NAME=17
+```
+
+Показать локальные dump файлы:
+
+```sh
+make postgres-dump-list
 ```
 
 Создать базу данных:
@@ -404,6 +454,12 @@ make npm-shell
 
 ### MariaDB
 
+Показать статус MariaDB instances и phpMyAdmin:
+
+```sh
+make mariadb-status
+```
+
 Зайти в shell MariaDB instance:
 
 ```sh
@@ -420,6 +476,12 @@ make mariadb-import NAME=11-4 DATABASE=app DUMP_FILE=dumps/mariadb/app.sql
 
 ```sh
 make mariadb-export NAME=11-4 DATABASE=app DUMP_FILE=dumps/mariadb/app.sql.gz
+```
+
+Показать локальные MariaDB dump файлы:
+
+```sh
+make mariadb-dump-list
 ```
 
 Показать список баз данных:
@@ -464,6 +526,19 @@ make mariadb-instance-add VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWO
 
 ```sh
 make mariadb-instance-list
+```
+
+Найти MariaDB instance по имени или контейнеру:
+
+```sh
+make mariadb-instance-resolve NAME=11-4
+make mariadb-instance-resolve CONTAINER=mariadb-11-4-container
+```
+
+Показать статус MariaDB instance:
+
+```sh
+make mariadb-instance-status NAME=11-4
 ```
 
 Перегенерировать `docker/phpmyadmin/config.inc.php`:
@@ -516,6 +591,18 @@ make mariadb-instance-shell NAME=11-4
 
 ### phpMyAdmin
 
+Показать статус phpMyAdmin:
+
+```sh
+make phpmyadmin-status
+```
+
+Показать URL phpMyAdmin:
+
+```sh
+make phpmyadmin-link
+```
+
 Скачать или обновить Docker image phpMyAdmin:
 
 ```sh
@@ -558,6 +645,12 @@ make phpmyadmin-clean
 make phpmyadmin-logs
 ```
 
+Зайти в shell контейнера phpMyAdmin:
+
+```sh
+make phpmyadmin-shell
+```
+
 Перегенерировать список серверов phpMyAdmin:
 
 ```sh
@@ -571,6 +664,12 @@ make phpmyadmin-reload
 ```
 
 ### Postgres
+
+Показать статус Postgres instances и pgAdmin:
+
+```sh
+make postgres-status
+```
 
 Запустить Postgres instance:
 
@@ -626,6 +725,12 @@ make postgres-import NAME=17 POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.sql
 make postgres-export NAME=17 POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.dump
 ```
 
+Показать локальные Postgres dump файлы:
+
+```sh
+make postgres-dump-list
+```
+
 Показать список баз данных:
 
 ```sh
@@ -668,6 +773,19 @@ make postgres-instance-add VERSION=17 DB_USER=admin PASSWORD=secret DATABASE=app
 
 ```sh
 make postgres-instance-list
+```
+
+Найти Postgres instance по имени или контейнеру:
+
+```sh
+make postgres-instance-resolve NAME=17
+make postgres-instance-resolve CONTAINER=postgres-17-container
+```
+
+Показать статус Postgres instance:
+
+```sh
+make postgres-instance-status NAME=17
 ```
 
 Запустить Postgres instance:
@@ -714,6 +832,18 @@ make postgres-instance-shell NAME=17
 
 ### pgAdmin
 
+Показать статус pgAdmin:
+
+```sh
+make pgadmin-status
+```
+
+Показать URL pgAdmin:
+
+```sh
+make pgadmin-link
+```
+
 Скачать или обновить Docker image pgAdmin:
 
 ```sh
@@ -754,4 +884,10 @@ make pgadmin-clean
 
 ```sh
 make pgadmin-logs
+```
+
+Зайти в shell контейнера pgAdmin:
+
+```sh
+make pgadmin-shell
 ```

@@ -10,7 +10,7 @@ export const port = Number(process.env.UI_PORT || 8088);
 export const projectRoot = process.cwd();
 export const staticRoot = path.resolve(process.env.UI_STATIC_DIR || path.join(moduleDir, "../dist"));
 export const commandMap = Object.fromEntries(
-  Object.entries(commandManifest.commands).map(([id, command]) => [id, ["make", "-e", ...command.make]]),
+  Object.entries(commandManifest.commands).map(([id, command]) => [id, ["make", ...command.make]]),
 );
 export const serviceContainers = commandManifest.services;
 export const shellGroups = commandManifest.shells;

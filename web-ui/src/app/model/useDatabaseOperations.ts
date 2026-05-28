@@ -55,7 +55,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.create,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => streamMariaDbInstanceCreate(form, handlers),
-      preview: `node ./scripts/database/mariadb/instances.mjs add --version ${form.version}`,
+      preview: `make mariadb-instance-add VERSION=${form.version} DB_USER=${form.user} PASSWORD=******** ROOT_PASSWORD=********`,
     });
   };
 
@@ -65,7 +65,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.import.action,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => streamMariaDbImport(form, handlers),
-      preview: `make -e mariadb-import CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
+      preview: `make mariadb-import CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 
@@ -75,7 +75,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.export.action,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => streamMariaDbExport(form, handlers),
-      preview: `make -e mariadb-export CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
+      preview: `make mariadb-export CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 
@@ -85,7 +85,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.databaseManager.createAction,
       onSettled: refreshDatabaseCatalog,
       open: (handlers) => streamMariaDbDatabase(form, "create", handlers),
-      preview: `make -e mariadb-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
+      preview: `make mariadb-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
 
@@ -104,7 +104,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.databaseManager.deleteAction,
       onSettled: refreshDatabaseCatalog,
       open: (handlers) => streamMariaDbDatabase(form, "drop", handlers),
-      preview: `make -e mariadb-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
+      preview: `make mariadb-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
 
@@ -125,7 +125,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.actions[action].label,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => streamMariaDbInstanceAction(instance.name, action, handlers),
-      preview: `docker compose -f ${instance.composeFile} ${action}`,
+      preview: `make mariadb-instance-${action} NAME=${instance.name}`,
     });
   };
 
@@ -134,7 +134,7 @@ export function useDatabaseOperations({
       key: `shell:${instance.container}`,
       label: text.mariadbInstances.actions.shell.label,
       open: (handlers) => streamShell(instance.container, handlers),
-      preview: `docker exec -i ${instance.container} sh`,
+      preview: `make mariadb-instance-shell NAME=${instance.name}`,
     });
   };
 
@@ -144,7 +144,7 @@ export function useDatabaseOperations({
       label: text.postgresInstances.create,
       onSettled: refreshPostgresInstances,
       open: (handlers) => streamPostgresInstanceCreate(form, handlers),
-      preview: `node ./scripts/database/postgres/instances.mjs add --version ${form.version}`,
+      preview: `make postgres-instance-add VERSION=${form.version} DB_USER=${form.user} PASSWORD=******** DATABASE=${form.database}`,
     });
   };
 
@@ -154,7 +154,7 @@ export function useDatabaseOperations({
       label: text.postgresInstances.import.action,
       onSettled: refreshPostgresInstances,
       open: (handlers) => streamPostgresImport(form, handlers),
-      preview: `make -e postgres-import CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
+      preview: `make postgres-import CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 
@@ -164,7 +164,7 @@ export function useDatabaseOperations({
       label: text.postgresInstances.export.action,
       onSettled: refreshPostgresInstances,
       open: (handlers) => streamPostgresExport(form, handlers),
-      preview: `make -e postgres-export CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
+      preview: `make postgres-export CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
 
@@ -174,7 +174,7 @@ export function useDatabaseOperations({
       label: text.postgresInstances.databaseManager.createAction,
       onSettled: refreshDatabaseCatalog,
       open: (handlers) => streamPostgresDatabase(form, "create", handlers),
-      preview: `make -e postgres-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
+      preview: `make postgres-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
 
@@ -193,7 +193,7 @@ export function useDatabaseOperations({
       label: text.postgresInstances.databaseManager.deleteAction,
       onSettled: refreshDatabaseCatalog,
       open: (handlers) => streamPostgresDatabase(form, "drop", handlers),
-      preview: `make -e postgres-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
+      preview: `make postgres-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
 
@@ -214,7 +214,7 @@ export function useDatabaseOperations({
       label: text.mariadbInstances.actions[action].label,
       onSettled: refreshPostgresInstances,
       open: (handlers) => streamPostgresInstanceAction(instance.name, action, handlers),
-      preview: `docker compose -f ${instance.composeFile} ${action}`,
+      preview: `make postgres-instance-${action} NAME=${instance.name}`,
     });
   };
 
@@ -223,7 +223,7 @@ export function useDatabaseOperations({
       key: `shell:${instance.container}`,
       label: text.mariadbInstances.actions.shell.label,
       open: (handlers) => streamShell(instance.container, handlers),
-      preview: `docker exec -i ${instance.container} sh`,
+      preview: `make postgres-instance-shell NAME=${instance.name}`,
     });
   };
 
