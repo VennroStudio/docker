@@ -48,7 +48,7 @@ export async function getServiceLinks() {
   const registry = await readServiceLinks();
   const links = {
     ...defaultLinks,
-    "nginx-container": npmLinkFromSettings((await readSettings()).settings.proxy.npmPublicUrl),
+    "nginx-container": npmLinkFromSettings((await readSettings()).settings.proxy.npmUrl),
   };
 
   for (const binding of registry.bindings) {

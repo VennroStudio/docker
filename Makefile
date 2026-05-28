@@ -4,14 +4,10 @@ export
 COMPOSE_DIR := docker/compose
 COMPOSE_ENV := $(if $(wildcard .env),--env-file .env,)
 ROOT_DIR := $(CURDIR)
-NODE := docker run --rm -v "$(ROOT_DIR):/app" -w /app
-NODE_IMAGE := node:24-bookworm
-HOST_BRIDGE_HOST ?= 0.0.0.0
-HOST_BRIDGE_PORT ?= 8099
-HOST_BRIDGE_URL ?= http://host.docker.internal:$(HOST_BRIDGE_PORT)
-HOST_BRIDGE_PID := .tmp/host-bridge.pid
-HOST_BRIDGE_LOG := .tmp/host-bridge.log
-WEB_UI_COMPOSE := PWD="$(ROOT_DIR)" HOST_BRIDGE_URL="$(HOST_BRIDGE_URL)" docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-web-ui.yml
+NODE_RUN := ./scripts/config/node-runtime.sh run
+WEB_UI_IMAGE := infrastructure-ui
+WEB_UI_RUNTIME_DIR := build/web-ui
+WEB_UI_STATIC_DIR := $(WEB_UI_RUNTIME_DIR)/dist
 
 compose-file = $(COMPOSE_DIR)/docker-compose-$(NAME).yml
 compose = docker compose $(COMPOSE_ENV) -f $(call compose-file)
@@ -26,61 +22,44 @@ help: ## Показать список команд
 
 ##@ Project
 init: ## Создать settings.json из дефолтного шаблона
-	@$(NODE) \
-		-e INFRA_SETTINGS_FILE \
-		-e INFRA_DEFAULT_SETTINGS_FILE \
-		$(NODE_IMAGE) node ./scripts/config/settings.mjs init
+	@$(NODE_RUN) ./scripts/config/settings.mjs init
 
 settings-show: ## Показать текущий settings.json
-	@$(NODE) \
-		-e INFRA_SETTINGS_FILE \
-		-e INFRA_DEFAULT_SETTINGS_FILE \
-		$(NODE_IMAGE) node ./scripts/config/settings.mjs show
+	@$(NODE_RUN) ./scripts/config/settings.mjs show
 
 settings-set: ## Изменить settings.json, передать KEY=proxy.npmEmail VALUE=user@example.com
-	@$(NODE) \
-		-e INFRA_SETTINGS_FILE \
-		-e INFRA_DEFAULT_SETTINGS_FILE \
-		-e KEY \
-		-e VALUE \
-		$(NODE_IMAGE) node ./scripts/config/settings.mjs set
+	@$(NODE_RUN) ./scripts/config/settings.mjs set
 
 ##@ Web UI
-ui-bridge: ## Запустить host bridge для выполнения make-команд на хосте
-	@HOST_BRIDGE_HOST="$(HOST_BRIDGE_HOST)" HOST_BRIDGE_PORT="$(HOST_BRIDGE_PORT)" node ./web-ui/server-new/host-bridge.mjs
+node-runtime: ## Скачать локальный Node.js runtime в .runtime/node
+	@./scripts/config/node-runtime.sh ensure
 
-ui-bridge-start: ## Запустить host bridge в фоне
-	@mkdir -p .tmp
-	@if [ -f "$(HOST_BRIDGE_PID)" ] && kill -0 "$$(cat "$(HOST_BRIDGE_PID)")" 2>/dev/null; then \
-		echo "Host bridge already running: $$(cat "$(HOST_BRIDGE_PID)")"; \
-	else \
-		HOST_BRIDGE_HOST="$(HOST_BRIDGE_HOST)" HOST_BRIDGE_PORT="$(HOST_BRIDGE_PORT)" \
-			nohup node ./web-ui/server-new/host-bridge.mjs > "$(HOST_BRIDGE_LOG)" 2>&1 & \
-		echo "$$!" > "$(HOST_BRIDGE_PID)"; \
-		echo "Host bridge started: $$(cat "$(HOST_BRIDGE_PID)")"; \
-		echo "Logs: $(HOST_BRIDGE_LOG)"; \
+ui: node-runtime web-ui-dist proxy-network-ensure ## Запустить Web UI на хосте
+	@if docker ps --format '{{.Names}}' | grep -qx 'web-ui'; then \
+		echo "Stopping legacy web-ui container..."; \
+		docker stop web-ui >/dev/null; \
+	fi
+	@$(NODE_RUN) "$(WEB_UI_RUNTIME_DIR)/server.mjs"
+
+web-ui-build: ## Собрать frontend dist через Docker
+	docker build -t $(WEB_UI_IMAGE) -f web-ui/Dockerfile .
+	@container="$$(docker create $(WEB_UI_IMAGE))"; \
+		rm -rf "$(WEB_UI_RUNTIME_DIR)"; \
+		mkdir -p "$(WEB_UI_RUNTIME_DIR)"; \
+		docker cp "$$container:/opt/web-ui/dist" "$(WEB_UI_STATIC_DIR)"; \
+		docker rm "$$container" >/dev/null; \
+		cp web-ui/server.mjs "$(WEB_UI_RUNTIME_DIR)/server.mjs"; \
+		cp web-ui/commands.manifest.json "$(WEB_UI_RUNTIME_DIR)/commands.manifest.json"; \
+		cp -R web-ui/server "$(WEB_UI_RUNTIME_DIR)/server"; \
+		cp -R web-ui/server-new "$(WEB_UI_RUNTIME_DIR)/server-new"
+
+web-ui-dist: ## Создать build/web-ui, если его нет
+	@if [ ! -f "$(WEB_UI_STATIC_DIR)/index.html" ] || [ ! -f "$(WEB_UI_RUNTIME_DIR)/server.mjs" ]; then \
+		$(MAKE) web-ui-build; \
 	fi
 
-ui-bridge-stop: ## Остановить host bridge
-	@if [ -f "$(HOST_BRIDGE_PID)" ] && kill -0 "$$(cat "$(HOST_BRIDGE_PID)")" 2>/dev/null; then \
-		kill "$$(cat "$(HOST_BRIDGE_PID)")"; \
-		rm -f "$(HOST_BRIDGE_PID)"; \
-		echo "Host bridge stopped"; \
-	else \
-		rm -f "$(HOST_BRIDGE_PID)"; \
-		echo "Host bridge is not running"; \
-	fi
-
-ui: ui-bridge-start web-ui-up ## Запустить host bridge и Web UI контейнер
-
-web-ui-up: proxy-network-ensure ## Собрать и запустить Web UI
-	$(WEB_UI_COMPOSE) up -d --build
-
-web-ui-down: ## Удалить Web UI контейнер
-	$(WEB_UI_COMPOSE) down
-
-web-ui-logs: ## Показать логи Web UI
-	$(WEB_UI_COMPOSE) logs -f web-ui
+web-ui-clean: ## Удалить собранный frontend dist
+	rm -rf "$(WEB_UI_RUNTIME_DIR)"
 
 ##@ Docker network
 proxy-network-ensure: ## Создать общую сеть proxy, если ее еще нет
@@ -124,8 +103,7 @@ host-remove: ## Удалить локальный домен из /etc/hosts, п
 
 ##@ NPM proxy hosts
 app-proxy: ## Создать/обновить Proxy Host в NPM, передать DOMAIN=site.local TARGET=container PORT=80, опционально SSL=1
-	@$(NODE) \
-		$(NODE_IMAGE) node ./scripts/nginx/npm-proxy.mjs \
+	@$(NODE_RUN) ./scripts/nginx/npm-proxy.mjs \
 			--domain "$(DOMAIN)" \
 			--target "$(TARGET)" \
 			--port "$(PORT)" \
@@ -133,8 +111,7 @@ app-proxy: ## Создать/обновить Proxy Host в NPM, передат�
 			$(if $(SSL),--ssl "$(SSL)",)
 
 app-proxy-remove: ## Удалить Proxy Host и SSL из NPM, передать DOMAIN=site.local
-	@$(NODE) \
-		$(NODE_IMAGE) node ./scripts/nginx/npm-proxy.mjs \
+	@$(NODE_RUN) ./scripts/nginx/npm-proxy.mjs \
 			--delete \
 			--domain "$(DOMAIN)"
 
@@ -168,8 +145,7 @@ npm-shell: ## Shell внутри контейнера NPM
 	$(MAKE) compose-shell NAME=npm
 
 .PHONY: help init settings-show settings-set
-.PHONY: ui-bridge ui-bridge-start ui-bridge-stop ui
-.PHONY: web-ui-up web-ui-down web-ui-logs
+.PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
 .PHONY: compose-up compose-pull compose-start compose-stop compose-down compose-logs compose-shell
 .PHONY: host-add host-remove

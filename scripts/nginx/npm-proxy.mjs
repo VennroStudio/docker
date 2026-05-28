@@ -18,7 +18,7 @@ const config = {
   port: deleting ? 0 : Number(need(args.port || process.env.PORT, "PORT")),
   scheme: args.scheme || process.env.SCHEME || "http",
   ssl: bool(args.ssl ?? process.env.SSL),
-  npmUrl: trimSlash(need(settings.proxy?.npmApiUrl, "proxy.npmApiUrl")),
+  npmUrl: trimSlash(need(settings.proxy?.npmUrl, "proxy.npmUrl")),
   npmEmail: need(settings.proxy?.npmEmail, "proxy.npmEmail"),
   npmPassword: need(settings.proxy?.npmPassword, "proxy.npmPassword"),
   certDir: process.env.CERT_DIR || "certs",
@@ -271,24 +271,24 @@ async function updateNpmPublicUrl() {
 
   settings.proxy = {
     ...settings.proxy,
-    npmPublicUrl: `${config.ssl ? "https" : config.scheme}://${config.domain}`,
+    npmUrl: `${config.ssl ? "https" : config.scheme}://${config.domain}`,
   };
   await writeSettings(settings);
-  console.log(`Updated settings proxy.npmPublicUrl: ${settings.proxy.npmPublicUrl}`);
+  console.log(`Updated settings proxy.npmUrl: ${settings.proxy.npmUrl}`);
 }
 
 async function resetNpmPublicUrl() {
   settings.proxy = {
     ...settings.proxy,
-    npmPublicUrl: "http://localhost:81",
+    npmUrl: "http://localhost:81",
   };
   await writeSettings(settings);
-  console.log(`Reset settings proxy.npmPublicUrl: ${settings.proxy.npmPublicUrl}`);
+  console.log(`Reset settings proxy.npmUrl: ${settings.proxy.npmUrl}`);
 }
 
 function shouldResetNpmPublicUrl() {
   try {
-    return new URL(settings.proxy?.npmPublicUrl || "").hostname === config.domain;
+    return new URL(settings.proxy?.npmUrl || "").hostname === config.domain;
   } catch {
     return false;
   }

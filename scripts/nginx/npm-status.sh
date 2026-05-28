@@ -28,7 +28,7 @@ RUNNING=false
 STATE="missing"
 UPTIME="not created"
 URL="$(
-  sed -n '/"proxy"[[:space:]]*:/,/[}]/s/.*"npmPublicUrl"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$SETTINGS_FILE" 2>/dev/null |
+  sed -n '/"proxy"[[:space:]]*:/,/[}]/s/.*"npmUrl"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$SETTINGS_FILE" 2>/dev/null |
     head -n 1
 )"
 

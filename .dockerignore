@@ -1,0 +1,10 @@
+.git
+.runtime
+.tmp
+build
+web-ui/node_modules
+web-ui/dist
+docker/nginx/data
+docker/nginx/letsencrypt
+docker/registry/data
+dumps

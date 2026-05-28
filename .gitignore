@@ -1,7 +1,8 @@
 .env
 
 # Runtime data
-/.tmp
+/.runtime
+/build
 /docker/nginx/data
 /docker/nginx/letsencrypt
 /docker/registry/data

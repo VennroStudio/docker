@@ -1,7 +1,6 @@
 {
   "proxy": {
-    "npmPublicUrl": "http://localhost:81",
-    "npmApiUrl": "http://nginx-container:81",
+    "npmUrl": "http://localhost:81",
     "npmEmail": "",
     "npmPassword": ""
   }

@@ -20,6 +20,7 @@ try {
 
 async function initSettings() {
   if (existsSync(settingsFile)) {
+    await migrateSettings();
     console.log(`Settings already exists: ${settingsFile}`);
     return;
   }
@@ -31,6 +32,7 @@ async function initSettings() {
 
 async function showSettings() {
   const settings = await readJson(settingsFile);
+  await writeJson(settingsFile, settings);
   console.log(JSON.stringify(settings, null, 2));
 }
 
@@ -65,12 +67,29 @@ function setByPath(target, key, value) {
 }
 
 async function readJson(file) {
-  return JSON.parse(await readFile(file, "utf8"));
+  return normalizeSettings(JSON.parse(await readFile(file, "utf8")));
 }
 
 async function writeJson(file, payload) {
   await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  await writeFile(file, `${JSON.stringify(normalizeSettings(payload), null, 2)}\n`, "utf8");
+}
+
+async function migrateSettings() {
+  const settings = await readJson(settingsFile);
+  await writeJson(settingsFile, settings);
+}
+
+function normalizeSettings(settings = {}) {
+  if (!settings || typeof settings !== "object") return settings;
+  if (!settings.proxy || typeof settings.proxy !== "object") return settings;
+
+  return {
+    ...settings,
+    proxy: {
+      ...settings.proxy,
+    },
+  };
 }
 
 function usage(code) {

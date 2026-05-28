@@ -89,7 +89,7 @@ make app-proxy DOMAIN=npm.local TARGET=nginx-container PORT=81 SSL=1
 ```json
 {
   "proxy": {
-    "npmPublicUrl": "http://npm.local"
+    "npmUrl": "http://npm.local"
   }
 }
 ```
@@ -113,7 +113,7 @@ make app-proxy-remove DOMAIN=npm.local
 ```json
 {
   "proxy": {
-    "npmPublicUrl": "http://localhost:81"
+    "npmUrl": "http://localhost:81"
   }
 }
 ```
