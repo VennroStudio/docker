@@ -130,6 +130,144 @@ make host-remove DOMAIN=npm.local
 make npm-status
 ```
 
+### Пример: MariaDB и phpMyAdmin
+
+Создать MariaDB instance:
+
+```sh
+make mariadb-instance-add VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWORD=root-secret
+```
+
+Показать список MariaDB instances:
+
+```sh
+make mariadb-instance-list
+```
+
+Запустить MariaDB instance:
+
+```sh
+make mariadb-instance-up NAME=11-4
+```
+
+Запустить phpMyAdmin:
+
+```sh
+make phpmyadmin-up
+```
+
+Если нужен локальный домен для phpMyAdmin:
+
+```sh
+make host-add DOMAIN=pma.local
+make app-proxy DOMAIN=pma.local TARGET=phpmyadmin-container PORT=80
+```
+
+Показать базы данных:
+
+```sh
+make mariadb-db-list NAME=11-4
+```
+
+Создать базу данных:
+
+```sh
+make mariadb-db-create NAME=11-4 DATABASE=app
+```
+
+Импортировать dump:
+
+```sh
+make mariadb-import NAME=11-4 DATABASE=app DUMP_FILE=dumps/mariadb/app.sql
+```
+
+Экспортировать dump:
+
+```sh
+make mariadb-export NAME=11-4 DATABASE=app DUMP_FILE=dumps/mariadb/app.sql.gz
+```
+
+Остановить MariaDB instance:
+
+```sh
+make mariadb-instance-stop NAME=11-4
+```
+
+Удалить контейнер MariaDB instance:
+
+```sh
+make mariadb-instance-down NAME=11-4
+```
+
+### Пример: Postgres и pgAdmin
+
+Создать Postgres instance:
+
+```sh
+make postgres-instance-add VERSION=17 DB_USER=admin PASSWORD=secret DATABASE=app
+```
+
+Показать список Postgres instances:
+
+```sh
+make postgres-instance-list
+```
+
+Запустить Postgres instance:
+
+```sh
+make postgres-instance-up NAME=17
+```
+
+Запустить pgAdmin:
+
+```sh
+make pgadmin-up
+```
+
+Если нужен локальный домен для pgAdmin:
+
+```sh
+make host-add DOMAIN=pgadmin.local
+make app-proxy DOMAIN=pgadmin.local TARGET=pgadmin-container PORT=80
+```
+
+Показать базы данных:
+
+```sh
+make postgres-db-list NAME=17
+```
+
+Создать базу данных:
+
+```sh
+make postgres-db-create NAME=17 DATABASE=app_test
+```
+
+Импортировать dump:
+
+```sh
+make postgres-import NAME=17 POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.sql
+```
+
+Экспортировать dump:
+
+```sh
+make postgres-export NAME=17 POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.dump
+```
+
+Остановить Postgres instance:
+
+```sh
+make postgres-instance-stop NAME=17
+```
+
+Удалить контейнер Postgres instance:
+
+```sh
+make postgres-instance-down NAME=17
+```
+
 ## Сводка команд
 
 ### Project
@@ -262,4 +400,358 @@ make npm-logs
 
 ```sh
 make npm-shell
+```
+
+### MariaDB
+
+Зайти в shell MariaDB instance:
+
+```sh
+make mariadb-shell NAME=11-4
+```
+
+Импортировать `.sql` или `.sql.gz` dump:
+
+```sh
+make mariadb-import NAME=11-4 DATABASE=app DUMP_FILE=dumps/mariadb/app.sql
+```
+
+Экспортировать `.sql` или `.sql.gz` dump:
+
+```sh
+make mariadb-export NAME=11-4 DATABASE=app DUMP_FILE=dumps/mariadb/app.sql.gz
+```
+
+Показать список баз данных:
+
+```sh
+make mariadb-db-list NAME=11-4
+```
+
+Создать базу данных:
+
+```sh
+make mariadb-db-create NAME=11-4 DATABASE=app
+```
+
+Удалить базу данных:
+
+```sh
+make mariadb-db-drop NAME=11-4 DATABASE=app
+```
+
+Загрузить dump на сервер:
+
+```sh
+make mariadb-dump-upload FILE=dumps/mariadb/app.sql TARGET_PATH=/remote/path/
+```
+
+### MariaDB Instances
+
+Создать MariaDB instance:
+
+```sh
+make mariadb-instance-add VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWORD=root-secret
+```
+
+Создать MariaDB instance с портом и режимом авторизации phpMyAdmin:
+
+```sh
+make mariadb-instance-add VERSION=11.4 DB_USER=admin PASSWORD=secret ROOT_PASSWORD=root-secret PORT=3308 AUTH_MODE=config
+```
+
+Показать MariaDB instances:
+
+```sh
+make mariadb-instance-list
+```
+
+Перегенерировать `docker/phpmyadmin/config.inc.php`:
+
+```sh
+make mariadb-instance-generate
+```
+
+Запустить MariaDB instance:
+
+```sh
+make mariadb-instance-up NAME=11-4
+```
+
+Запустить уже созданный MariaDB instance:
+
+```sh
+make mariadb-instance-start NAME=11-4
+```
+
+Остановить MariaDB instance:
+
+```sh
+make mariadb-instance-stop NAME=11-4
+```
+
+Удалить контейнер MariaDB instance:
+
+```sh
+make mariadb-instance-down NAME=11-4
+```
+
+Удалить контейнер MariaDB instance и Docker image:
+
+```sh
+make mariadb-instance-clean NAME=11-4
+```
+
+Показать логи MariaDB instance:
+
+```sh
+make mariadb-instance-logs NAME=11-4
+```
+
+Зайти в shell MariaDB instance:
+
+```sh
+make mariadb-instance-shell NAME=11-4
+```
+
+### phpMyAdmin
+
+Скачать или обновить Docker image phpMyAdmin:
+
+```sh
+make phpmyadmin-pull
+```
+
+Создать и запустить контейнер phpMyAdmin:
+
+```sh
+make phpmyadmin-up
+```
+
+Запустить уже созданный контейнер phpMyAdmin:
+
+```sh
+make phpmyadmin-start
+```
+
+Остановить контейнер phpMyAdmin:
+
+```sh
+make phpmyadmin-stop
+```
+
+Удалить контейнер phpMyAdmin:
+
+```sh
+make phpmyadmin-down
+```
+
+Удалить контейнер phpMyAdmin и Docker image:
+
+```sh
+make phpmyadmin-clean
+```
+
+Показать логи phpMyAdmin:
+
+```sh
+make phpmyadmin-logs
+```
+
+Перегенерировать список серверов phpMyAdmin:
+
+```sh
+make phpmyadmin-config-generate
+```
+
+Перезапустить phpMyAdmin после изменения списка серверов:
+
+```sh
+make phpmyadmin-reload
+```
+
+### Postgres
+
+Запустить Postgres instance:
+
+```sh
+make postgres-up NAME=17
+```
+
+Запустить уже созданный Postgres instance:
+
+```sh
+make postgres-start NAME=17
+```
+
+Остановить Postgres instance:
+
+```sh
+make postgres-stop NAME=17
+```
+
+Удалить контейнер Postgres instance:
+
+```sh
+make postgres-down NAME=17
+```
+
+Удалить контейнер Postgres instance и Docker image:
+
+```sh
+make postgres-clean NAME=17
+```
+
+Показать логи Postgres instance:
+
+```sh
+make postgres-logs NAME=17
+```
+
+Зайти в shell Postgres instance:
+
+```sh
+make postgres-shell NAME=17
+```
+
+Импортировать `.sql`, `.sql.gz` или `.dump`:
+
+```sh
+make postgres-import NAME=17 POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.sql
+```
+
+Экспортировать `.sql`, `.sql.gz` или `.dump`:
+
+```sh
+make postgres-export NAME=17 POSTGRES_DB=app DUMP_FILE=dumps/postgres/app.dump
+```
+
+Показать список баз данных:
+
+```sh
+make postgres-db-list NAME=17
+```
+
+Создать базу данных:
+
+```sh
+make postgres-db-create NAME=17 DATABASE=app_test
+```
+
+Удалить базу данных:
+
+```sh
+make postgres-db-drop NAME=17 DATABASE=app_test
+```
+
+Загрузить dump на сервер:
+
+```sh
+make postgres-dump-upload FILE=dumps/postgres/app.dump TARGET_PATH=/remote/path/
+```
+
+### Postgres Instances
+
+Создать Postgres instance:
+
+```sh
+make postgres-instance-add VERSION=17 DB_USER=admin PASSWORD=secret DATABASE=app
+```
+
+Создать Postgres instance с портом:
+
+```sh
+make postgres-instance-add VERSION=17 DB_USER=admin PASSWORD=secret DATABASE=app PORT=5433
+```
+
+Показать Postgres instances:
+
+```sh
+make postgres-instance-list
+```
+
+Запустить Postgres instance:
+
+```sh
+make postgres-instance-up NAME=17
+```
+
+Запустить уже созданный Postgres instance:
+
+```sh
+make postgres-instance-start NAME=17
+```
+
+Остановить Postgres instance:
+
+```sh
+make postgres-instance-stop NAME=17
+```
+
+Удалить контейнер Postgres instance:
+
+```sh
+make postgres-instance-down NAME=17
+```
+
+Удалить контейнер Postgres instance и Docker image:
+
+```sh
+make postgres-instance-clean NAME=17
+```
+
+Показать логи Postgres instance:
+
+```sh
+make postgres-instance-logs NAME=17
+```
+
+Зайти в shell Postgres instance:
+
+```sh
+make postgres-instance-shell NAME=17
+```
+
+### pgAdmin
+
+Скачать или обновить Docker image pgAdmin:
+
+```sh
+make pgadmin-pull
+```
+
+Создать и запустить контейнер pgAdmin:
+
+```sh
+make pgadmin-up
+```
+
+Запустить уже созданный контейнер pgAdmin:
+
+```sh
+make pgadmin-start
+```
+
+Остановить контейнер pgAdmin:
+
+```sh
+make pgadmin-stop
+```
+
+Удалить контейнер pgAdmin:
+
+```sh
+make pgadmin-down
+```
+
+Удалить контейнер pgAdmin и Docker image:
+
+```sh
+make pgadmin-clean
+```
+
+Показать логи pgAdmin:
+
+```sh
+make pgadmin-logs
 ```
