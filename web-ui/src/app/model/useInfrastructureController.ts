@@ -5,9 +5,9 @@ import {
   dictionaries,
   getViewById,
   getViewByPath,
-  proxyShells,
   useAppMeta,
   useContainerStates,
+  useNginxStatus,
   useServiceLinks,
   useServiceStatuses,
   type CommandAction,
@@ -55,16 +55,15 @@ export function useInfrastructureController() {
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
   const activeShells =
-    activeView === "proxy"
-      ? proxyShells
-      : activeView === "mariadb"
+    activeView === "mariadb"
         ? [...(commandPageRegistry.mariadb.shells || []), ...(commandPageRegistry.postgres.shells || [])]
         : commandPageRegistry[activeView as CommandPageId]?.shells || [];
   const containerStates = useContainerStates({
-    enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings",
+    enabled: activeView !== "home" && activeView !== "mariadb" && activeView !== "settings" && activeView !== "proxy",
     names: activeShells.map((shell) => shell.container),
   });
-  const serviceLinks = useServiceLinks();
+  const serviceLinks = useServiceLinks(activeView !== "proxy");
+  const nginxStatus = useNginxStatus(activeView === "proxy");
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const settings = useSettings();
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
@@ -124,6 +123,7 @@ export function useInfrastructureController() {
     runWithTerminal({
       key: action.id,
       label: action.label,
+      onSettled: action.id.startsWith("npm:") ? nginxStatus.refresh : undefined,
       open: (handlers) => streamCommand(action.id, handlers),
       preview: commandPreview(action.id),
     });
@@ -133,6 +133,7 @@ export function useInfrastructureController() {
     runWithTerminal({
       key: "proxy:create",
       label: text.panels.proxy.createProxy,
+      onSettled: nginxStatus.refresh,
       open: (handlers) => streamProxy(proxyForm, handlers),
       preview: proxyPreview(proxyForm),
     });
@@ -151,6 +152,7 @@ export function useInfrastructureController() {
     runWithTerminal({
       key: "proxy:delete",
       label: text.panels.proxy.deleteProxy,
+      onSettled: nginxStatus.refresh,
       open: (handlers) => streamProxyDelete(proxyForm.domain, handlers),
       preview: proxyDeletePreview(proxyForm.domain),
     });
@@ -171,6 +173,7 @@ export function useInfrastructureController() {
     runWithTerminal({
       key: `host:${action}`,
       label: action === "add" ? text.panels.proxy.addHost : text.panels.proxy.removeHost,
+      onSettled: nginxStatus.refresh,
       open: (handlers) => streamHost(action, proxyForm.domain, handlers),
       preview: hostPreview(action, proxyForm.domain),
     });
@@ -181,7 +184,7 @@ export function useInfrastructureController() {
       key: `shell:${action.container}`,
       label: action.label,
       open: (handlers) => streamShell(action.container, handlers),
-      preview: `docker exec -i ${action.container} sh`,
+      preview: shellPreview(action.container),
     });
   };
 
@@ -196,6 +199,7 @@ export function useInfrastructureController() {
     databaseRefreshSignal,
     language,
     mariaDbInstances,
+    nginxStatus,
     operationBlockTitle,
     operationRunning,
     postgresInstances,
@@ -223,3 +227,7 @@ export function useInfrastructureController() {
 }
 
 export type InfrastructureController = ReturnType<typeof useInfrastructureController>;
+
+function shellPreview(container: string) {
+  return container === "nginx-container" ? "make npm-shell" : `docker exec -i ${container} sh`;
+}

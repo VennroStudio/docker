@@ -69,7 +69,7 @@ compose-logs: ## Логи compose service, передать NAME=npm
 
 compose-shell: ## Shell внутри compose service, передать NAME=npm
 	@service="$$( $(call compose) config --services | head -n 1 )"; \
-	$(call compose) exec "$$service" sh
+	$(call compose) exec $(COMPOSE_EXEC_FLAGS) "$$service" sh
 
 ##@ Hosts
 host-add: ## Добавить локальный домен в /etc/hosts, передать DOMAIN=site.local

@@ -360,6 +360,8 @@ export const ru: AppText = {
   },
   panels: {
     npm: {
+      configEyebrow: "Settings",
+      configTitle: "Конфиг",
       networkEyebrow: "Docker network",
       networkTitle: "Управление сетями",
       nginxEyebrow: "NPM container",

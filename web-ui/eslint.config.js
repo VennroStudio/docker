@@ -34,7 +34,7 @@ export default [
     },
   },
   {
-    files: ["server.mjs", "server/**/*.mjs"],
+    files: ["server.mjs", "server/**/*.mjs", "server-new/**/*.mjs"],
     languageOptions: {
       ecmaVersion: 2022,
       globals: {

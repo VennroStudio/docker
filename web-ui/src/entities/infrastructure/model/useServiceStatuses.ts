@@ -11,10 +11,18 @@ type UseServiceStatusesOptions = {
 export function useServiceStatuses({ enabled }: UseServiceStatusesOptions) {
   const [statuses, setStatuses] = useState<ServiceStatusMap>({});
 
-  const refresh = useCallback(async (signal?: AbortSignal) => {
-    const nextStatuses = await fetchServiceStatuses(signal);
-    setStatuses(Object.fromEntries(nextStatuses.map((status) => [status.id, status])) as ServiceStatusMap);
-  }, []);
+  const refresh = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!enabled) {
+        setStatuses({});
+        return;
+      }
+
+      const nextStatuses = await fetchServiceStatuses(signal);
+      setStatuses(Object.fromEntries(nextStatuses.map((status) => [status.id, status])) as ServiceStatusMap);
+    },
+    [enabled],
+  );
 
   useEffect(() => {
     if (!enabled) return undefined;

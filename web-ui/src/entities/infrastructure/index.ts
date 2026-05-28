@@ -1,6 +1,7 @@
 export * from "./api/containers";
 export * from "./api/links";
 export * from "./api/meta";
+export * from "./api/nginxStatus";
 export * from "./api/status";
 export * from "./config/actions";
 export * from "./config/pageRegistry";
@@ -12,6 +13,7 @@ export * from "./model/useAppMeta";
 export * from "./model/useContainerStates";
 export * from "./model/useServiceLinks";
 export * from "./model/useServiceStatuses";
+export * from "./model/useNginxStatus";
 export * from "./ui/ContainerStateBadge";
 export * from "./ui/DatabaseControls";
 export * from "./ui/DatabaseSections";

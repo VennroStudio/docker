@@ -18,6 +18,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     containerStates,
     databaseRefreshSignal,
     mariaDbInstances,
+    nginxStatus,
     operationBlockTitle,
     operationRunning,
     postgresInstances,
@@ -63,8 +64,8 @@ export function AppRouter({ controller }: AppRouterProps) {
         operationDisabled={operationRunning}
         operationDisabledTitle={operationBlockTitle}
         shellActions={translateShells(proxyShells)}
-        statusByContainer={containerStates.states}
-        serviceLinks={serviceLinks.links}
+        nginxStatus={nginxStatus}
+        settingsState={settings}
         text={text}
         value={proxyForm}
         view={activeConfig}

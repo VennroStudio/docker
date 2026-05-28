@@ -361,6 +361,8 @@ export const en: AppText = {
   },
   panels: {
     npm: {
+      configEyebrow: "Settings",
+      configTitle: "Config",
       networkEyebrow: "Docker network",
       networkTitle: "Network management",
       nginxEyebrow: "NPM container",

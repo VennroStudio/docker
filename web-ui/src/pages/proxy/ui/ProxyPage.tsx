@@ -1,8 +1,7 @@
 import { ProxyPanel } from "@/features/manage-proxy";
-import type { ContainerStateInfo } from "@/entities/infrastructure";
-import type { ServiceLink } from "@/entities/infrastructure";
 import type { AppText } from "@/entities/infrastructure";
-import type { CommandAction, ProxyFormState, ShellAction, ViewConfig } from "@/entities/infrastructure";
+import type { CommandAction, ProxyFormState, ShellAction, useNginxStatus, ViewConfig } from "@/entities/infrastructure";
+import type { useSettings } from "@/entities/settings";
 import { ServicePageLayout } from "@/widgets/service-page-layout";
 import { ProxyRuntimeModules } from "./ProxyRuntimeModules";
 
@@ -12,8 +11,8 @@ type ProxyPageProps = {
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
   shellActions: ShellAction[];
-  serviceLinks: Record<string, ServiceLink>;
-  statusByContainer: Record<string, ContainerStateInfo>;
+  nginxStatus: ReturnType<typeof useNginxStatus>;
+  settingsState: ReturnType<typeof useSettings>;
   text: AppText;
   value: ProxyFormState;
   view: ViewConfig;
@@ -38,9 +37,9 @@ export function ProxyPage({
   onShellOpen,
   operationDisabled,
   operationDisabledTitle,
-  serviceLinks,
+  nginxStatus,
+  settingsState,
   shellActions,
-  statusByContainer,
   text,
   value,
   view,
@@ -70,9 +69,9 @@ export function ProxyPage({
             activeOperationKey={activeOperationKey}
             operationDisabled={operationDisabled}
             operationDisabledTitle={operationDisabledTitle}
-            serviceLinks={serviceLinks}
+            nginxStatus={nginxStatus}
+            settingsState={settingsState}
             shellAction={shellAction}
-            statusByContainer={statusByContainer}
             text={text}
             onRunCommand={onRunCommand}
             onShellOpen={onShellOpen}

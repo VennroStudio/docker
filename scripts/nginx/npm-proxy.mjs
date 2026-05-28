@@ -24,7 +24,6 @@ const config = {
   certDir: process.env.CERT_DIR || "certs",
   certDays: Number(process.env.CERT_DAYS || "825"),
   forceCert: bool(args["force-cert"] ?? process.env.FORCE_CERT),
-  linksFile: process.env.SERVICE_LINKS_FILE || "docker/services/links.json",
 };
 
 let token;
@@ -37,7 +36,7 @@ async function main() {
 
   if (config.delete) {
     await deleteProxyHostAndCertificate();
-    await removeServiceLink();
+    if (shouldResetNpmPublicUrl()) await resetNpmPublicUrl();
     return;
   }
 
@@ -46,7 +45,6 @@ async function main() {
     : 0;
 
   const host = await upsertProxyHost(certificateId);
-  await saveServiceLink();
   await updateNpmPublicUrl();
   console.log(`Proxy Host #${host.id}: ${config.domain} -> ${config.target}:${config.port}`);
   console.log(`Open: ${config.ssl ? "https" : "http"}://${config.domain}`);
@@ -268,35 +266,6 @@ async function deleteProxyHostAndCertificate() {
   }
 }
 
-async function saveServiceLink() {
-  const registry = await readServiceLinks();
-  const bindings = registry.bindings.filter((binding) => binding.domain !== config.domain);
-
-  bindings.push({
-    container: config.target,
-    domain: config.domain,
-    port: config.port,
-    scheme: config.ssl ? "https" : config.scheme,
-    ssl: config.ssl,
-    updatedAt: new Date().toISOString(),
-  });
-
-  await writeServiceLinks({ ...registry, bindings });
-  console.log(`Saved local link: ${config.target} -> ${config.ssl ? "https" : config.scheme}://${config.domain}`);
-}
-
-async function removeServiceLink() {
-  const registry = await readServiceLinks();
-  const removedBinding = registry.bindings.find((binding) => binding.domain === config.domain);
-  const bindings = registry.bindings.filter((binding) => binding.domain !== config.domain);
-
-  if (bindings.length === registry.bindings.length) return;
-
-  await writeServiceLinks({ ...registry, bindings });
-  if (removedBinding?.container === "nginx-container") await resetNpmPublicUrl();
-  console.log(`Removed local link binding for ${config.domain}`);
-}
-
 async function updateNpmPublicUrl() {
   if (config.target !== "nginx-container") return;
 
@@ -317,21 +286,12 @@ async function resetNpmPublicUrl() {
   console.log(`Reset settings proxy.npmPublicUrl: ${settings.proxy.npmPublicUrl}`);
 }
 
-async function readServiceLinks() {
+function shouldResetNpmPublicUrl() {
   try {
-    const payload = JSON.parse(await readFile(config.linksFile, "utf8"));
-    return {
-      bindings: Array.isArray(payload.bindings) ? payload.bindings : [],
-      version: 1,
-    };
+    return new URL(settings.proxy?.npmPublicUrl || "").hostname === config.domain;
   } catch {
-    return { bindings: [], version: 1 };
+    return false;
   }
-}
-
-async function writeServiceLinks(payload) {
-  await mkdir(path.dirname(config.linksFile), { recursive: true });
-  await writeFile(config.linksFile, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
 async function readSettings() {

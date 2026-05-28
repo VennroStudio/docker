@@ -248,6 +248,8 @@ export type AppText = {
   };
   panels: {
     npm: {
+      configEyebrow: string;
+      configTitle: string;
       networkEyebrow: string;
       networkTitle: string;
       nginxEyebrow: string;

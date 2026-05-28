@@ -1,11 +1,10 @@
 import { commandMap } from "../config.mjs";
 import { sendSseError, streamSse } from "../command-runner.mjs";
 import { getContainerStates } from "../docker-status.mjs";
-import { assert, body, validateDomain, validatePort, validateTarget } from "../http.mjs";
+import { assert, body, validatePort } from "../http.mjs";
 import { mariaDbInstanceCommand, readMariaDbInstances } from "../mariadb-instances.mjs";
 import { postgresInstanceCommand, readPostgresInstances } from "../postgres-instances.mjs";
 import { getRuntimeEnv } from "../settings-store.mjs";
-import { streamShell } from "../shell-sessions.mjs";
 
 export async function streamRoute(req, res) {
   const url = new URL(req.url, "http://localhost");
@@ -17,41 +16,6 @@ export async function streamRoute(req, res) {
     const entry = commandMap[param("command")];
     assert(entry, "Unknown command");
     return streamSse(req, res, entry[0], entry.slice(1), runtimeEnv);
-  }
-
-  if (url.pathname === "/api/stream/host") {
-    const action = param("action");
-    const domain = param("domain");
-    assert(action === "add" || action === "remove", "Invalid host action");
-    validateDomain(domain);
-    return streamSse(req, res, "make", [action === "add" ? "host-add" : "host-remove", `DOMAIN=${domain}`], runtimeEnv);
-  }
-
-  if (url.pathname === "/api/stream/proxy") {
-    const domain = param("domain");
-    const target = param("target");
-    const proxyPort = param("port");
-    const ssl = isTruthy(param("ssl"));
-
-    validateDomain(domain);
-    validateTarget(target);
-    validatePort(proxyPort);
-
-    const args = ["app-proxy", `DOMAIN=${domain}`, `TARGET=${target}`, `PORT=${String(proxyPort)}`];
-    if (ssl) args.push("SSL=1");
-    return streamSse(req, res, "make", args, runtimeEnv);
-  }
-
-  if (url.pathname === "/api/stream/proxy-delete") {
-    const domain = param("domain");
-    validateDomain(domain);
-    return streamSse(req, res, "make", ["app-proxy-remove", `DOMAIN=${domain}`], runtimeEnv);
-  }
-
-  if (url.pathname === "/api/stream/shell") {
-    const container = param("container");
-    assert(container, "Container is required");
-    return streamShell(req, res, container);
   }
 
   if (url.pathname === "/api/stream/mariadb-instance-add") {
@@ -250,10 +214,6 @@ export async function streamRoute(req, res) {
   }
 
   sendSseError(res, "Not found");
-}
-
-function isTruthy(value) {
-  return value === true || ["1", "true", "yes", "on"].includes(String(value || "").toLowerCase());
 }
 
 function validateDatabaseName(database) {
