@@ -12,5 +12,6 @@ export * from "./model/useAppMeta";
 export * from "./model/useContainerStates";
 export * from "./model/useServiceLinks";
 export * from "./model/useServiceStatuses";
+export * from "./ui/ContainerStateBadge";
 export * from "./ui/DatabaseControls";
 export * from "./ui/DatabaseSections";

@@ -6,7 +6,7 @@ import { getRuntimeEnv } from "../settings-store.mjs";
 export async function host(req, res, action) {
   const { domain } = await body(req);
   validateDomain(domain);
-  stream(res, "bash", ["./scripts/hosts.sh", action, domain]);
+  stream(res, "make", [action === "add" ? "host-add" : "host-remove", `DOMAIN=${domain}`], getRuntimeEnv());
 }
 
 export async function proxy(req, res) {
@@ -15,16 +15,9 @@ export async function proxy(req, res) {
   validateTarget(target);
   validatePort(port);
 
-  const env = getRuntimeEnv({ DOMAIN: domain, TARGET: target, PORT: String(port) });
-  if (ssl) env.SSL = "1";
-  else delete env.SSL;
-
-  stream(
-    res,
-    "node",
-    ["./scripts/npm-proxy.mjs", "--domain", domain, "--target", target, "--port", String(port), "--scheme", "http"],
-    env,
-  );
+  const args = ["app-proxy", `DOMAIN=${domain}`, `TARGET=${target}`, `PORT=${String(port)}`];
+  if (ssl) args.push("SSL=1");
+  stream(res, "make", args, getRuntimeEnv());
 }
 
 export async function runCommand(req, res) {

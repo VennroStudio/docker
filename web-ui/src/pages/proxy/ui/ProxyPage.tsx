@@ -8,7 +8,6 @@ import { ProxyRuntimeModules } from "./ProxyRuntimeModules";
 
 type ProxyPageProps = {
   activeOperationKey?: null | string;
-  networkActions: CommandAction[];
   nginxActions: CommandAction[];
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
@@ -29,7 +28,6 @@ type ProxyPageProps = {
 
 export function ProxyPage({
   activeOperationKey,
-  networkActions,
   nginxActions,
   onChange,
   onCreateProxy,
@@ -68,7 +66,6 @@ export function ProxyPage({
           />
 
           <ProxyRuntimeModules
-            networkActions={networkActions}
             nginxActions={nginxActions}
             activeOperationKey={activeOperationKey}
             operationDisabled={operationDisabled}

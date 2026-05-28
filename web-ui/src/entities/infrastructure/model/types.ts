@@ -51,7 +51,17 @@ export type ProxyFormState = {
 export type MariaDbAuthMode = "config" | "cookie";
 export type MariaDbInstanceAction = "clean" | "down" | "logs" | "start" | "stop" | "up";
 export type PostgresInstanceAction = MariaDbInstanceAction;
-export type ContainerRuntimeState = "missing" | "running" | "stopped" | "unknown";
+export type ContainerRuntimeState =
+  | "created"
+  | "dead"
+  | "exited"
+  | "missing"
+  | "paused"
+  | "removing"
+  | "restarting"
+  | "running"
+  | "stopped"
+  | "unknown";
 
 export type MariaDbInstance = {
   authMode: MariaDbAuthMode;

@@ -74,7 +74,13 @@ export function ShellIconButton({
 
 export function StatusDot({ state }: { state: ContainerRuntimeState }) {
   const stateClass = {
+    created: "bg-amber-300 text-amber-300",
+    dead: "bg-red-500 text-red-500",
+    exited: "bg-amber-300 text-amber-300",
     missing: "bg-slate-400 text-slate-400",
+    paused: "bg-amber-300 text-amber-300",
+    removing: "bg-red-400 text-red-400",
+    restarting: "bg-red-400 text-red-400",
     running: "bg-[#52ff8f] text-[#52ff8f]",
     stopped: "bg-amber-300 text-amber-300",
     unknown: "bg-slate-400 text-slate-400",

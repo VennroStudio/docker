@@ -27,7 +27,7 @@ export function ProxyFormFields({ copy, onChange, value }: ProxyFormFieldsProps)
         value={value.target}
         onChange={(event) => onChange({ target: event.target.value })}
       />
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <Field
           error={value.port.trim() && !validity.port ? copy.validation.port : undefined}
           hint={copy.hints.port}
@@ -36,7 +36,9 @@ export function ProxyFormFields({ copy, onChange, value }: ProxyFormFieldsProps)
           inputMode="numeric"
           onChange={(event) => onChange({ port: event.target.value })}
         />
-        <Switch label="SSL" checked={value.ssl} onChange={(ssl) => onChange({ ssl })} />
+        <div className="sm:pt-6">
+          <Switch label="SSL" checked={value.ssl} onChange={(ssl) => onChange({ ssl })} />
+        </div>
       </div>
     </div>
   );

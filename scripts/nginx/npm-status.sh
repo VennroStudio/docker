@@ -19,6 +19,10 @@ STATUS="$(
   docker ps -a --filter "name=^/${CONTAINER}$" --format "{{.Status}}" |
     head -n 1
 )"
+DOCKER_STATE="$(
+  docker inspect --format "{{.State.Status}}" "$CONTAINER" 2>/dev/null ||
+    true
+)"
 
 RUNNING=false
 STATE="missing"
@@ -30,11 +34,9 @@ URL="$(
 
 if [[ -n "$STATUS" ]]; then
   UPTIME="$STATUS"
-  if [[ "$STATUS" == Up* ]]; then
+  STATE="${DOCKER_STATE:-unknown}"
+  if [[ "$STATE" == "running" ]]; then
     RUNNING=true
-    STATE="running"
-  else
-    STATE="stopped"
   fi
 fi
 

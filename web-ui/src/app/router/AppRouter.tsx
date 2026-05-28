@@ -1,4 +1,4 @@
-import { networkActions, nginxActions, proxyShells } from "@/entities/infrastructure";
+import { nginxActions, proxyShells } from "@/entities/infrastructure";
 import { DatabasesPage } from "@/pages/databases";
 import { HomePage } from "@/pages/home";
 import { ProxyPage } from "@/pages/proxy";
@@ -58,7 +58,6 @@ export function AppRouter({ controller }: AppRouterProps) {
   if (activeView === "proxy") {
     return (
       <ProxyPage
-        networkActions={translateActions(networkActions)}
         nginxActions={translateActions(nginxActions)}
         activeOperationKey={activeOperationKey}
         operationDisabled={operationRunning}

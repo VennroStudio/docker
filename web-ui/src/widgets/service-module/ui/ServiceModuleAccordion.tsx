@@ -1,6 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { useMemo, useState } from "react";
-import { InfoLine, StatusDot } from "@/entities/infrastructure";
+import { ContainerStateBadge, InfoLine, StatusDot } from "@/entities/infrastructure";
 import type { ContainerStateInfo } from "@/entities/infrastructure";
 import type { ServiceLink } from "@/entities/infrastructure";
 import type { CommandAction, ShellAction } from "@/entities/infrastructure";
@@ -20,6 +20,7 @@ type ServiceModuleAccordionProps = {
   operationDisabledTitle?: string;
   shell?: ShellAction;
   status?: ContainerStateInfo;
+  stateEyebrow?: boolean;
   statusLabel?: string;
   title: string;
   onRun: (action: CommandAction) => void;
@@ -39,6 +40,7 @@ export function ServiceModuleAccordion({
   operationDisabledTitle,
   shell,
   status,
+  stateEyebrow = false,
   statusLabel = "Status",
   title,
 }: ServiceModuleAccordionProps) {
@@ -51,7 +53,7 @@ export function ServiceModuleAccordion({
     <AccordionPanel
       contentClassName="px-4 py-4"
       defaultTitleElement="span"
-      eyebrow={eyebrow}
+      eyebrow={stateEyebrow ? <ContainerStateBadge state={status?.state || "unknown"} /> : eyebrow}
       open={open}
       title={title}
       titlePrefix={status ? <StatusDot state={status.state} /> : undefined}

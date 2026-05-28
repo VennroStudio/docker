@@ -8,7 +8,7 @@ type AccordionPanelProps = {
   className?: string;
   contentClassName?: string;
   defaultTitleElement?: "strong" | "span";
-  eyebrow: string;
+  eyebrow: ReactNode;
   open: boolean;
   title: string;
   titlePrefix?: ReactNode;

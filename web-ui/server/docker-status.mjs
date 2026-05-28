@@ -41,7 +41,7 @@ export async function getContainerStates(names) {
     names.map((name) => {
       const container = result.containers.get(name);
       if (!container) return [name, { state: "missing" }];
-      return [name, { state: container.state === "running" ? "running" : "stopped", status: container.status }];
+      return [name, { state: container.state || "unknown", status: container.status }];
     }),
   );
 }

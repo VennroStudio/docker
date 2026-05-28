@@ -24,7 +24,7 @@ export async function streamRoute(req, res) {
     const domain = param("domain");
     assert(action === "add" || action === "remove", "Invalid host action");
     validateDomain(domain);
-    return streamSse(req, res, "bash", ["./scripts/hosts.sh", action, domain]);
+    return streamSse(req, res, "make", [action === "add" ? "host-add" : "host-remove", `DOMAIN=${domain}`], runtimeEnv);
   }
 
   if (url.pathname === "/api/stream/proxy") {
@@ -37,33 +37,15 @@ export async function streamRoute(req, res) {
     validateTarget(target);
     validatePort(proxyPort);
 
-    const env = { ...runtimeEnv, DOMAIN: domain, TARGET: target, PORT: String(proxyPort) };
-    if (ssl) env.SSL = "1";
-    else delete env.SSL;
-
-    return streamSse(
-      req,
-      res,
-      "node",
-      [
-        "./scripts/npm-proxy.mjs",
-        "--domain",
-        domain,
-        "--target",
-        target,
-        "--port",
-        String(proxyPort),
-        "--scheme",
-        "http",
-      ],
-      env,
-    );
+    const args = ["app-proxy", `DOMAIN=${domain}`, `TARGET=${target}`, `PORT=${String(proxyPort)}`];
+    if (ssl) args.push("SSL=1");
+    return streamSse(req, res, "make", args, runtimeEnv);
   }
 
   if (url.pathname === "/api/stream/proxy-delete") {
     const domain = param("domain");
     validateDomain(domain);
-    return streamSse(req, res, "node", ["./scripts/npm-proxy.mjs", "--delete", "--domain", domain], runtimeEnv);
+    return streamSse(req, res, "make", ["app-proxy-remove", `DOMAIN=${domain}`], runtimeEnv);
   }
 
   if (url.pathname === "/api/stream/shell") {

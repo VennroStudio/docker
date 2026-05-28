@@ -3,7 +3,6 @@ import type { AppText, CommandAction, ContainerStateInfo, ServiceLink, ShellActi
 
 type ProxyRuntimeModulesProps = {
   activeOperationKey?: null | string;
-  networkActions: CommandAction[];
   nginxActions: CommandAction[];
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
@@ -17,7 +16,6 @@ type ProxyRuntimeModulesProps = {
 
 export function ProxyRuntimeModules({
   activeOperationKey,
-  networkActions,
   nginxActions,
   onRunCommand,
   onShellOpen,
@@ -39,22 +37,12 @@ export function ProxyRuntimeModules({
         operationDisabledTitle={operationDisabledTitle}
         shell={shellAction}
         status={shellAction ? statusByContainer[shellAction.container] : undefined}
+        stateEyebrow
         statusLabel={text.mariadbInstances.statusLabel}
         title={text.panels.npm.nginxTitle}
         details={moduleDetails(serviceLinks, shellAction?.container, text)}
         onRun={onRunCommand}
         onShellOpen={onShellOpen}
-      />
-
-      <ServiceModuleAccordion
-        actions={networkActions}
-        activeOperationKey={activeOperationKey}
-        eyebrow={text.panels.npm.networkEyebrow}
-        operationDisabled={operationDisabled}
-        operationDisabledTitle={operationDisabledTitle}
-        title={text.panels.npm.networkTitle}
-        details={[{ label: "Network", value: "proxy" }]}
-        onRun={onRunCommand}
       />
     </div>
   );
