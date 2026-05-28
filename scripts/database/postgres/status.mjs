@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { containerStatus, parseArgs, printJson, serviceLink } from "../status-common.mjs";
+import { containerStatus, parseArgs, printJson, settingsLink } from "../status-common.mjs";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/postgres/instances.json");
@@ -41,14 +41,7 @@ async function pgAdminStatus() {
 }
 
 async function pgAdminLink() {
-  const port = Number(process.env.PGADMIN_PORT || 5050);
-
-  return serviceLink(pgAdminContainer, {
-    label: "pgAdmin",
-    port,
-    source: "local",
-    url: `http://localhost:${port}`,
-  });
+  return settingsLink("pgadmin.pgaUrl", "pgAdmin");
 }
 
 async function instanceStatus(options) {

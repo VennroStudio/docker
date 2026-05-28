@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { containerStatus, parseArgs, printJson, serviceLink } from "../status-common.mjs";
+import { containerStatus, parseArgs, printJson, settingsLink } from "../status-common.mjs";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
@@ -41,12 +41,7 @@ async function phpMyAdminStatus() {
 }
 
 async function phpMyAdminLink() {
-  return serviceLink(phpMyAdminContainer, {
-    domain: "pma.local",
-    label: "pma.local",
-    source: "domain",
-    url: "http://pma.local",
-  });
+  return settingsLink("phpmyadmin.pmaUrl", "phpMyAdmin");
 }
 
 async function instanceStatus(options) {

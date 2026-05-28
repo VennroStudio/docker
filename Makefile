@@ -34,6 +34,9 @@ settings-show: ## Показать текущий settings.json
 settings-set: ## Изменить settings.json, передать KEY=proxy.npmEmail VALUE=user@example.com
 	@$(NODE_RUN) ./scripts/config/settings.mjs set
 
+settings-env: ## Сгенерировать .env из config/settings.json
+	@$(NODE_RUN) ./scripts/config/settings.mjs env
+
 ##@ Web UI
 node-runtime: ## Скачать локальный Node.js runtime в .runtime/node
 	@./scripts/config/node-runtime.sh ensure
@@ -392,7 +395,7 @@ pgadmin-logs: ## Логи pgAdmin
 pgadmin-shell: ## Shell внутри контейнера pgAdmin
 	$(MAKE) compose-shell NAME=pgadmin
 
-.PHONY: help init settings-show settings-set
+.PHONY: help init settings-show settings-set settings-env
 .PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
 .PHONY: compose-up compose-pull compose-start compose-stop compose-restart compose-down compose-logs compose-shell

@@ -79,7 +79,6 @@ export type MariaDbInstance = {
 
 export type PhpMyAdminOverview = {
   container: string;
-  domain?: string;
   link?: ServiceLink;
   state: ContainerRuntimeState;
   status?: string;
@@ -127,7 +126,6 @@ export type PostgresInstance = {
 
 export type PgAdminOverview = {
   container: string;
-  domain?: string;
   link?: ServiceLink;
   state: ContainerRuntimeState;
   status?: string;

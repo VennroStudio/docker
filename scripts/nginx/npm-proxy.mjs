@@ -10,7 +10,25 @@ process.on("unhandledRejection", fail);
 const args = parseArgs(process.argv.slice(2));
 const deleting = bool(args.delete ?? args.remove ?? process.env.DELETE_PROXY);
 const settingsFile = process.env.INFRA_SETTINGS_FILE || "config/settings.json";
+const defaultsFile = process.env.INFRA_DEFAULT_SETTINGS_FILE || "config/default-settings.json";
 const settings = await readSettings();
+const publicTargets = {
+  "nginx-container": {
+    group: "proxy",
+    key: "npmUrl",
+    name: "proxy.npmUrl",
+  },
+  "phpmyadmin-container": {
+    group: "phpmyadmin",
+    key: "pmaUrl",
+    name: "phpmyadmin.pmaUrl",
+  },
+  "pgadmin-container": {
+    group: "pgadmin",
+    key: "pgaUrl",
+    name: "pgadmin.pgaUrl",
+  },
+};
 const config = {
   delete: deleting,
   domain: need(args.domain || process.env.DOMAIN, "DOMAIN"),
@@ -37,7 +55,7 @@ async function main() {
 
   if (config.delete) {
     await deleteProxyHostAndCertificate();
-    if (shouldResetNpmPublicUrl()) await resetNpmPublicUrl();
+    await resetPublicUrlsForDomain();
     return;
   }
 
@@ -46,7 +64,7 @@ async function main() {
     : 0;
 
   const host = await upsertProxyHost(certificateId);
-  await updateNpmPublicUrl();
+  await updatePublicUrl();
   console.log(`Proxy Host #${host.id}: ${config.domain} -> ${config.target}:${config.port}`);
   console.log(`Open: ${config.ssl ? "https" : "http"}://${config.domain}`);
 }
@@ -267,29 +285,39 @@ async function deleteProxyHostAndCertificate() {
   }
 }
 
-async function updateNpmPublicUrl() {
-  if (config.target !== "nginx-container") return;
+async function updatePublicUrl() {
+  const binding = publicTargets[config.target];
+  if (!binding) return;
 
-  settings.proxy = {
-    ...settings.proxy,
-    npmUrl: `${config.ssl ? "https" : config.scheme}://${config.domain}`,
+  settings[binding.group] = {
+    ...(settings[binding.group] || {}),
+    [binding.key]: `${config.ssl ? "https" : config.scheme}://${config.domain}`,
   };
   await writeSettings(settings);
-  console.log(`Updated settings proxy.npmUrl: ${settings.proxy.npmUrl}`);
+  console.log(`Updated settings ${binding.name}: ${settings[binding.group][binding.key]}`);
 }
 
-async function resetNpmPublicUrl() {
-  settings.proxy = {
-    ...settings.proxy,
-    npmUrl: "http://localhost:81",
-  };
-  await writeSettings(settings);
-  console.log(`Reset settings proxy.npmUrl: ${settings.proxy.npmUrl}`);
+async function resetPublicUrlsForDomain() {
+  let changed = false;
+
+  for (const binding of Object.values(publicTargets)) {
+    if (!shouldResetPublicUrl(binding)) continue;
+
+    const defaultUrl = getByPath(await readDefaults(), binding.name);
+    settings[binding.group] = {
+      ...(settings[binding.group] || {}),
+      [binding.key]: defaultUrl,
+    };
+    changed = true;
+    console.log(`Reset settings ${binding.name}: ${defaultUrl}`);
+  }
+
+  if (changed) await writeSettings(settings);
 }
 
-function shouldResetNpmPublicUrl() {
+function shouldResetPublicUrl(binding) {
   try {
-    return new URL(settings.proxy?.npmUrl || "").hostname === config.domain;
+    return new URL(settings[binding.group]?.[binding.key] || "").hostname === config.domain;
   } catch {
     return false;
   }
@@ -297,16 +325,37 @@ function shouldResetNpmPublicUrl() {
 
 async function readSettings() {
   try {
-    const payload = JSON.parse(await readFile(settingsFile, "utf8"));
-    return {
-      ...payload,
-      proxy: {
-        ...(payload.proxy || {}),
-      },
-    };
+    return deepMerge(await readDefaults(), JSON.parse(await readFile(settingsFile, "utf8")));
   } catch {
-    return { proxy: {} };
+    return readDefaults();
   }
+}
+
+async function readDefaults() {
+  try {
+    return JSON.parse(await readFile(defaultsFile, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function getByPath(source, key) {
+  return key.split(".").reduce((value, part) => value?.[part], source) || "";
+}
+
+function deepMerge(base, override) {
+  if (!isPlainObject(base)) return override;
+  if (!isPlainObject(override)) return base;
+
+  const result = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    result[key] = isPlainObject(value) ? deepMerge(base[key], value) : value;
+  }
+  return result;
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 async function writeSettings(payload) {

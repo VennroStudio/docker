@@ -17,7 +17,12 @@ export async function settings(req, res) {
 }
 
 export async function generateEnv(_req, res) {
-  sendJson(res, 501, { ok: false, output: "Env generation is not implemented in the new console flow" });
+  await execMake(["settings-env"]);
+  sendJson(res, 200, {
+    ok: true,
+    path: `${projectRoot}/.env`,
+    settings: (await readSettings()).settings,
+  });
 }
 
 async function readSettings() {

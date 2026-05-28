@@ -20,7 +20,7 @@ import {
   type ShellAction,
   type ViewConfig,
 } from "@/entities/infrastructure";
-import type { AppSettings } from "@/entities/settings";
+import type { useSettings } from "@/entities/settings";
 import { MariaDbInstancesPanel, PhpMyAdminPanel } from "@/features/manage-mariadb";
 import { PgAdminPanel, PostgresInstancesPanel } from "@/features/manage-postgres";
 import { ServicePageLayout } from "@/widgets/service-page-layout";
@@ -42,7 +42,7 @@ type DatabasesPageProps = {
     loading: boolean;
     pgadmin: PgAdminOverview;
   };
-  settings?: AppSettings | null;
+  settingsState: ReturnType<typeof useSettings>;
   text: AppText;
   view: ViewConfig;
   translateActions: (actions: CommandAction[]) => CommandAction[];
@@ -87,29 +87,12 @@ export function DatabasesPage({
   operationDisabled,
   operationDisabledTitle,
   postgres,
-  settings,
+  settingsState,
   text,
   translateActions,
   view,
 }: DatabasesPageProps) {
   const page = text.servicePages.mariadb;
-  const mariaDbDefaults = settings?.mariadb;
-  const postgresDefaults = settings?.postgres;
-  const defaultPostgresDumpPath = postgresDefaults
-    ? joinPath(postgresDefaults.homeDumpPath, postgresDefaults.dumpName)
-    : undefined;
-  const defaultMariaDbCreateForm = mariaDbDefaults
-    ? {
-        rootPassword: mariaDbDefaults.rootPassword,
-      }
-    : undefined;
-  const defaultPostgresCreateForm = postgresDefaults
-    ? {
-        database: postgresDefaults.database,
-        password: postgresDefaults.password,
-        user: postgresDefaults.user,
-      }
-    : undefined;
 
   return (
     <ServicePageLayout view={view} eyebrow={page.eyebrow} description={page.description} title={text.views.mariadb}>
@@ -117,7 +100,6 @@ export function DatabasesPage({
         <MariaDbInstancesPanel
           activeOperationKey={activeOperationKey}
           databaseRefreshSignal={databaseRefreshSignal}
-          defaultCreateForm={defaultMariaDbCreateForm}
           error={mariaDb.error}
           instances={mariaDb.instances}
           loading={mariaDb.loading}
@@ -135,9 +117,6 @@ export function DatabasesPage({
         <PostgresInstancesPanel
           activeOperationKey={activeOperationKey}
           databaseRefreshSignal={databaseRefreshSignal}
-          defaultCreateForm={defaultPostgresCreateForm}
-          defaultDatabase={postgresDefaults?.database}
-          defaultDumpPath={defaultPostgresDumpPath}
           error={postgres.error}
           instances={postgres.instances}
           loading={postgres.loading}
@@ -171,6 +150,7 @@ export function DatabasesPage({
           operationDisabled={operationDisabled}
           operationDisabledTitle={operationDisabledTitle}
           overview={postgres.pgadmin}
+          settingsState={settingsState}
           shell={shellAction(postgres.pgadmin.container, "pgAdmin", text)}
           text={text}
           onRun={onCommandRun}
@@ -179,12 +159,6 @@ export function DatabasesPage({
       </div>
     </ServicePageLayout>
   );
-}
-
-function joinPath(base: string, name: string) {
-  if (!base) return name;
-  if (!name) return base;
-  return `${base.replace(/\/+$/, "")}/${name.replace(/^\/+/, "")}`;
 }
 
 function shellAction(container: string, label: string, text: AppText): ShellAction | undefined {

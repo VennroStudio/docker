@@ -166,8 +166,6 @@ export function PhpMyAdminPanel({
       activeOperationKey={activeOperationKey}
       copy={{
         containerLabel: copy.containerLabel,
-        domainLabel: copy.domainLabel,
-        domainUnknown: copy.domainUnknown,
         linkLabel: text.common.link,
         shellLabel: copy.actions.shell.label,
         statusLabel: copy.statusLabel,

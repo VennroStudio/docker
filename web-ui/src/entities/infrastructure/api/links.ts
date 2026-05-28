@@ -2,7 +2,7 @@ export type ServiceLink = {
   domain?: string;
   label: string;
   port?: number;
-  source: "domain" | "local";
+  source: "domain" | "local" | "settings";
   url: string;
 };
 

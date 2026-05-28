@@ -3,5 +3,13 @@
     "npmUrl": "http://localhost:81",
     "npmEmail": "",
     "npmPassword": ""
+  },
+  "phpmyadmin": {
+    "pmaUrl": "http://localhost:8080"
+  },
+  "pgadmin": {
+    "pgaUrl": "http://localhost:5050",
+    "pgaEmail": "admin@example.com",
+    "pgaPassword": "admin"
   }
 }

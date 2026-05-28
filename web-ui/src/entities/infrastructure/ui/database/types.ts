@@ -26,8 +26,6 @@ export type DatabaseInstancesCopy = {
 
 export type DatabaseAdminCopy = {
   containerLabel: string;
-  domainLabel: string;
-  domainUnknown: string;
   linkLabel: string;
   shellLabel: string;
   statusLabel: string;
@@ -35,7 +33,6 @@ export type DatabaseAdminCopy = {
 
 export type DatabaseAdminOverview = {
   container: string;
-  domain?: string;
   link?: ServiceLink;
   state: ContainerRuntimeState;
   status?: string;
@@ -44,6 +41,7 @@ export type DatabaseAdminOverview = {
 export type DatabaseAdminSectionProps = {
   activeOperationKey?: null | string;
   actions: CommandAction[];
+  children?: ReactNode;
   copy: DatabaseAdminCopy;
   eyebrow: string;
   link?: ServiceLink;

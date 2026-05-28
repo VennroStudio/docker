@@ -12,6 +12,7 @@ try {
   if (command === "init") await initSettings();
   else if (command === "show") await showSettings();
   else if (command === "set") await setSetting();
+  else if (command === "env") await generateEnv();
   else usage(1);
 } catch (error) {
   console.error(error.message || String(error));
@@ -45,9 +46,19 @@ async function setSetting() {
   console.log(`Updated ${key}`);
 }
 
+async function generateEnv() {
+  const settings = await readJson(settingsFile);
+  const lines = envEntries(settings)
+    .filter(([, value]) => value !== undefined && value !== null)
+    .map(([key, value]) => `${key}=${String(value).replace(/\n/g, "")}`);
+
+  await writeFile(".env", `${lines.join("\n")}\n`, "utf8");
+  console.log("Generated .env from config/settings.json");
+}
+
 function readArg(name) {
   const value = process.env[name];
-  if (!value) throw new Error(`${name} is required`);
+  if (!(name in process.env)) throw new Error(`${name} is required`);
   return value;
 }
 
@@ -67,7 +78,13 @@ function setByPath(target, key, value) {
 }
 
 async function readJson(file) {
-  return normalizeSettings(JSON.parse(await readFile(file, "utf8")));
+  const payload = JSON.parse(await readFile(file, "utf8"));
+  if (path.resolve(file) === path.resolve(defaultsFile) || !existsSync(defaultsFile)) {
+    return normalizeSettings(payload);
+  }
+
+  const defaults = JSON.parse(await readFile(defaultsFile, "utf8"));
+  return normalizeSettings(deepMerge(defaults, payload));
 }
 
 async function writeJson(file, payload) {
@@ -81,21 +98,52 @@ async function migrateSettings() {
 }
 
 function normalizeSettings(settings = {}) {
-  if (!settings || typeof settings !== "object") return settings;
-  if (!settings.proxy || typeof settings.proxy !== "object") return settings;
+  const source = settings && typeof settings === "object" ? settings : {};
 
   return {
-    ...settings,
     proxy: {
-      ...settings.proxy,
+      npmUrl: source.proxy?.npmUrl || "http://localhost:81",
+      npmEmail: source.proxy?.npmEmail || "",
+      npmPassword: source.proxy?.npmPassword || "",
+    },
+    phpmyadmin: {
+      pmaUrl: source.phpmyadmin?.pmaUrl || "http://localhost:8080",
+    },
+    pgadmin: {
+      pgaUrl: source.pgadmin?.pgaUrl || "http://localhost:5050",
+      pgaEmail: source.pgadmin?.pgaEmail || "admin@example.com",
+      pgaPassword: source.pgadmin?.pgaPassword || "admin",
     },
   };
+}
+
+function deepMerge(base, override) {
+  if (!isPlainObject(base)) return override;
+  if (!isPlainObject(override)) return base;
+
+  const result = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    result[key] = isPlainObject(value) ? deepMerge(base[key], value) : value;
+  }
+  return result;
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function envEntries(settings) {
+  return [
+    ["PGADMIN_EMAIL", settings.pgadmin?.pgaEmail],
+    ["PGADMIN_PASSWORD", settings.pgadmin?.pgaPassword],
+  ];
 }
 
 function usage(code) {
   console.log("Usage:");
   console.log("  node scripts/config/settings.mjs init");
   console.log("  node scripts/config/settings.mjs show");
+  console.log("  node scripts/config/settings.mjs env");
   console.log("  KEY=proxy.npmEmail VALUE=user@example.com node scripts/config/settings.mjs set");
   process.exit(code);
 }

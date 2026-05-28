@@ -89,7 +89,7 @@ export function AppRouter({ controller }: AppRouterProps) {
         operationDisabled={operationRunning}
         operationDisabledTitle={operationBlockTitle}
         postgres={postgresInstances}
-        settings={settings.settings}
+        settingsState={settings}
         text={text}
         translateActions={translateActions}
         view={activeConfig}

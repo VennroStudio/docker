@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { DatabaseAdminSection, DatabaseInstancesSection } from "@/entities/infrastructure";
 import type { ServiceLink } from "@/entities/infrastructure";
+import type { useSettings } from "@/entities/settings";
+import { SettingsConfigForm, type SettingsConfigField } from "@/features/manage-settings";
 import type {
   AppText,
   CommandAction,
@@ -46,11 +48,24 @@ type PgAdminPanelProps = {
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
   overview: PgAdminOverview;
+  settingsState: ReturnType<typeof useSettings>;
   shell?: ShellAction;
   text: AppText;
   onRun: (action: CommandAction) => void;
   onShellOpen: (action: ShellAction) => void;
 };
+
+const pgAdminConfigFields: SettingsConfigField[] = [
+  { group: "pgadmin", label: "pgAdmin URL", name: "pgaUrl" },
+  { autocomplete: "username", group: "pgadmin", label: "pgAdmin email", name: "pgaEmail" },
+  {
+    autocomplete: "current-password",
+    group: "pgadmin",
+    label: "pgAdmin password",
+    name: "pgaPassword",
+    type: "password",
+  },
+];
 
 export function PostgresInstancesPanel({
   activeOperationKey,
@@ -163,6 +178,7 @@ export function PgAdminPanel({
   operationDisabled,
   operationDisabledTitle,
   overview,
+  settingsState,
   shell,
   text,
 }: PgAdminPanelProps) {
@@ -176,8 +192,6 @@ export function PgAdminPanel({
       activeOperationKey={activeOperationKey}
       copy={{
         containerLabel: copy.containerLabel,
-        domainLabel: copy.domainLabel,
-        domainUnknown: copy.domainUnknown,
         linkLabel: text.common.link,
         shellLabel: actionLabels.shell.label,
         statusLabel: copy.statusLabel,
@@ -193,6 +207,16 @@ export function PgAdminPanel({
       onOpenChange={setOpen}
       onRun={onRun}
       onShellOpen={onShellOpen}
-    />
+    >
+      <div className="border-t border-sky-100 pt-4">
+        <p className="mb-3 text-xs font-semibold uppercase text-slate-500">{copy.pgadminConfigTitle}</p>
+        <SettingsConfigForm
+          copy={text.settings}
+          fields={pgAdminConfigFields}
+          generateEnvAfterSave
+          settingsState={settingsState}
+        />
+      </div>
+    </DatabaseAdminSection>
   );
 }

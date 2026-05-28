@@ -81,8 +81,6 @@ export type AppText = {
     addVersion: string;
     create: string;
     createTitle: string;
-    domainLabel: string;
-    domainUnknown: string;
     empty: string;
     error: string;
     fields: {
@@ -168,8 +166,6 @@ export type AppText = {
     create: string;
     createTitle: string;
     databaseLabel: string;
-    domainLabel: string;
-    domainUnknown: string;
     empty: string;
     error: string;
     fields: {
@@ -239,6 +235,7 @@ export type AppText = {
     };
     instanceTitle: (version: string) => string;
     loading: string;
+    pgadminConfigTitle: string;
     pgadminEyebrow: string;
     portLabel: string;
     serversTitle: string;
@@ -305,13 +302,9 @@ export type AppText = {
     saved: string;
     sectionEyebrow: string;
     sections: {
-      deployment: string;
-      environment: string;
-      mariadb: string;
-      postgres: string;
+      pgadmin: string;
+      phpmyadmin: string;
       proxy: string;
-      registry: string;
-      storage: string;
     };
     sourceLabel: string;
     sourceMissing: string;

@@ -1,6 +1,5 @@
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import path from "node:path";
 
 export async function containerStatus(container) {
   const item = await dockerContainer(container);
@@ -53,18 +52,12 @@ export function printJson(value) {
   console.log(JSON.stringify(value, null, 2));
 }
 
-export async function serviceLink(container, fallback) {
-  const registry = await readServiceLinks();
-  const binding = registry.bindings.find((item) => item.container === container);
-
-  if (!binding?.domain) return fallback;
-
+export async function settingsLink(path, label) {
+  const url = getByPath(await readSettings(), path);
   return {
-    domain: binding.domain,
-    label: binding.domain,
-    port: binding.port,
-    source: "domain",
-    url: `${binding.scheme || "http"}://${binding.domain}`,
+    label,
+    source: "settings",
+    url,
   };
 }
 
@@ -101,13 +94,35 @@ function execFileText(command, args) {
   });
 }
 
-async function readServiceLinks() {
-  const linksFile = path.resolve(process.env.SERVICE_LINKS_FILE || "docker/services/links.json");
+async function readSettings() {
+  const defaults = await readJson("config/default-settings.json");
+  const settings = await readJson(process.env.INFRA_SETTINGS_FILE || "config/settings.json");
+  return deepMerge(defaults, settings);
+}
 
+async function readJson(file) {
   try {
-    const payload = JSON.parse(await readFile(linksFile, "utf8"));
-    return { bindings: Array.isArray(payload.bindings) ? payload.bindings : [] };
+    return JSON.parse(await readFile(file, "utf8"));
   } catch {
-    return { bindings: [] };
+    return {};
   }
+}
+
+function deepMerge(base, override) {
+  if (!isPlainObject(base)) return override;
+  if (!isPlainObject(override)) return base;
+
+  const result = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    result[key] = isPlainObject(value) ? deepMerge(base[key], value) : value;
+  }
+  return result;
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function getByPath(source, key) {
+  return key.split(".").reduce((value, part) => value?.[part], source) || "";
 }

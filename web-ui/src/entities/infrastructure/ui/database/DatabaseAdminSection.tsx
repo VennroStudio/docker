@@ -8,6 +8,7 @@ import type { DatabaseAdminSectionProps } from "./types";
 export function DatabaseAdminSection({
   activeOperationKey,
   actions,
+  children,
   copy,
   eyebrow,
   link,
@@ -66,11 +67,13 @@ export function DatabaseAdminSection({
       }
       onOpenChange={onOpenChange}
     >
-      <div className="grid gap-2 sm:grid-cols-2">
-        <InfoLine label={copy.containerLabel} value={overview.container} />
-        <InfoLine label={copy.domainLabel} value={overview.domain || copy.domainUnknown} />
-        {link ? <InfoLine href={link.url} label={copy.linkLabel} value={link.url} /> : null}
-        {overview.status ? <InfoLine label={copy.statusLabel} value={overview.status} /> : null}
+      <div className="grid gap-4">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <InfoLine label={copy.containerLabel} value={overview.container} />
+          {link ? <InfoLine href={link.url} label={copy.linkLabel} value={link.url} /> : null}
+          {overview.status ? <InfoLine label={copy.statusLabel} value={overview.status} /> : null}
+        </div>
+        {children}
       </div>
     </AccordionPanel>
   );

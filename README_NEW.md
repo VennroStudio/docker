@@ -23,6 +23,19 @@ make settings-set KEY=proxy.npmEmail VALUE=user@example.com
 make settings-set KEY=proxy.npmPassword VALUE=secret
 ```
 
+Изменить настройки pgAdmin:
+
+```sh
+make settings-set KEY=pgadmin.pgaEmail VALUE=admin@example.com
+make settings-set KEY=pgadmin.pgaPassword VALUE=secret
+```
+
+Сгенерировать `.env` для `docker-compose-pgadmin.yml`:
+
+```sh
+make settings-env
+```
+
 ## Рабочий флоу
 
 ### Пример: запуск Nginx Proxy Manager
@@ -344,6 +357,12 @@ make settings-show
 
 ```sh
 make settings-set KEY=proxy.npmEmail VALUE=user@example.com
+```
+
+Сгенерировать `.env` для `docker-compose-pgadmin.yml`:
+
+```sh
+make settings-env
 ```
 
 ### Docker Network
