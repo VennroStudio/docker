@@ -3,7 +3,6 @@ import {
   streamSshConnect,
   streamSshKeyGenerate,
   streamSshKeyPush,
-  streamSshKeyTest,
   streamSshServerAdd,
   streamSshServerRemove,
   streamSshServerUpdate,
@@ -62,7 +61,7 @@ export function useSshOperations({ confirmDialog, refreshSshServers, runWithTerm
       key: `ssh:connect:${server.id}`,
       label: `${text.ssh.actions.terminal}: ${server.name}`,
       open: (handlers) => streamSshConnect(server.id, handlers),
-      preview: `make ssh-connect ID=${server.id}`,
+      preview: `make ssh-connect-ui ID=${server.id}`,
     });
   };
 
@@ -81,16 +80,7 @@ export function useSshOperations({ confirmDialog, refreshSshServers, runWithTerm
       key: `ssh:key-push:${server.id}`,
       label: text.ssh.actions.keyPush,
       open: (handlers) => streamSshKeyPush(server.id, handlers),
-      preview: `make ssh-key-push ID=${server.id}`,
-    });
-  };
-
-  const runSshKeyTest = (server: SshServer) => {
-    runWithTerminal({
-      key: `ssh:key-test:${server.id}`,
-      label: text.ssh.actions.keyTest,
-      open: (handlers) => streamSshKeyTest(server.id, handlers),
-      preview: `make ssh-key-test ID=${server.id}`,
+      preview: `make ssh-key-push-ui ID=${server.id}`,
     });
   };
 
@@ -98,7 +88,6 @@ export function useSshOperations({ confirmDialog, refreshSshServers, runWithTerm
     runSshConnect,
     runSshKeyGenerate,
     runSshKeyPush,
-    runSshKeyTest,
     runSshServerAdd,
     runSshServerRemove,
     runSshServerUpdate,

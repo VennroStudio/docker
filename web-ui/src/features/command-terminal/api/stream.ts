@@ -86,10 +86,6 @@ export function streamSshKeyPush(id: number, handlers: StreamHandlers): () => vo
   return openPostStream("/api/stream/ssh-key-push", { id }, handlers);
 }
 
-export function streamSshKeyTest(id: number, handlers: StreamHandlers): () => void {
-  return openPostStream("/api/stream/ssh-key-test", { id }, handlers);
-}
-
 export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers: StreamHandlers): () => void {
   return openPostStream(
     "/api/stream/mariadb-instance-add",

@@ -31,7 +31,6 @@ export function AppRouter({ controller }: AppRouterProps) {
     runSshConnect,
     runSshKeyGenerate,
     runSshKeyPush,
-    runSshKeyTest,
     runSshServerAdd,
     runSshServerRemove,
     runSshServerUpdate,
@@ -161,7 +160,6 @@ export function AppRouter({ controller }: AppRouterProps) {
         }}
         onKeyGenerate={runSshKeyGenerate}
         onKeyPush={runSshKeyPush}
-        onKeyTest={runSshKeyTest}
         onServerAdd={runSshServerAdd}
         onServerDelete={runSshServerRemove}
         onServerSave={runSshServerUpdate}

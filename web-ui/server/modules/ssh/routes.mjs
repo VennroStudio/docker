@@ -9,7 +9,6 @@ const streamRoutes = new Set([
   "/api/stream/ssh-connect",
   "/api/stream/ssh-key-generate",
   "/api/stream/ssh-key-push",
-  "/api/stream/ssh-key-test",
 ]);
 
 export function isSshStreamRoute(req) {
@@ -38,7 +37,7 @@ export async function sshStreamRoute(req, res) {
 
   if (url.pathname === "/api/stream/ssh-connect") {
     const id = validateId(param("id"));
-    return streamSse(req, res, "make", ["ssh-connect", `ID=${id}`], process.env, { interactive: true });
+    return streamSse(req, res, "make", ["ssh-connect-ui", `ID=${id}`], process.env, { interactive: true });
   }
 
   if (url.pathname === "/api/stream/ssh-key-generate") {
@@ -48,12 +47,7 @@ export async function sshStreamRoute(req, res) {
 
   if (url.pathname === "/api/stream/ssh-key-push") {
     const id = validateId(param("id"));
-    return streamSse(req, res, "make", ["ssh-key-push", `ID=${id}`], process.env, { interactive: true });
-  }
-
-  if (url.pathname === "/api/stream/ssh-key-test") {
-    const id = validateId(param("id"));
-    return streamSse(req, res, "make", ["ssh-key-test", `ID=${id}`], process.env, { interactive: true });
+    return streamSse(req, res, "make", ["ssh-key-push-ui", `ID=${id}`], process.env, { interactive: true });
   }
 
   throw new Error("Unknown SSH stream route");

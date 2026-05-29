@@ -92,6 +92,7 @@ function generateKey() {
 
 function pushKey() {
   const server = requireKeyServer();
+  assertUiCanPushKey(server);
   const publicKeyPath = `${expandHome(server.keyPath)}.pub`;
   if (!existsSync(publicKeyPath))
     throw new Error(`Public key does not exist: ${server.keyPath}.pub`);
@@ -148,6 +149,14 @@ function requireKeyServer() {
   if (!server.keyPath)
     throw new Error("KEY_PATH is empty. Run make ssh-key-generate ID=...");
   return server;
+}
+
+function assertUiCanPushKey(server) {
+  if (process.env.SSH_UI === "1" && server.passwordMode === "manual") {
+    throw new Error(
+      "ssh-key-push from Web UI requires PASSWORD_MODE=sshpass: ssh-copy-id asks the password in the host TTY. Switch this server to PASSWORD_MODE=sshpass or run make ssh-key-push ID=... in your host terminal.",
+    );
+  }
 }
 
 function passwordCommand(server, command, args) {

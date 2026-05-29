@@ -19,7 +19,6 @@ type SshPageProps = {
   onCopyPassword: (password: string) => void;
   onKeyGenerate: (form: SshKeyForm) => void;
   onKeyPush: (server: SshServer) => void;
-  onKeyTest: (server: SshServer) => void;
   onServerAdd: (form: SshServerForm) => void;
   onServerDelete: (server: SshServer) => void;
   onServerSave: (server: SshServer, form: SshServerForm) => void;
@@ -30,7 +29,6 @@ export function SshPage({
   onCopyPassword,
   onKeyGenerate,
   onKeyPush,
-  onKeyTest,
   onServerAdd,
   onServerDelete,
   onServerSave,
@@ -71,7 +69,6 @@ export function SshPage({
               onCopyPassword={onCopyPassword}
               onDelete={onServerDelete}
               onKeyPush={onKeyPush}
-              onKeyTest={onKeyTest}
               onSave={onServerSave}
               onTerminalOpen={onTerminalOpen}
             />
