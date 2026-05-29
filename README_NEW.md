@@ -1408,12 +1408,6 @@ make ssh-update ID=1 NAME=prod HOST=example.com PORT=22 USER=root AUTH_TYPE=pass
 make ssh-remove ID=1
 ```
 
-Проверить SSH подключение:
-
-```sh
-make ssh-test ID=1
-```
-
 Подключиться к SSH серверу:
 
 ```sh
@@ -1444,16 +1438,16 @@ make ssh-key-generate ID=1 FORCE=1
 make ssh-key-push ID=1
 ```
 
+Удалить публичный RSA ключ с SSH сервера:
+
+```sh
+make ssh-key-remove ID=1
+```
+
 Показать публичный RSA ключ:
 
 ```sh
 make ssh-key-show ID=1
-```
-
-Проверить подключение по RSA ключу:
-
-```sh
-make ssh-key-test ID=1
 ```
 
 ### Utilities

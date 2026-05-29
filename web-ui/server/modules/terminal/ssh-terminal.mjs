@@ -38,7 +38,11 @@ async function openSshTerminal(ws, req) {
     const url = new URL(req.url, "http://localhost");
     const id = validateId(url.searchParams.get("id"));
     const action = validateAction(url.searchParams.get("action"));
-    const command = action === "key-push" ? "ssh-key-push" : "ssh-connect";
+    const command = {
+      connect: "ssh-connect",
+      "key-push": "ssh-key-push",
+      "key-remove": "ssh-key-remove",
+    }[action];
 
     sendTerminalMessage(ws, {
       data: `$ make ${command} ID=${id}\r\n\r\n`,
@@ -80,6 +84,7 @@ function validateId(value) {
 
 function validateAction(value) {
   if (!value) return "connect";
-  if (value === "connect" || value === "key-push") return value;
+  if (value === "connect" || value === "key-push" || value === "key-remove")
+    return value;
   throw new Error("Invalid SSH terminal action");
 }

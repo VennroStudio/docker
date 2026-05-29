@@ -80,9 +80,23 @@ export function useSshOperations({
     openSshTerminal(server, "key-push");
   };
 
+  const runSshKeyRemove = async (server: SshServer) => {
+    const confirmed = await confirmDialog.confirm({
+      body: text.confirm.runCommand.body(`make ssh-key-remove ID=${server.id}`),
+      cancelLabel: text.common.cancel,
+      confirmLabel: text.confirm.runCommand.confirmLabel,
+      title: text.ssh.actions.keyRemove,
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    openSshTerminal(server, "key-remove");
+  };
+
   return {
     runSshConnect,
     runSshKeyGenerate,
+    runSshKeyRemove,
     runSshKeyPush,
     runSshServerAdd,
     runSshServerRemove,

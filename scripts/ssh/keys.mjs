@@ -26,11 +26,11 @@ try {
     case "push":
       pushKey();
       break;
+    case "remove":
+      removeKey();
+      break;
     case "show":
       showKey();
-      break;
-    case "test":
-      testKey();
       break;
     default:
       usage();
@@ -127,20 +127,38 @@ function pushKey() {
   if (result.status !== 0) process.exit(result.status || 1);
 }
 
+function removeKey() {
+  const server = requireKeyServer();
+  const publicKeyPath = `${expandHome(server.keyPath)}.pub`;
+  if (!existsSync(publicKeyPath))
+    throw new Error(`Public key does not exist: ${server.keyPath}.pub`);
+
+  const publicKey = readFileSync(publicKeyPath, "utf8").trim();
+  if (!publicKey) throw new Error(`Public key is empty: ${server.keyPath}.pub`);
+  const [keyType, keyBlob] = publicKey.split(/\s+/);
+  if (!keyType || !keyBlob)
+    throw new Error(`Invalid public key: ${server.keyPath}.pub`);
+
+  const matcher =
+    "function has_key() { for (i = 1; i < NF; i++) if ($i == key_type && $(i + 1) == key_blob) return 1; return 0 }";
+  const remoteCommand =
+    "mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys && " +
+    "tmp_file=$(mktemp) && " +
+    `match_count=$(awk -v key_type=${shellQuote(keyType)} -v key_blob=${shellQuote(keyBlob)} '${matcher} has_key() { count++ } END { print count + 0 }' ~/.ssh/authorized_keys) && ` +
+    `awk -v key_type=${shellQuote(keyType)} -v key_blob=${shellQuote(keyBlob)} '${matcher} has_key() { next } { print }' ~/.ssh/authorized_keys > "$tmp_file" && ` +
+    "cat \"$tmp_file\" > ~/.ssh/authorized_keys && " +
+    "rm -f \"$tmp_file\" && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys && " +
+    "if [ \"$match_count\" -gt 0 ]; then echo \"Removed RSA key from ~/.ssh/authorized_keys\"; else echo \"RSA key is not present in ~/.ssh/authorized_keys\"; fi";
+  const { command, args } = sshCommand(server, [remoteCommand]);
+  runInherit(command, args);
+}
+
 function showKey() {
   const server = requireKeyServer();
   const publicKeyPath = `${expandHome(server.keyPath)}.pub`;
   if (!existsSync(publicKeyPath))
     throw new Error(`Public key does not exist: ${server.keyPath}.pub`);
   console.log(readFileSync(publicKeyPath, "utf8").trim());
-}
-
-function testKey() {
-  const server = requireKeyServer();
-  const { command, args } = sshCommand(server, ["echo connected && hostname"], {
-    authType: "key",
-  });
-  runInherit(command, args);
 }
 
 function requireKeyServer() {
@@ -182,11 +200,15 @@ function safeName(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+function shellQuote(value) {
+  return `'${String(value).replaceAll("'", "'\\''")}'`;
+}
+
 function usage() {
   console.log("Usage:");
   console.log("  make ssh-key-generate ID=1");
   console.log("  make ssh-key-push ID=1");
+  console.log("  make ssh-key-remove ID=1");
   console.log("  make ssh-key-show ID=1");
-  console.log("  make ssh-key-test ID=1");
   console.log(`Root: ${rootDir}`);
 }

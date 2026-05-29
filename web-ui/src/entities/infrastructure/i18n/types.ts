@@ -311,8 +311,8 @@ export type AppText = {
       copyPassword: string;
       deleteServer: string;
       generateKey: string;
+      keyRemove: string;
       keyPush: string;
-      keyTest: string;
       saveServer: string;
       terminal: string;
     };

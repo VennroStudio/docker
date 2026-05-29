@@ -30,6 +30,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     registryStatus,
     runSshConnect,
     runSshKeyGenerate,
+    runSshKeyRemove,
     runSshKeyPush,
     runSshServerAdd,
     runSshServerRemove,
@@ -159,6 +160,7 @@ export function AppRouter({ controller }: AppRouterProps) {
           toast.show({ title: text.ssh.actions.copyPassword, tone: "success" });
         }}
         onKeyGenerate={runSshKeyGenerate}
+        onKeyRemove={runSshKeyRemove}
         onKeyPush={runSshKeyPush}
         onServerAdd={runSshServerAdd}
         onServerDelete={runSshServerRemove}

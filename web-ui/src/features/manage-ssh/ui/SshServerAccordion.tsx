@@ -1,4 +1,4 @@
-import { Send, TerminalSquare, Trash2 } from "lucide-react";
+import { KeyRound, Send, TerminalSquare, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { AppText, SshServer, SshServerForm } from "@/entities/infrastructure";
 import { AccordionPanel, IconButton } from "@/shared/ui";
@@ -10,6 +10,7 @@ type SshServerAccordionProps = {
   server: SshServer;
   onCopyPassword: (password: string) => void;
   onDelete: (server: SshServer) => void;
+  onKeyRemove: (server: SshServer) => void;
   onKeyPush: (server: SshServer) => void;
   onSave: (server: SshServer, form: SshServerForm) => void;
   onTerminalOpen: (server: SshServer) => void;
@@ -19,6 +20,7 @@ export function SshServerAccordion({
   copy,
   onCopyPassword,
   onDelete,
+  onKeyRemove,
   onKeyPush,
   onSave,
   onTerminalOpen,
@@ -52,6 +54,14 @@ export function SshServerAccordion({
           </IconButton>
           <IconButton label={copy.actions.keyPush} tone="primary" onClick={() => onKeyPush(server)}>
             <Send size={16} strokeWidth={2.5} />
+          </IconButton>
+          <IconButton
+            disabled={!server.keyPath}
+            label={copy.actions.keyRemove}
+            tone="danger"
+            onClick={() => onKeyRemove(server)}
+          >
+            <KeyRound size={16} strokeWidth={2.5} />
           </IconButton>
           <IconButton label={copy.actions.deleteServer} tone="danger" onClick={() => onDelete(server)}>
             <Trash2 size={16} strokeWidth={2.5} />

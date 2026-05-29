@@ -34,9 +34,6 @@ try {
     case "remove":
       removeServer();
       break;
-    case "test":
-      runSsh(["echo connected && hostname"]);
-      break;
     case "connect":
       runSsh();
       break;
@@ -113,6 +110,5 @@ function usage() {
     "  make ssh-update ID=1 NAME=prod HOST=example.com USER=root PASSWORD=secret",
   );
   console.log("  make ssh-remove ID=1");
-  console.log("  make ssh-test ID=1");
   console.log("  make ssh-connect ID=1");
 }

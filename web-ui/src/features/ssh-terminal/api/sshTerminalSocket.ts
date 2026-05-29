@@ -1,6 +1,6 @@
 export type SshTerminalMessage = { data: string; type: "output" } | { code: number; type: "exit" };
 
-export type SshTerminalAction = "connect" | "key-push";
+export type SshTerminalAction = "connect" | "key-push" | "key-remove";
 
 export function createSshTerminalSocket(serverId: number, action: SshTerminalAction, cols: number, rows: number) {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
