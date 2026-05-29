@@ -20,7 +20,6 @@ function actionsFor(group: CommandGroupId): CommandAction[] {
 
 export const mariadbActions = actionsFor("mariadb");
 export const minioActions = actionsFor("minio");
-export const networkActions = actionsFor("network");
 export const nginxActions = actionsFor("nginx");
 export const pgadminActions = actionsFor("pgadmin");
 export const phpmyadminActions = actionsFor("phpmyadmin");

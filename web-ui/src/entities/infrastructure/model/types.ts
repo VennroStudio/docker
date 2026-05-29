@@ -3,7 +3,6 @@ import commandManifest from "../../../../commands.manifest.json";
 export type ViewId =
   | "home"
   | "proxy"
-  | "network"
   | "nginx"
   | "mariadb"
   | "postgres"
@@ -12,7 +11,7 @@ export type ViewId =
   | "registry"
   | "utilities"
   | "settings";
-export type ServiceViewId = Exclude<ViewId, "home" | "network" | "settings" | "utilities">;
+export type ServiceViewId = Exclude<ViewId, "home" | "settings" | "utilities">;
 export type CommandId = keyof typeof commandManifest.commands;
 export type CommandGroupId = keyof typeof commandManifest.groups;
 

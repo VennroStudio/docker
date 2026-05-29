@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { AppText } from "@/entities/infrastructure";
-import type { useSettings } from "@/entities/settings";
 import { AccordionPanel } from "@/shared/ui";
+import type { useSettings } from "../model/useSettings";
 import { SettingsConfigForm, type SettingsConfigField } from "./SettingsConfigForm";
 
 type SettingsConfigAccordionProps = {

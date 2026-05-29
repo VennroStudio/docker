@@ -1,4 +1,4 @@
-import type { DatabaseInstancesCopy } from "./types";
+import type { DatabaseInstancesCopy } from "../../model/database/types";
 
 type DatabaseSectionStateProps = {
   copy: DatabaseInstancesCopy;

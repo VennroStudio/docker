@@ -12,10 +12,10 @@ import type {
   FetchDatabases,
   FetchDumpFiles,
   InstanceLabel,
-} from "./formTypes";
-import { selectClassName } from "./formUtils";
-import { useDatabaseNames } from "./useDatabaseNames";
-import { useDumpFiles } from "./useDumpFiles";
+} from "../../model/database/formTypes";
+import { selectClassName } from "../../model/database/formUtils";
+import { useDatabaseNames } from "../../model/database/useDatabaseNames";
+import { useDumpFiles } from "../../model/database/useDumpFiles";
 
 type DatabaseDumpImportFormProps<
   Instance extends DatabaseInstanceOption,

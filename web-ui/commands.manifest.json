@@ -1,19 +1,5 @@
 {
   "commands": {
-    "network:add": {
-      "confirm": false,
-      "group": "network",
-      "make": ["add-proxy"],
-      "preview": "make add-proxy",
-      "tone": "primary"
-    },
-    "network:delete": {
-      "confirm": true,
-      "group": "network",
-      "make": ["delete-proxy"],
-      "preview": "make delete-proxy",
-      "tone": "danger"
-    },
     "npm:up": {
       "confirm": false,
       "group": "nginx",
@@ -404,7 +390,6 @@
       "phpmyadmin:clean"
     ],
     "minio": ["minio:up", "minio:down", "minio:start", "minio:stop", "minio:logs", "minio:clean"],
-    "network": ["network:add", "network:delete"],
     "nginx": ["npm:up", "npm:down", "npm:start", "npm:stop", "npm:logs", "npm:clean"],
     "pgadmin": ["pgadmin:up", "pgadmin:down", "pgadmin:start", "pgadmin:stop", "pgadmin:logs", "pgadmin:clean"],
     "postgres": ["postgres:up", "postgres:down", "postgres:start", "postgres:stop", "postgres:logs", "postgres:clean"],

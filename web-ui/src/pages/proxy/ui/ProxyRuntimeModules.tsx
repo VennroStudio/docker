@@ -1,7 +1,6 @@
 import { ServiceModuleAccordion } from "@/widgets/service-module";
 import type { AppText, CommandAction, ShellAction, useNginxStatus } from "@/entities/infrastructure";
-import type { useSettings } from "@/entities/settings";
-import { SettingsConfigAccordion, type SettingsConfigField } from "@/features/manage-settings";
+import { SettingsConfigAccordion, type SettingsConfigField, type useSettings } from "@/entities/settings";
 
 const npmConfigFields: SettingsConfigField[] = [
   { autocomplete: "username", group: "proxy", label: "NPM email", name: "npmEmail" },

@@ -1,17 +1,13 @@
 import { useState } from "react";
-import { DatabaseAdminSection, DatabaseInstancesSection } from "@/entities/infrastructure";
-import type { ServiceLink } from "@/entities/infrastructure";
+import { DatabaseInstancesSection } from "@/entities/infrastructure";
 import type {
   AppText,
   MariaDbDatabaseForm,
   MariaDbExportForm,
   MariaDbImportForm,
-  CommandAction,
   MariaDbInstance,
   MariaDbInstanceAction,
   MariaDbInstanceForm,
-  PhpMyAdminOverview,
-  ShellAction,
 } from "@/entities/infrastructure";
 import { MariaDbCreateModal } from "./MariaDbCreateModal";
 import { MariaDbDatabaseBlock } from "./MariaDbDatabaseBlock";
@@ -35,19 +31,6 @@ type MariaDbInstancesPanelProps = {
   onImport: (form: MariaDbImportForm) => void;
   onRun: (instance: MariaDbInstance, action: MariaDbInstanceAction) => void;
   onShellOpen: (instance: MariaDbInstance) => void;
-};
-
-type PhpMyAdminPanelProps = {
-  activeOperationKey?: null | string;
-  actions: CommandAction[];
-  link?: ServiceLink;
-  operationDisabled?: boolean;
-  operationDisabledTitle?: string;
-  overview: PhpMyAdminOverview;
-  shell?: ShellAction;
-  text: AppText;
-  onRun: (action: CommandAction) => void;
-  onShellOpen: (action: ShellAction) => void;
 };
 
 export function MariaDbInstancesPanel({
@@ -142,44 +125,5 @@ export function MariaDbInstancesPanel({
         />
       ) : null}
     </>
-  );
-}
-
-export function PhpMyAdminPanel({
-  actions,
-  activeOperationKey,
-  link,
-  onRun,
-  onShellOpen,
-  operationDisabled,
-  operationDisabledTitle,
-  overview,
-  shell,
-  text,
-}: PhpMyAdminPanelProps) {
-  const [open, setOpen] = useState(false);
-  const copy = text.mariadbInstances;
-
-  return (
-    <DatabaseAdminSection
-      actions={actions}
-      activeOperationKey={activeOperationKey}
-      copy={{
-        containerLabel: copy.containerLabel,
-        linkLabel: text.common.link,
-        shellLabel: copy.actions.shell.label,
-        statusLabel: copy.statusLabel,
-      }}
-      link={link}
-      open={open}
-      operationDisabled={operationDisabled}
-      operationDisabledTitle={operationDisabledTitle}
-      overview={overview}
-      shell={shell}
-      title="phpMyAdmin"
-      onOpenChange={setOpen}
-      onRun={onRun}
-      onShellOpen={onShellOpen}
-    />
   );
 }

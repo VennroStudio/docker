@@ -2,8 +2,9 @@ import { RotateCcw, Save } from "lucide-react";
 import type { FormEvent, InputHTMLAttributes } from "react";
 import { useMemo, useState } from "react";
 import type { AppText } from "@/entities/infrastructure";
-import type { AppSettings, useSettings } from "@/entities/settings";
 import { Button, Field } from "@/shared/ui";
+import type { AppSettings } from "../model/types";
+import type { useSettings } from "../model/useSettings";
 
 export type SettingsConfigField = {
   autocomplete?: string;

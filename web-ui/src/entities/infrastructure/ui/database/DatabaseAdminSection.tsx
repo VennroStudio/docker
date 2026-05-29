@@ -1,10 +1,10 @@
 import { ExternalLink } from "lucide-react";
 import { useMemo } from "react";
-import { ContainerStateBadge } from "@/entities/infrastructure";
 import { AccordionPanel, IconLink } from "@/shared/ui";
+import { ContainerStateBadge } from "../ContainerStateBadge";
 import { DatabaseAction, InfoLine, ShellIconButton, StatusDot } from "../DatabaseControls";
-import { commandActionsBySuffix, databaseActionOrder } from "./types";
-import type { DatabaseAdminSectionProps } from "./types";
+import { commandActionsBySuffix, databaseActionOrder } from "../../model/database/types";
+import type { DatabaseAdminSectionProps } from "../../model/database/types";
 
 export function DatabaseAdminSection({
   activeOperationKey,

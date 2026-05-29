@@ -10,9 +10,9 @@ import type {
   DatabaseInstanceOption,
   FetchDatabases,
   InstanceLabel,
-} from "./formTypes";
-import { selectClassName } from "./formUtils";
-import { useDatabaseNames } from "./useDatabaseNames";
+} from "../../model/database/formTypes";
+import { selectClassName } from "../../model/database/formUtils";
+import { useDatabaseNames } from "../../model/database/useDatabaseNames";
 
 type DatabaseDumpExportFormProps<Instance extends DatabaseInstanceOption, Form extends DatabaseDumpForm> = {
   copy: DatabaseExportCopy;

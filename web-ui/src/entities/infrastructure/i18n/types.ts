@@ -242,8 +242,6 @@ export type AppText = {
     npm: {
       configEyebrow: string;
       configTitle: string;
-      networkEyebrow: string;
-      networkTitle: string;
       nginxEyebrow: string;
       nginxTitle: string;
     };

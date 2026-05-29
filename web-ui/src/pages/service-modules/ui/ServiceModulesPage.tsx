@@ -1,7 +1,6 @@
 import type { CommandAction, ShellAction, ViewConfig } from "@/entities/infrastructure";
 import type { AppText } from "@/entities/infrastructure";
-import type { useSettings } from "@/entities/settings";
-import { SettingsConfigForm } from "@/features/manage-settings";
+import { SettingsConfigForm, type useSettings } from "@/entities/settings";
 import { ServiceModuleAccordion } from "@/widgets/service-module";
 import { ServicePageLayout } from "@/widgets/service-page-layout";
 import type { ServiceModuleDescriptor } from "../model/types";

@@ -1,4 +1,4 @@
-import { Box, Database, HardDrive, House, Package, Route, Server, Settings, Shield, Wrench } from "lucide-react";
+import { Box, Database, HardDrive, House, Package, Server, Settings, Shield, Wrench } from "lucide-react";
 import type { ViewConfig } from "../model/types";
 
 const routeViews: ViewConfig[] = [
@@ -15,16 +15,8 @@ const routeViews: ViewConfig[] = [
     label: "NPM",
     path: "/proxy",
     shortLabel: "NP",
-    subtitle: "Proxy + network",
+    subtitle: "Proxy",
     icon: Shield,
-  },
-  {
-    id: "network",
-    label: "Network",
-    path: "/network",
-    shortLabel: "NW",
-    subtitle: "Docker proxy",
-    icon: Route,
   },
   {
     id: "nginx",
@@ -92,14 +84,14 @@ const routeViews: ViewConfig[] = [
   },
 ];
 
-export const views = routeViews.filter((view) => !["network", "nginx", "postgres"].includes(view.id));
+export const views = routeViews.filter((view) => !["nginx", "postgres"].includes(view.id));
 
 export function getViewById(viewId: string): ViewConfig {
   return routeViews.find((view) => view.id === viewId) ?? routeViews[0];
 }
 
 export function getViewByPath(pathname: string): ViewConfig {
-  if (pathname === "/nginx" || pathname === "/network") return getViewById("proxy");
+  if (pathname === "/nginx") return getViewById("proxy");
   if (pathname === "/mariadb" || pathname === "/postgres") return getViewById("mariadb");
   return routeViews.find((view) => view.path === pathname) ?? routeViews[0];
 }

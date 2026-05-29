@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { AccordionPanel, Button } from "@/shared/ui";
 import { DatabaseInstanceRow } from "./DatabaseInstanceRow";
 import { DatabaseSectionState } from "./DatabaseSectionState";
-import type { DatabaseInstanceRuntime, DatabaseInstancesSectionProps } from "./types";
+import type { DatabaseInstanceRuntime, DatabaseInstancesSectionProps } from "../../model/database/types";
 
 export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntime>({
   activeOperationKey,

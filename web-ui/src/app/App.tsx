@@ -1,6 +1,6 @@
 import { AppShell } from "@/widgets/app-shell";
+import { useInfrastructureController } from "@/widgets/infrastructure-controller";
 import { Workspace } from "@/widgets/workspace";
-import { useInfrastructureController } from "./model/useInfrastructureController";
 import { AppRouter } from "./router/AppRouter";
 
 export function App() {

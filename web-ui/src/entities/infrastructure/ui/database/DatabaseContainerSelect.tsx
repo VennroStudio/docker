@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
-import type { DatabaseInstanceOption, InstanceLabel } from "./formTypes";
-import { selectClassName } from "./formUtils";
+import type { DatabaseInstanceOption, InstanceLabel } from "../../model/database/formTypes";
+import { selectClassName } from "../../model/database/formUtils";
 
 type DatabaseContainerSelectCopy = {
   container: string;

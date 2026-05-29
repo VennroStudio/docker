@@ -1,7 +1,7 @@
-import { ContainerStateBadge } from "@/entities/infrastructure";
+import { ContainerStateBadge } from "../ContainerStateBadge";
 import { DatabaseAction, ShellIconButton, StatusDot } from "../DatabaseControls";
-import { databaseActionOrder } from "./types";
-import type { DatabaseInstanceRuntime, DatabaseInstancesCopy, DatabaseRuntimeAction } from "./types";
+import { databaseActionOrder } from "../../model/database/types";
+import type { DatabaseInstanceRuntime, DatabaseInstancesCopy, DatabaseRuntimeAction } from "../../model/database/types";
 
 type DatabaseInstanceRowProps<Instance extends DatabaseInstanceRuntime> = {
   activeOperationKey?: null | string;

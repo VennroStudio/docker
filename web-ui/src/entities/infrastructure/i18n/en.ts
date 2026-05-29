@@ -8,8 +8,6 @@ export const en: AppText = {
     "minio:start": { label: "MinIO start", detail: "start existing container" },
     "minio:stop": { label: "MinIO stop", detail: "stop service" },
     "minio:up": { label: "MinIO up", detail: "docker compose up" },
-    "network:add": { label: "Create proxy network", detail: "docker network create proxy" },
-    "network:delete": { label: "Delete proxy network", detail: "docker network rm proxy" },
     "npm:clean": { label: "NPM clean", detail: "remove image" },
     "npm:down": { label: "NPM down", detail: "remove container" },
     "npm:logs": { label: "NPM logs", detail: "live stream" },
@@ -141,7 +139,7 @@ export const en: AppText = {
         title: "Postgres",
       },
       proxy: {
-        description: "Domains, proxy hosts, the NPM container and shared Docker network.",
+        description: "Domains, proxy hosts and the NPM container.",
         meta: "NPM module",
         title: "Nginx Proxy Manager",
       },
@@ -163,7 +161,6 @@ export const en: AppText = {
     workflow: {
       eyebrow: "Local flow",
       steps: [
-        { title: "Create proxy network", detail: "Run the network command once before attaching services." },
         {
           title: "Start only what you need",
           detail: "Each service has its own up, start, stop, down, clean and logs commands.",
@@ -358,8 +355,6 @@ export const en: AppText = {
     npm: {
       configEyebrow: "Settings",
       configTitle: "Config",
-      networkEyebrow: "Docker network",
-      networkTitle: "Network management",
       nginxEyebrow: "NPM container",
       nginxTitle: "Nginx management",
     },
@@ -436,12 +431,6 @@ export const en: AppText = {
       panelEyebrow: "S3 storage",
       panelTitle: "MinIO commands",
     },
-    network: {
-      description: "Create or remove the shared proxy network used by local infrastructure services.",
-      eyebrow: "Docker network",
-      panelEyebrow: "Network",
-      panelTitle: "Proxy network",
-    },
     nginx: {
       description: "Manage the NPM container lifecycle and stream proxy manager logs.",
       eyebrow: "Nginx Proxy Manager",
@@ -455,7 +444,7 @@ export const en: AppText = {
       panelTitle: "Postgres commands",
     },
     proxy: {
-      description: "Create local host records and manage proxy hosts, the NPM container and the shared Docker network.",
+      description: "Create local host records and manage proxy hosts and the NPM container.",
       eyebrow: "Nginx Proxy Manager",
       panelEyebrow: "Proxy host",
       panelTitle: "Routing and NPM",
@@ -508,7 +497,6 @@ export const en: AppText = {
     home: "Home",
     mariadb: "Databases",
     minio: "MinIO",
-    network: "Network",
     nginx: "Nginx",
     postgres: "Postgres",
     proxy: "Nginx Proxy Manager",

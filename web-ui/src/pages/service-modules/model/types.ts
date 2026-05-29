@@ -1,5 +1,5 @@
 import type { CommandAction, ContainerStateInfo, ServiceLink, ShellAction } from "@/entities/infrastructure";
-import type { SettingsConfigField } from "@/features/manage-settings";
+import type { SettingsConfigField } from "@/entities/settings";
 
 export type ServiceModuleConfigSection = {
   fields: SettingsConfigField[];

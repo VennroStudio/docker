@@ -5,7 +5,7 @@ import { ProxyPage } from "@/pages/proxy";
 import { getServiceModulesPageModel, ServiceModulesPage } from "@/pages/service-modules";
 import { SettingsPage } from "@/pages/settings";
 import { UtilitiesPage } from "@/pages/utilities";
-import type { InfrastructureController } from "../model/useInfrastructureController";
+import type { InfrastructureController } from "@/widgets/infrastructure-controller";
 
 type AppRouterProps = {
   controller: InfrastructureController;

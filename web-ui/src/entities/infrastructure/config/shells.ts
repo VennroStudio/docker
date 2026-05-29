@@ -1,7 +1,7 @@
 import commandManifest from "../../../../commands.manifest.json";
 import type { ShellAction, ViewId } from "../model/types";
 
-type ShellGroupId = Exclude<ViewId, "home" | "network">;
+type ShellGroupId = Exclude<ViewId, "home">;
 type ManifestShell = {
   container: string;
   label: string;
