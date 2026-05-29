@@ -9,6 +9,7 @@ export type ViewId =
   | "redis"
   | "minio"
   | "registry"
+  | "ssh"
   | "utilities"
   | "settings";
 export type ServiceViewId = Exclude<ViewId, "home" | "settings" | "utilities">;
@@ -182,6 +183,30 @@ export type ArchiveCreateForm = {
 export type ArchiveExtractForm = {
   dest: string;
   name: string;
+};
+
+export type SshAuthType = "key" | "password";
+export type SshPasswordMode = "manual" | "sshpass";
+
+export type SshServer = {
+  authType: SshAuthType;
+  host: string;
+  id: number;
+  keyPath: string;
+  name: string;
+  password: string;
+  passwordMode: SshPasswordMode;
+  port: string;
+  user: string;
+};
+
+export type SshServerForm = Omit<SshServer, "id">;
+
+export type SshKeyForm = {
+  comment: string;
+  force: boolean;
+  keyPath: string;
+  serverId: string;
 };
 
 export type StreamState = "ready" | "running" | "done" | "error" | "stopped";

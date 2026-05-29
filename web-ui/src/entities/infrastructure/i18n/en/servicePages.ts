@@ -43,6 +43,12 @@ export const enServicePages = {
     panelEyebrow: "Registry",
     panelTitle: "Registry commands",
   },
+  ssh: {
+    description: "Store SSH servers, connect through the terminal and manage RSA keys.",
+    eyebrow: "SSH",
+    panelEyebrow: "Server",
+    panelTitle: "SSH servers",
+  },
   utilities: {
     description: "Local project tools.",
     eyebrow: "Utilities",

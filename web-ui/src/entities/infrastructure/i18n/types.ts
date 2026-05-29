@@ -305,6 +305,63 @@ export type AppText = {
     description: string;
     eyebrow: string;
   };
+  ssh: {
+    actions: {
+      addServer: string;
+      copyPassword: string;
+      deleteServer: string;
+      generateKey: string;
+      keyPush: string;
+      keyTest: string;
+      saveServer: string;
+      terminal: string;
+    };
+    authType: string;
+    description: string;
+    empty: string;
+    eyebrow: string;
+    fields: {
+      comment: string;
+      force: string;
+      host: string;
+      keyPath: string;
+      name: string;
+      password: string;
+      passwordMode: string;
+      port: string;
+      server: string;
+      user: string;
+    };
+    modals: {
+      addServer: string;
+      generateKey: string;
+    };
+    options: {
+      key: string;
+      manual: string;
+      password: string;
+      sshpass: string;
+    };
+    placeholders: {
+      comment: string;
+      host: string;
+      keyPath: string;
+      name: string;
+      password: string;
+      port: string;
+      user: string;
+    };
+    sectionEyebrow: string;
+    title: string;
+    validation: {
+      host: string;
+      name: string;
+      password: string;
+      port: string;
+      server: string;
+      user: string;
+    };
+  };
   servicePages: Record<
     Exclude<ViewId, "home" | "settings">,
     {

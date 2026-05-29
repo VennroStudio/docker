@@ -2,7 +2,7 @@ import { mariadbActions, minioActions, postgresActions, redisActions, registryAc
 import { serviceShells } from "./shells";
 import type { CommandAction, ShellAction, ViewId } from "../model/types";
 
-export type CommandPageId = Exclude<ViewId, "home" | "proxy" | "settings">;
+export type CommandPageId = Exclude<ViewId, "home" | "proxy" | "settings" | "ssh">;
 
 export const commandPageRegistry: Record<CommandPageId, { actions: CommandAction[]; shells?: ShellAction[] }> = {
   mariadb: { actions: mariadbActions, shells: serviceShells.mariadb },

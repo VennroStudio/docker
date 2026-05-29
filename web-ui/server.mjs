@@ -16,6 +16,7 @@ import { host, proxy, nginxStatus, isNginxStreamRoute, nginxStreamRoute } from "
 import { isRedisStreamRoute, redisStatus, redisStreamRoute } from "./server/modules/redis/routes.mjs";
 import { isMinioStreamRoute, minioStatus, minioStreamRoute } from "./server/modules/minio/routes.mjs";
 import { isRegistryStreamRoute, registryStatus, registryStreamRoute } from "./server/modules/registry/routes.mjs";
+import { isSshStreamRoute, sshServers, sshStreamRoute } from "./server/modules/ssh/routes.mjs";
 import { archives, isUtilitiesStreamRoute, utilitiesStreamRoute } from "./server/modules/utilities/routes.mjs";
 import { runCommand } from "./server/run-route.mjs";
 import { generateEnv, settings } from "./server/settings-route.mjs";
@@ -32,6 +33,7 @@ createServer(async (req, res) => {
       if (isRedisStreamRoute(req)) return await redisStreamRoute(req, res);
       if (isMinioStreamRoute(req)) return await minioStreamRoute(req, res);
       if (isRegistryStreamRoute(req)) return await registryStreamRoute(req, res);
+      if (isSshStreamRoute(req)) return await sshStreamRoute(req, res);
       if (isUtilitiesStreamRoute(req)) return await utilitiesStreamRoute(req, res);
       return sendJson(res, 404, { ok: false, output: "Unknown stream route" });
     }
@@ -42,6 +44,7 @@ createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/api/redis/status") return await redisStatus(req, res);
     if (req.method === "GET" && req.url === "/api/minio/status") return await minioStatus(req, res);
     if (req.method === "GET" && req.url === "/api/registry/status") return await registryStatus(req, res);
+    if (req.method === "GET" && req.url === "/api/ssh/servers") return await sshServers(req, res);
     if (req.method === "GET" && req.url === "/api/archives") return await archives(req, res);
     if (req.method === "GET" && req.url === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && req.url === "/api/mariadb/instances") return await mariadbInstances(req, res);

@@ -43,6 +43,11 @@ export const enHome = {
       meta: "Images",
       title: "Registry",
     },
+    ssh: {
+      description: "Servers, passwords, RSA keys and SSH terminal.",
+      meta: "Servers",
+      title: "SSH",
+    },
   },
   services: {
     eyebrow: "Service panels",

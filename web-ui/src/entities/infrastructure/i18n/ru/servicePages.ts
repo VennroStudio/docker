@@ -43,6 +43,12 @@ export const ruServicePages = {
     panelEyebrow: "Registry",
     panelTitle: "Команды Registry",
   },
+  ssh: {
+    description: "Храни SSH серверы, подключайся через терминал и управляй RSA ключами.",
+    eyebrow: "SSH",
+    panelEyebrow: "Server",
+    panelTitle: "SSH серверы",
+  },
   utilities: {
     description: "Локальные инструменты проекта.",
     eyebrow: "Utilities",

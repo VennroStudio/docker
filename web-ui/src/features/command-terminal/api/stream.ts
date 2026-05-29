@@ -13,6 +13,8 @@ import type {
   PostgresInstanceAction,
   PostgresInstanceForm,
   ProxyFormState,
+  SshKeyForm,
+  SshServerForm,
 } from "@/entities/infrastructure";
 import { openPostStream, openStream, sendJsonRequest, streamUrl, type StreamHandlers } from "./streamClient";
 
@@ -54,6 +56,38 @@ export function streamArchiveExtract(form: ArchiveExtractForm, handlers: StreamH
 
 export function streamArchiveDelete(name: string, handlers: StreamHandlers): () => void {
   return openPostStream("/api/stream/archive-delete", { name }, handlers);
+}
+
+export function streamSshServerAdd(form: SshServerForm, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/ssh-add", form, handlers);
+}
+
+export function streamSshServerUpdate(id: number, form: SshServerForm, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/ssh-update", { ...form, id }, handlers);
+}
+
+export function streamSshServerRemove(id: number, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/ssh-remove", { id }, handlers);
+}
+
+export function streamSshConnect(id: number, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/ssh-connect", { id }, handlers);
+}
+
+export function streamSshKeyGenerate(form: SshKeyForm, handlers: StreamHandlers): () => void {
+  return openPostStream(
+    "/api/stream/ssh-key-generate",
+    { comment: form.comment, force: form.force, id: form.serverId, keyPath: form.keyPath },
+    handlers,
+  );
+}
+
+export function streamSshKeyPush(id: number, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/ssh-key-push", { id }, handlers);
+}
+
+export function streamSshKeyTest(id: number, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/ssh-key-test", { id }, handlers);
 }
 
 export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers: StreamHandlers): () => void {

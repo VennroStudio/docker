@@ -9,6 +9,7 @@ export const ruViews = {
   proxy: "Nginx Proxy Manager",
   redis: "Redis",
   registry: "Registry",
+  ssh: "SSH",
   utilities: "Утилиты",
   settings: "Настройки",
 } satisfies AppText["views"];

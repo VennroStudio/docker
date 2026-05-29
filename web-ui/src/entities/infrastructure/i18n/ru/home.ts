@@ -43,6 +43,11 @@ export const ruHome = {
       meta: "Images",
       title: "Registry",
     },
+    ssh: {
+      description: "Серверы, пароли, RSA ключи и SSH терминал.",
+      meta: "Servers",
+      title: "SSH",
+    },
   },
   services: {
     eyebrow: "Панели сервисов",

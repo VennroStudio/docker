@@ -12,6 +12,7 @@ import {
   useRedisStatus,
   useRegistryStatus,
   useServiceStatuses,
+  useSshServers,
   type CommandAction,
   type ProxyFormState,
   type ShellAction,
@@ -29,6 +30,7 @@ import { useCommandOperations } from "./useCommandOperations";
 import { useDatabaseOperations } from "./useDatabaseOperations";
 import { useLanguage } from "./useLanguage";
 import { useProxyOperations } from "./useProxyOperations";
+import { useSshOperations } from "./useSshOperations";
 import { useTerminalOperations } from "./useTerminalOperations";
 
 const initialProxyForm: ProxyFormState = {
@@ -54,10 +56,12 @@ export function useInfrastructureController() {
   const minioView = activeView === "minio";
   const registryView = activeView === "registry";
   const utilitiesView = activeView === "utilities";
+  const sshView = activeView === "ssh";
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const redisStatus = useRedisStatus(redisView);
   const minioStatus = useMinioStatus(minioView);
   const registryStatus = useRegistryStatus(registryView);
+  const sshServers = useSshServers(sshView);
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const statusRefresh = redisView
     ? redisStatus.refresh
@@ -65,7 +69,9 @@ export function useInfrastructureController() {
       ? minioStatus.refresh
       : registryView
         ? registryStatus.refresh
-        : nginxStatus.refresh;
+        : sshView
+          ? sshServers.refresh
+          : nginxStatus.refresh;
   const settings = useSettings();
   const archives = useArchives(utilitiesView, archivesRefreshSignal);
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
@@ -116,6 +122,12 @@ export function useInfrastructureController() {
     runWithTerminal,
     text,
   });
+  const sshOperations = useSshOperations({
+    confirmDialog,
+    refreshSshServers: sshServers.refresh,
+    runWithTerminal,
+    text,
+  });
   const selectView = (view: ViewId) => navigate(getViewById(view).path);
   const translateActions = (actions: CommandAction[]) =>
     actions.map((action) => ({
@@ -157,10 +169,12 @@ export function useInfrastructureController() {
     proxyForm,
     redisStatus,
     registryStatus,
+    sshServers,
     ...archiveOperations,
     ...commandOperations,
     ...databaseOperations,
     ...proxyOperations,
+    ...sshOperations,
     runShell,
     selectView,
     serviceStatuses,

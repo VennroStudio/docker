@@ -4,6 +4,7 @@ import { HomePage } from "@/pages/home";
 import { ProxyPage } from "@/pages/proxy";
 import { getServiceModulesPageModel, ServiceModulesPage } from "@/pages/service-modules";
 import { SettingsPage } from "@/pages/settings";
+import { SshPage } from "@/pages/ssh";
 import { UtilitiesPage } from "@/pages/utilities";
 import type { InfrastructureController } from "@/widgets/infrastructure-controller";
 
@@ -27,6 +28,13 @@ export function AppRouter({ controller }: AppRouterProps) {
     proxyForm,
     redisStatus,
     registryStatus,
+    runSshConnect,
+    runSshKeyGenerate,
+    runSshKeyPush,
+    runSshKeyTest,
+    runSshServerAdd,
+    runSshServerRemove,
+    runSshServerUpdate,
     runArchiveCreate,
     runArchiveDelete,
     runArchiveExtract,
@@ -53,7 +61,9 @@ export function AppRouter({ controller }: AppRouterProps) {
     serviceStatuses,
     settings,
     setProxyForm,
+    sshServers,
     text,
+    toast,
     translateActions,
     translateShells,
   } = controller;
@@ -135,6 +145,27 @@ export function AppRouter({ controller }: AppRouterProps) {
         onArchiveCreate={runArchiveCreate}
         onArchiveDelete={runArchiveDelete}
         onArchiveExtract={runArchiveExtract}
+      />
+    );
+  }
+
+  if (activeView === "ssh") {
+    return (
+      <SshPage
+        sshServers={sshServers}
+        text={text}
+        view={activeConfig}
+        onCopyPassword={(password) => {
+          void navigator.clipboard.writeText(password);
+          toast.show({ title: text.ssh.actions.copyPassword, tone: "success" });
+        }}
+        onKeyGenerate={runSshKeyGenerate}
+        onKeyPush={runSshKeyPush}
+        onKeyTest={runSshKeyTest}
+        onServerAdd={runSshServerAdd}
+        onServerDelete={runSshServerRemove}
+        onServerSave={runSshServerUpdate}
+        onTerminalOpen={runSshConnect}
       />
     );
   }

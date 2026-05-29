@@ -9,6 +9,7 @@ import { enMariadbInstances } from "./en/mariadbInstances";
 import { enPostgresInstances } from "./en/postgresInstances";
 import { enPanels } from "./en/panels";
 import { enUtilities } from "./en/utilities";
+import { enSsh } from "./en/ssh";
 import { enServicePages } from "./en/servicePages";
 import { enSettings } from "./en/settings";
 import { enViews } from "./en/views";
@@ -24,6 +25,7 @@ export const en: AppText = {
   postgresInstances: enPostgresInstances,
   panels: enPanels,
   utilities: enUtilities,
+  ssh: enSsh,
   servicePages: enServicePages,
   settings: enSettings,
   views: enViews,
