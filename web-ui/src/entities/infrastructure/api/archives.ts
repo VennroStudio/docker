@@ -1,3 +1,4 @@
+import { fetchJson } from "@/shared/api";
 import type { ArchiveFile } from "../model/types";
 
 export type ArchivesResponse = {
@@ -5,7 +6,5 @@ export type ArchivesResponse = {
 };
 
 export async function fetchArchives(signal?: AbortSignal) {
-  const response = await fetch("/api/archives", { signal });
-  if (!response.ok) throw new Error(`Archives request failed: ${response.status}`);
-  return (await response.json()) as ArchivesResponse;
+  return fetchJson<ArchivesResponse>("/api/archives", { signal }, "Archives request failed");
 }

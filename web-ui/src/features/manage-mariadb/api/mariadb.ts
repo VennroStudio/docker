@@ -1,4 +1,5 @@
 import type { MariaDbInstance, PhpMyAdminOverview } from "@/entities/infrastructure";
+import { fetchJson } from "@/shared/api";
 
 export type MariaDbOverview = {
   instances: MariaDbInstance[];
@@ -6,11 +7,5 @@ export type MariaDbOverview = {
 };
 
 export async function getMariaDbOverview(): Promise<MariaDbOverview> {
-  const response = await fetch("/api/mariadb/instances");
-
-  if (!response.ok) {
-    throw new Error(await response.text());
-  }
-
-  return (await response.json()) as MariaDbOverview;
+  return fetchJson<MariaDbOverview>("/api/mariadb/instances", undefined, "MariaDB overview request failed");
 }

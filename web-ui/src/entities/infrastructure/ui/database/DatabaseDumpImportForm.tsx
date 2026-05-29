@@ -1,9 +1,11 @@
-import { RefreshCw, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import type { FormEvent } from "react";
 import { useCallback, useState } from "react";
 import { Button, Field } from "@/shared/ui";
 import { DatabaseBlockHeader } from "./DatabaseBlockHeader";
 import { DatabaseContainerSelect } from "./DatabaseContainerSelect";
+import { DatabaseDumpFileSelect } from "./DatabaseDumpFileSelect";
+import { DatabaseNameSelect } from "./DatabaseNameSelect";
 import type {
   DatabaseDumpFile,
   DatabaseDumpForm,
@@ -13,7 +15,6 @@ import type {
   FetchDumpFiles,
   InstanceLabel,
 } from "../../model/database/formTypes";
-import { selectClassName } from "../../model/database/formUtils";
 import { useDatabaseNames } from "../../model/database/useDatabaseNames";
 import { useDumpFiles } from "../../model/database/useDumpFiles";
 
@@ -116,44 +117,15 @@ export function DatabaseDumpImportForm<
           }}
         />
 
-        <div className="grid gap-3 min-[780px]:grid-cols-[minmax(0,1fr)_auto] min-[780px]:items-end">
-          <label className="grid gap-2 text-sm">
-            <span className="text-xs font-semibold uppercase text-slate-500">{copy.fileSelect}</span>
-            <select
-              className={selectClassName}
-              disabled={disabled || dumpFiles.loading || dumpFiles.files.length === 0}
-              value=""
-              onChange={(event) => {
-                const nextPath = event.target.value;
-                if (nextPath) setForm((current) => ({ ...current, filePath: nextPath }));
-              }}
-            >
-              <option value="">
-                {dumpFiles.loading
-                  ? copy.refreshFiles
-                  : dumpFiles.files.length > 0
-                    ? copy.fileSelectPlaceholder
-                    : copy.emptyFiles}
-              </option>
-              {dumpFiles.files.map((file) => (
-                <option key={file.path} value={file.path}>
-                  {file.path}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button
-            disabled={disabled || dumpFiles.loading}
-            icon={<RefreshCw size={16} strokeWidth={2.4} />}
-            loading={dumpFiles.loading}
-            type="button"
-            onClick={() => void dumpFiles.refresh()}
-          >
-            {copy.refreshFiles}
-          </Button>
-        </div>
-
-        {dumpFiles.error ? <p className="text-xs font-medium text-red-600">{dumpFiles.error}</p> : null}
+        <DatabaseDumpFileSelect
+          copy={copy}
+          disabled={disabled}
+          error={dumpFiles.error}
+          files={dumpFiles.files}
+          loading={dumpFiles.loading}
+          onRefresh={() => void dumpFiles.refresh()}
+          onSelect={(path) => setForm((current) => ({ ...current, filePath: path }))}
+        />
 
         <Field
           disabled={disabled}
@@ -165,27 +137,17 @@ export function DatabaseDumpImportForm<
         />
 
         <div className="grid gap-3">
-          <label className="grid gap-2 text-sm">
-            <span className="text-xs font-semibold uppercase text-slate-500">{copy.database}</span>
-            <select
-              className={selectClassName}
-              disabled={disabled || !containerReady || databaseList.loading || databaseList.databases.length === 0}
-              value={selectedDatabase}
-              onChange={(event) => setForm((current) => ({ ...current, database: event.target.value }))}
-            >
-              <option value="">{databaseList.loading ? copy.refreshFiles : copy.databasePlaceholder}</option>
-              {databaseList.databases.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            {databaseList.error ? (
-              <span className="text-xs font-medium text-red-600">{databaseList.error}</span>
-            ) : database && !databaseReady ? (
-              <span className="text-xs font-medium text-red-600">{copy.validation.database}</span>
-            ) : null}
-          </label>
+          <DatabaseNameSelect
+            copy={copy}
+            disabled={disabled || !containerReady}
+            error={databaseList.error}
+            invalid={Boolean(database && !databaseReady)}
+            loading={databaseList.loading}
+            loadingPlaceholder={copy.refreshFiles}
+            names={databaseList.databases}
+            value={selectedDatabase}
+            onChange={(value) => setForm((current) => ({ ...current, database: value }))}
+          />
           <Button
             className="w-full"
             disabled={!formReady || disabled}

@@ -2,13 +2,13 @@
 
 ## Первый запуск
 
-Создать локальный `config/settings.json` из дефолтного шаблона:
+Создать локальные config-файлы:
 
 ```sh
 make init
 ```
 
-Команда не запускает контейнеры. Если `config/settings.json` уже существует, файл не перезаписывается.
+Команда не запускает контейнеры. Если `config/settings.json` или `config/ssh-servers.json` уже существуют, файлы не перезаписываются.
 
 Проверить настройки:
 
@@ -520,7 +520,7 @@ make app-proxy-remove DOMAIN=registry.local
 make help
 ```
 
-Создать `config/settings.json` из `config/default-settings.json`:
+Создать локальные config-файлы:
 
 ```sh
 make init
@@ -1362,6 +1362,62 @@ make registry-ui-logs
 
 ```sh
 make registry-ui-shell
+```
+
+### SSH
+
+Создать `config/ssh-servers.json`:
+
+```sh
+make ssh-init
+```
+
+Показать сохраненные SSH серверы, включая пароли:
+
+```sh
+make ssh-list
+```
+
+Добавить SSH сервер с ручным вводом пароля:
+
+```sh
+make ssh-add NAME=prod HOST=example.com PORT=22 USER=root AUTH_TYPE=password PASSWORD=secret PASSWORD_MODE=manual
+```
+
+Добавить SSH сервер с `sshpass`:
+
+```sh
+make ssh-add NAME=prod HOST=example.com PORT=22 USER=root AUTH_TYPE=password PASSWORD=secret PASSWORD_MODE=sshpass
+```
+
+Добавить SSH сервер с ключом:
+
+```sh
+make ssh-add NAME=prod HOST=example.com PORT=22 USER=root AUTH_TYPE=key KEY_PATH=~/.ssh/id_rsa
+```
+
+Изменить SSH сервер:
+
+```sh
+make ssh-update ID=1 NAME=prod HOST=example.com PORT=22 USER=root AUTH_TYPE=password PASSWORD=secret PASSWORD_MODE=manual
+```
+
+Удалить SSH сервер:
+
+```sh
+make ssh-remove ID=1
+```
+
+Проверить SSH подключение:
+
+```sh
+make ssh-test ID=1
+```
+
+Подключиться к SSH серверу:
+
+```sh
+make ssh-connect ID=1
 ```
 
 ### Utilities

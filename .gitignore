@@ -10,8 +10,9 @@
 /docker/registry/auth
 /certs
 
-# Generated MariaDB/phpMyAdmin local state
+# Generated local state
 /config/settings.json
+/config/ssh-servers.json
 /docker/mariadb/instances.json
 /docker/postgres/instances.json
 /docker/compose/docker-compose-mariadb-*.yml

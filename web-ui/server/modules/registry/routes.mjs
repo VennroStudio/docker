@@ -33,10 +33,7 @@ export async function registryStreamRoute(req, res) {
 }
 
 export async function registryStatus(_req, res) {
-  const [registry, registryUi] = await Promise.all([
-    execMake(["registry-status"]),
-    execMake(["registry-ui-status"]),
-  ]);
+  const [registry, registryUi] = await Promise.all([execMake(["registry-status"]), execMake(["registry-ui-status"])]);
 
   sendJson(res, 200, {
     registry: JSON.parse(registry),

@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Button, Field } from "@/shared/ui";
 import { DatabaseBlockHeader } from "./DatabaseBlockHeader";
 import { DatabaseContainerSelect } from "./DatabaseContainerSelect";
+import { DatabaseNameSelect } from "./DatabaseNameSelect";
 import type {
   DatabaseDumpForm,
   DatabaseExportCopy,
@@ -11,7 +12,6 @@ import type {
   FetchDatabases,
   InstanceLabel,
 } from "../../model/database/formTypes";
-import { selectClassName } from "../../model/database/formUtils";
 import { useDatabaseNames } from "../../model/database/useDatabaseNames";
 
 type DatabaseDumpExportFormProps<Instance extends DatabaseInstanceOption, Form extends DatabaseDumpForm> = {
@@ -121,33 +121,22 @@ export function DatabaseDumpExportForm<Instance extends DatabaseInstanceOption, 
         />
 
         <div className="grid gap-3">
-          <label className="grid gap-2 text-sm">
-            <span className="text-xs font-semibold uppercase text-slate-500">{copy.database}</span>
-            <select
-              className={selectClassName}
-              disabled={disabled || !containerReady || databaseList.loading || databaseList.databases.length === 0}
-              value={selectedDatabase}
-              onChange={(event) => {
-                const nextDatabase = event.target.value;
-                setDatabase(nextDatabase);
-                if (!filePathValue || filePathValue === suggestedPath) {
-                  setFilePath(getSuggestedFilePath(nextDatabase.trim() || initialDatabase));
-                }
-              }}
-            >
-              <option value="">{databaseList.loading ? copy.containerPlaceholder : copy.databasePlaceholder}</option>
-              {databaseList.databases.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            {databaseList.error ? (
-              <span className="text-xs font-medium text-red-600">{databaseList.error}</span>
-            ) : normalizedDatabase && !databaseReady ? (
-              <span className="text-xs font-medium text-red-600">{copy.validation.database}</span>
-            ) : null}
-          </label>
+          <DatabaseNameSelect
+            copy={copy}
+            disabled={disabled || !containerReady}
+            error={databaseList.error}
+            invalid={Boolean(normalizedDatabase && !databaseReady)}
+            loading={databaseList.loading}
+            loadingPlaceholder={copy.containerPlaceholder}
+            names={databaseList.databases}
+            value={selectedDatabase}
+            onChange={(nextDatabase) => {
+              setDatabase(nextDatabase);
+              if (!filePathValue || filePathValue === suggestedPath) {
+                setFilePath(getSuggestedFilePath(nextDatabase.trim() || initialDatabase));
+              }
+            }}
+          />
           <Button
             className="w-full"
             disabled={!formReady || disabled}

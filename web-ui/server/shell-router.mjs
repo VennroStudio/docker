@@ -1,11 +1,7 @@
 import { assert, body, sendJson } from "./http.mjs";
 import { isCommandSession, stopCommandSession, writeCommandInput } from "./command-runner.mjs";
 import { isNginxShellSession, stopNginxShell, writeNginxShellInput } from "./modules/nginx/shell.mjs";
-import {
-  isDatabaseShellSession,
-  stopDatabaseShell,
-  writeDatabaseShellInput,
-} from "./modules/database/shell.mjs";
+import { isDatabaseShellSession, stopDatabaseShell, writeDatabaseShellInput } from "./modules/database/shell.mjs";
 import { isRedisShellSession, stopRedisShell, writeRedisShellInput } from "./modules/redis/shell.mjs";
 import { isMinioShellSession, stopMinioShell, writeMinioShellInput } from "./modules/minio/shell.mjs";
 import { isRegistryShellSession, stopRegistryShell, writeRegistryShellInput } from "./modules/registry/shell.mjs";
@@ -15,12 +11,12 @@ export async function shellInput(req, res) {
   const sessionId = payload.sessionId;
 
   assert(
-    isNginxShellSession(sessionId)
-      || isDatabaseShellSession(sessionId)
-      || isRedisShellSession(sessionId)
-      || isMinioShellSession(sessionId)
-      || isRegistryShellSession(sessionId)
-      || isCommandSession(sessionId),
+    isNginxShellSession(sessionId) ||
+      isDatabaseShellSession(sessionId) ||
+      isRedisShellSession(sessionId) ||
+      isMinioShellSession(sessionId) ||
+      isRegistryShellSession(sessionId) ||
+      isCommandSession(sessionId),
     "Unknown shell session",
   );
   if (isCommandSession(sessionId)) writeCommandInput(sessionId, String(payload.input || ""));
@@ -37,12 +33,12 @@ export async function shellStop(req, res) {
   const sessionId = payload.sessionId;
 
   assert(
-    isNginxShellSession(sessionId)
-      || isDatabaseShellSession(sessionId)
-      || isRedisShellSession(sessionId)
-      || isMinioShellSession(sessionId)
-      || isRegistryShellSession(sessionId)
-      || isCommandSession(sessionId),
+    isNginxShellSession(sessionId) ||
+      isDatabaseShellSession(sessionId) ||
+      isRedisShellSession(sessionId) ||
+      isMinioShellSession(sessionId) ||
+      isRegistryShellSession(sessionId) ||
+      isCommandSession(sessionId),
     "Unknown shell session",
   );
   if (isCommandSession(sessionId)) stopCommandSession(sessionId);

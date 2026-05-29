@@ -1,3 +1,4 @@
+import { fetchJson } from "@/shared/api";
 import type { ContainerRuntimeState } from "../model/types";
 
 export type NginxStatus = {
@@ -9,7 +10,5 @@ export type NginxStatus = {
 };
 
 export async function fetchNginxStatus(signal?: AbortSignal): Promise<NginxStatus> {
-  const response = await fetch("/api/nginx/status", { signal });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return (await response.json()) as NginxStatus;
+  return fetchJson<NginxStatus>("/api/nginx/status", { signal }, "Nginx status request failed");
 }

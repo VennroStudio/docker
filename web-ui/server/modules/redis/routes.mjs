@@ -33,10 +33,7 @@ export async function redisStreamRoute(req, res) {
 }
 
 export async function redisStatus(_req, res) {
-  const [redis, redisinsight] = await Promise.all([
-    execMake(["redis-status"]),
-    execMake(["redisinsight-status"]),
-  ]);
+  const [redis, redisinsight] = await Promise.all([execMake(["redis-status"]), execMake(["redisinsight-status"])]);
 
   sendJson(res, 200, {
     redis: JSON.parse(redis),

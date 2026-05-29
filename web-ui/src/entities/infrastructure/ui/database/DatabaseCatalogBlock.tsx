@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { Button, Field } from "@/shared/ui";
 import { DatabaseBlockHeader } from "./DatabaseBlockHeader";
 import { DatabaseContainerSelect } from "./DatabaseContainerSelect";
+import { DatabaseNameSelect } from "./DatabaseNameSelect";
 import type {
   DatabaseCatalogCopy,
   DatabaseCatalogForm,
@@ -11,7 +12,6 @@ import type {
   FetchDatabases,
   InstanceLabel,
 } from "../../model/database/formTypes";
-import { selectClassName } from "../../model/database/formUtils";
 import { useDatabaseNames } from "../../model/database/useDatabaseNames";
 
 type DatabaseCatalogBlockProps<Instance extends DatabaseInstanceOption, Form extends DatabaseCatalogForm> = {
@@ -115,21 +115,16 @@ export function DatabaseCatalogBlock<Instance extends DatabaseInstanceOption, Fo
 
       <div className="mt-3 grid gap-3 min-[1180px]:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] min-[1180px]:items-start">
         <form id={dropFormId} className="grid gap-2" onSubmit={submitDrop}>
-          <span className="text-xs font-semibold uppercase text-slate-500">{copy.database}</span>
-          <select
-            className={selectClassName}
-            disabled={disabled || !containerReady || databaseList.loading || databaseList.databases.length === 0}
+          <DatabaseNameSelect
+            copy={{ ...copy, databasePlaceholder: copy.emptyDatabases }}
+            disabled={disabled || !containerReady}
+            error={databaseList.error}
+            loading={databaseList.loading}
+            loadingPlaceholder={copy.refresh}
+            names={databaseList.databases}
             value={databaseToDrop}
-            onChange={(event) => setDatabaseToDrop(event.target.value)}
-          >
-            <option value="">{databaseList.loading ? copy.refresh : copy.emptyDatabases}</option>
-            {databaseList.databases.map((database) => (
-              <option key={database} value={database}>
-                {database}
-              </option>
-            ))}
-          </select>
-          {databaseList.error ? <span className="text-xs font-medium text-red-600">{databaseList.error}</span> : null}
+            onChange={setDatabaseToDrop}
+          />
         </form>
 
         <div className="grid gap-2 min-[720px]:grid-cols-3 min-[1180px]:mt-6">

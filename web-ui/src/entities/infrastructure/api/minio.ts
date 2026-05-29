@@ -1,3 +1,4 @@
+import { fetchJson } from "@/shared/api";
 import type { ContainerRuntimeState } from "../model/types";
 
 export type MinioStatusResponse = {
@@ -10,7 +11,5 @@ export type MinioStatusResponse = {
 };
 
 export async function fetchMinioStatus(signal?: AbortSignal) {
-  const response = await fetch("/api/minio/status", { signal });
-  if (!response.ok) throw new Error(`MinIO status request failed: ${response.status}`);
-  return (await response.json()) as MinioStatusResponse;
+  return fetchJson<MinioStatusResponse>("/api/minio/status", { signal }, "MinIO status request failed");
 }

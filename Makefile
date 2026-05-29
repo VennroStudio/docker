@@ -22,12 +22,13 @@ help: ## Показать список команд
 	@echo ""
 
 ##@ Project
-init: ## Создать settings.json из дефолтного шаблона
+init: ## Создать локальные config файлы
 	@$(NODE_RUN) ./scripts/config/settings.mjs init
 	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres dumps/mariadb dumps/postgres
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs init
 
 settings-show: ## Показать текущий settings.json
 	@$(NODE_RUN) ./scripts/config/settings.mjs show
@@ -533,6 +534,28 @@ registry-ui-logs: ## Логи Registry UI
 registry-ui-shell: ## Shell внутри контейнера Registry UI
 	$(MAKE) compose-shell NAME=registry-ui
 
+##@ SSH
+ssh-init: ## Создать config/ssh-servers.json
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs init
+
+ssh-list: ## Показать SSH серверы из config/ssh-servers.json
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs list
+
+ssh-add: ## Добавить SSH сервер, передать NAME HOST USER PASSWORD или KEY_PATH
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs add
+
+ssh-update: ## Изменить SSH сервер, передать ID и нужные поля
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs update
+
+ssh-remove: ## Удалить SSH сервер, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs remove
+
+ssh-test: ## Проверить SSH подключение, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs test
+
+ssh-connect: ## Подключиться к SSH серверу, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/servers.mjs connect
+
 ##@ Utilities
 archive: ## Создать архив NAME-DD-MM-YYYY.tar.gz, передать NAME=archiveName FOLDER=folderName
 	@$(NODE_RUN) ./scripts/utilities/archive.mjs create --name "$(NAME)" --folder "$(FOLDER)"
@@ -564,4 +587,5 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
+.PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-test ssh-connect
 .PHONY: archive archive-list unarchive archive-delete

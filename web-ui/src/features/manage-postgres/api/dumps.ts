@@ -1,3 +1,5 @@
+import { fetchJson } from "@/shared/api";
+
 export type PostgresDumpFile = {
   modifiedAt: string;
   name: string;
@@ -10,9 +12,10 @@ type DumpFilesResponse = {
 };
 
 export async function fetchPostgresDumps(): Promise<PostgresDumpFile[]> {
-  const response = await fetch("/api/dumps?engine=postgres");
-  if (!response.ok) throw new Error(await response.text());
-
-  const payload = (await response.json()) as DumpFilesResponse;
+  const payload = await fetchJson<DumpFilesResponse>(
+    "/api/dumps?engine=postgres",
+    undefined,
+    "Postgres dumps request failed",
+  );
   return payload.dumps;
 }

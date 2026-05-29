@@ -1,3 +1,4 @@
+import { fetchJson } from "@/shared/api";
 import type { ContainerRuntimeState } from "../model/types";
 
 export type RedisRuntimeInfo = {
@@ -15,7 +16,5 @@ export type RedisStatusResponse = {
 };
 
 export async function fetchRedisStatus(signal?: AbortSignal) {
-  const response = await fetch("/api/redis/status", { signal });
-  if (!response.ok) throw new Error(`Redis status request failed: ${response.status}`);
-  return (await response.json()) as RedisStatusResponse;
+  return fetchJson<RedisStatusResponse>("/api/redis/status", { signal }, "Redis status request failed");
 }
