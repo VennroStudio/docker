@@ -202,6 +202,12 @@ export type SshServer = {
 
 export type SshServerForm = Omit<SshServer, "id">;
 
+export type SshQuickCommand = {
+  command: string;
+  id: number;
+  serverId: number;
+};
+
 export type SshKeyForm = {
   comment: string;
   force: boolean;

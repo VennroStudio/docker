@@ -13,6 +13,7 @@
 # Generated local state
 /config/settings.json
 /config/ssh-servers.json
+/config/ssh-commands.json
 /docker/mariadb/instances.json
 /docker/postgres/instances.json
 /docker/compose/docker-compose-mariadb-*.yml

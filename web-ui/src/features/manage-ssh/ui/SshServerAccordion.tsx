@@ -1,14 +1,20 @@
 import { KeyRound, Send, TerminalSquare, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import type { AppText, SshServer, SshServerForm } from "@/entities/infrastructure";
+import { useState } from "react";
+import type { AppText, SshQuickCommand, SshServer, SshServerForm } from "@/entities/infrastructure";
 import { AccordionPanel, IconButton } from "@/shared/ui";
 import { validateSshServerForm } from "../model/validation";
+import { SshQuickCommandsBlock } from "./SshQuickCommandsBlock";
 import { SshServerFormFields } from "./SshServerFormFields";
 
 type SshServerAccordionProps = {
+  commands: SshQuickCommand[];
   copy: AppText["ssh"];
   server: SshServer;
   onCopyPassword: (password: string) => void;
+  onCommandAdd: (server: SshServer, command: string) => void;
+  onCommandInsert: (server: SshServer, command: string) => void;
+  onCommandRemove: (command: SshQuickCommand) => void;
+  onCommandUpdate: (command: SshQuickCommand, value: string) => void;
   onDelete: (server: SshServer) => void;
   onKeyRemove: (server: SshServer) => void;
   onKeyPush: (server: SshServer) => void;
@@ -17,7 +23,12 @@ type SshServerAccordionProps = {
 };
 
 export function SshServerAccordion({
+  commands,
   copy,
+  onCommandAdd,
+  onCommandInsert,
+  onCommandRemove,
+  onCommandUpdate,
   onCopyPassword,
   onDelete,
   onKeyRemove,
@@ -29,10 +40,6 @@ export function SshServerAccordion({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<SshServerForm>(serverForm(server));
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setForm(serverForm(server));
-  }, [server]);
 
   const save = () => {
     const nextError = validateSshServerForm(form, copy);
@@ -70,14 +77,31 @@ export function SshServerAccordion({
       }
       onOpenChange={setOpen}
     >
-      <SshServerFormFields
-        copy={copy}
-        error={error}
-        value={form}
-        onChange={setForm}
-        onCopyPassword={() => onCopyPassword(form.password)}
-        onSubmit={save}
-      />
+      <div className="grid gap-4">
+        <section className="rounded-lg border border-sky-100 bg-white/70 p-4 shadow-[0_10px_24px_rgba(14,165,233,0.08)]">
+          <BlockHeader eyebrow={copy.sections.serverEyebrow} title={copy.sections.serverTitle} />
+          <div className="mt-4">
+            <SshServerFormFields
+              copy={copy}
+              error={error}
+              value={form}
+              onChange={setForm}
+              onCopyPassword={() => onCopyPassword(form.password)}
+              onSubmit={save}
+            />
+          </div>
+        </section>
+
+        <SshQuickCommandsBlock
+          commands={commands}
+          copy={copy}
+          server={server}
+          onAdd={onCommandAdd}
+          onInsert={onCommandInsert}
+          onRemove={onCommandRemove}
+          onUpdate={onCommandUpdate}
+        />
+      </div>
     </AccordionPanel>
   );
 }
@@ -101,4 +125,13 @@ function serverForm(server: SshServer): SshServerForm {
     port: server.port,
     user: server.user,
   };
+}
+
+function BlockHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div>
+      <span className="text-xs font-semibold uppercase text-teal-700">{eyebrow}</span>
+      <h3 className="mt-1 text-base font-bold text-slate-950">{title}</h3>
+    </div>
+  );
 }

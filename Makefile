@@ -30,6 +30,7 @@ init: ## Создать локальные config файлы
 	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
 	@$(NODE_RUN) ./scripts/ssh/servers.mjs init
+	@$(NODE_RUN) ./scripts/ssh/commands.mjs init
 
 settings-show: ## Показать текущий settings.json
 	@$(NODE_RUN) ./scripts/config/settings.mjs show
@@ -544,8 +545,9 @@ registry-ui-shell: ## Shell внутри контейнера Registry UI
 	$(MAKE) compose-shell NAME=registry-ui
 
 ##@ SSH
-ssh-init: ## Создать config/ssh-servers.json
+ssh-init: ## Создать config/ssh-servers.json и config/ssh-commands.json
 	@$(NODE_RUN) ./scripts/ssh/servers.mjs init
+	@$(NODE_RUN) ./scripts/ssh/commands.mjs init
 
 ssh-list: ## Показать SSH серверы из config/ssh-servers.json
 	@$(NODE_RUN) ./scripts/ssh/servers.mjs list
@@ -573,6 +575,18 @@ ssh-key-remove: ## Удалить публичный RSA ключ с SSH сер�
 
 ssh-key-show: ## Показать публичный RSA ключ, передать ID=1
 	@$(NODE_RUN) ./scripts/ssh/keys.mjs show
+
+ssh-command-list: ## Показать частые команды SSH, передать SERVER_ID=1
+	@$(NODE_RUN) ./scripts/ssh/commands.mjs list
+
+ssh-command-add: ## Добавить частую команду SSH, передать SERVER_ID=1 COMMAND='docker ps'
+	@$(NODE_RUN) ./scripts/ssh/commands.mjs add
+
+ssh-command-update: ## Изменить частую команду SSH, передать ID=1 COMMAND='df -h'
+	@$(NODE_RUN) ./scripts/ssh/commands.mjs update
+
+ssh-command-remove: ## Удалить частую команду SSH, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/commands.mjs remove
 
 ##@ Utilities
 archive: ## Создать архив NAME-DD-MM-YYYY.tar.gz, передать NAME=archiveName FOLDER=folderName
@@ -605,5 +619,5 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
-.PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-connect ssh-key-generate ssh-key-push ssh-key-remove ssh-key-show
+.PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-connect ssh-key-generate ssh-key-push ssh-key-remove ssh-key-show ssh-command-list ssh-command-add ssh-command-update ssh-command-remove
 .PHONY: archive archive-list unarchive archive-delete

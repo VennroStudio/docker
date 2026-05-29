@@ -1366,7 +1366,7 @@ make registry-ui-shell
 
 ### SSH
 
-Создать `config/ssh-servers.json`:
+Создать `config/ssh-servers.json` и `config/ssh-commands.json`:
 
 ```sh
 make ssh-init
@@ -1448,6 +1448,36 @@ make ssh-key-remove ID=1
 
 ```sh
 make ssh-key-show ID=1
+```
+
+Показать все частые команды SSH:
+
+```sh
+make ssh-command-list
+```
+
+Показать частые команды конкретного сервера:
+
+```sh
+make ssh-command-list SERVER_ID=1
+```
+
+Добавить частую команду для сервера:
+
+```sh
+make ssh-command-add SERVER_ID=1 COMMAND='docker ps'
+```
+
+Изменить частую команду:
+
+```sh
+make ssh-command-update ID=1 COMMAND='df -h'
+```
+
+Удалить частую команду:
+
+```sh
+make ssh-command-remove ID=1
 ```
 
 ### Utilities

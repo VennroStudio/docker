@@ -22,7 +22,11 @@ export function openCommandTerminal(command: CommandId, handlers: TerminalHandle
   return openTerminal({ command, type: "command" }, handlers);
 }
 
-export function openHostTerminal(action: "add" | "remove", domain: string, handlers: TerminalHandlers): TerminalSession {
+export function openHostTerminal(
+  action: "add" | "remove",
+  domain: string,
+  handlers: TerminalHandlers,
+): TerminalSession {
   return openTerminal({ action, domain, type: "host" }, handlers);
 }
 
@@ -63,7 +67,11 @@ export function openSshServerAddTerminal(form: SshServerForm, handlers: Terminal
   return openTerminal({ ...form, type: "ssh-add" }, handlers);
 }
 
-export function openSshServerUpdateTerminal(id: number, form: SshServerForm, handlers: TerminalHandlers): TerminalSession {
+export function openSshServerUpdateTerminal(
+  id: number,
+  form: SshServerForm,
+  handlers: TerminalHandlers,
+): TerminalSession {
   return openTerminal({ ...form, id, type: "ssh-update" }, handlers);
 }
 
@@ -78,7 +86,26 @@ export function openSshKeyGenerateTerminal(form: SshKeyForm, handlers: TerminalH
   );
 }
 
-export function openMariaDbInstanceCreateTerminal(form: MariaDbInstanceForm, handlers: TerminalHandlers): TerminalSession {
+export function openSshCommandAddTerminal(
+  serverId: number,
+  command: string,
+  handlers: TerminalHandlers,
+): TerminalSession {
+  return openTerminal({ command, serverId, type: "ssh-command-add" }, handlers);
+}
+
+export function openSshCommandUpdateTerminal(id: number, command: string, handlers: TerminalHandlers): TerminalSession {
+  return openTerminal({ command, id, type: "ssh-command-update" }, handlers);
+}
+
+export function openSshCommandRemoveTerminal(id: number, handlers: TerminalHandlers): TerminalSession {
+  return openTerminal({ id, type: "ssh-command-remove" }, handlers);
+}
+
+export function openMariaDbInstanceCreateTerminal(
+  form: MariaDbInstanceForm,
+  handlers: TerminalHandlers,
+): TerminalSession {
   return openTerminal(
     {
       authMode: form.authMode,
@@ -141,7 +168,10 @@ export function openMariaDbDatabaseTerminal(
   );
 }
 
-export function openPostgresInstanceCreateTerminal(form: PostgresInstanceForm, handlers: TerminalHandlers): TerminalSession {
+export function openPostgresInstanceCreateTerminal(
+  form: PostgresInstanceForm,
+  handlers: TerminalHandlers,
+): TerminalSession {
   return openTerminal(
     {
       database: form.database,

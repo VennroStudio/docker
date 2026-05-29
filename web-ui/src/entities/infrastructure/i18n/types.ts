@@ -308,11 +308,15 @@ export type AppText = {
   ssh: {
     actions: {
       addServer: string;
+      addCommand: string;
       copyPassword: string;
+      deleteCommand: string;
       deleteServer: string;
       generateKey: string;
+      insertCommand: string;
       keyRemove: string;
       keyPush: string;
+      saveCommand: string;
       saveServer: string;
       terminal: string;
     };
@@ -322,6 +326,7 @@ export type AppText = {
     eyebrow: string;
     fields: {
       comment: string;
+      command: string;
       force: string;
       host: string;
       keyPath: string;
@@ -344,6 +349,7 @@ export type AppText = {
     };
     placeholders: {
       comment: string;
+      command: string;
       host: string;
       keyPath: string;
       name: string;
@@ -352,14 +358,25 @@ export type AppText = {
       user: string;
     };
     sectionEyebrow: string;
+    sections: {
+      commandsEyebrow: string;
+      commandsTitle: string;
+      serverEyebrow: string;
+      serverTitle: string;
+    };
     title: string;
     validation: {
+      command: string;
       host: string;
       name: string;
       password: string;
       port: string;
       server: string;
       user: string;
+    };
+    messages: {
+      commandInserted: string;
+      connectFirst: string;
     };
   };
   servicePages: Record<

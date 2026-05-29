@@ -2,12 +2,16 @@ import type { AppText } from "../types";
 
 export const enSsh = {
   actions: {
+    addCommand: "Add command",
     addServer: "Add server",
     copyPassword: "Copy password",
+    deleteCommand: "Delete command",
     deleteServer: "Delete server",
     generateKey: "Generate RSA",
+    insertCommand: "Insert into terminal",
     keyRemove: "Remove RSA",
     keyPush: "Push RSA",
+    saveCommand: "Save command",
     saveServer: "Save",
     terminal: "Terminal",
   },
@@ -17,6 +21,7 @@ export const enSsh = {
   eyebrow: "SSH",
   fields: {
     comment: "Comment",
+    command: "Command",
     force: "Overwrite key",
     host: "Host",
     keyPath: "Key path",
@@ -31,6 +36,10 @@ export const enSsh = {
     addServer: "Add SSH server",
     generateKey: "Generate RSA key",
   },
+  messages: {
+    commandInserted: "Command inserted into SSH terminal",
+    connectFirst: "Connect to this SSH server first.",
+  },
   options: {
     key: "RSA key",
     manual: "Manual input",
@@ -39,6 +48,7 @@ export const enSsh = {
   },
   placeholders: {
     comment: "infrastructure-prod",
+    command: "docker ps",
     host: "1.2.3.4",
     keyPath: "~/.ssh/infrastructure/prod_rsa",
     name: "prod",
@@ -47,8 +57,15 @@ export const enSsh = {
     user: "root",
   },
   sectionEyebrow: "Server",
+  sections: {
+    commandsEyebrow: "Commands",
+    commandsTitle: "Quick commands",
+    serverEyebrow: "Settings",
+    serverTitle: "Server settings",
+  },
   title: "SSH servers",
   validation: {
+    command: "Enter command.",
     host: "Enter server host.",
     name: "Enter server name.",
     password: "Enter password or choose RSA key.",

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchSshServers } from "../api/ssh";
-import type { SshServer } from "./types";
+import type { SshQuickCommand, SshServer } from "./types";
 
 export function useSshServers(enabled: boolean) {
+  const [commands, setCommands] = useState<SshQuickCommand[]>([]);
   const [servers, setServers] = useState<SshServer[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -13,6 +14,7 @@ export function useSshServers(enabled: boolean) {
 
     try {
       const response = await fetchSshServers();
+      setCommands(response.commands || []);
       setServers(response.servers);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : String(requestError));
@@ -26,5 +28,5 @@ export function useSshServers(enabled: boolean) {
     void refresh();
   }, [enabled, refresh]);
 
-  return { error, loading, refresh, servers };
+  return { commands, error, loading, refresh, servers };
 }

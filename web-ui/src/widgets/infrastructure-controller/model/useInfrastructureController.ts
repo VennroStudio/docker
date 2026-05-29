@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  commandPageRegistry,
   dictionaries,
   getViewById,
   getViewByPath,
@@ -49,6 +48,10 @@ export function useInfrastructureController() {
   const [proxyForm, setProxyForm] = useState(initialProxyForm);
   const [sshTerminalSession, setSshTerminalSession] = useState<{
     action: SshTerminalAction;
+    input?: {
+      data: string;
+      id: number;
+    };
     server: SshServer;
   } | null>(null);
   const confirmDialog = useConfirmDialog();
@@ -132,6 +135,27 @@ export function useInfrastructureController() {
   });
   const sshOperations = useSshOperations({
     confirmDialog,
+    insertSshCommand: (server, command) => {
+      const data = command.trim();
+      if (!data) return;
+
+      if (
+        !sshTerminalSession ||
+        sshTerminalSession.action !== "connect" ||
+        sshTerminalSession.server.id !== server.id
+      ) {
+        toast.show({ title: text.ssh.messages.connectFirst, tone: "info" });
+        showTerminal();
+        return;
+      }
+
+      setSshTerminalSession({
+        ...sshTerminalSession,
+        input: { data, id: Date.now() },
+      });
+      showTerminal();
+      toast.show({ title: text.ssh.messages.commandInserted, tone: "success" });
+    },
     openSshTerminal: (server, action) => {
       if (operationRunning) {
         toast.show({ title: operationBlockTitle || text.operationToast.blocked(server.name), tone: "info" });

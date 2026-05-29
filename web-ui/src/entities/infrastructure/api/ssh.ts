@@ -1,7 +1,8 @@
-import type { SshServer } from "../model/types";
+import type { SshQuickCommand, SshServer } from "../model/types";
 import { fetchJson } from "@/shared/api";
 
 export type SshServersResponse = {
+  commands: SshQuickCommand[];
   servers: SshServer[];
 };
 

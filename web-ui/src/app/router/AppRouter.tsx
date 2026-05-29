@@ -29,6 +29,10 @@ export function AppRouter({ controller }: AppRouterProps) {
     redisStatus,
     registryStatus,
     runSshConnect,
+    runSshCommandAdd,
+    runSshCommandInsert,
+    runSshCommandRemove,
+    runSshCommandUpdate,
     runSshKeyGenerate,
     runSshKeyRemove,
     runSshKeyPush,
@@ -159,6 +163,10 @@ export function AppRouter({ controller }: AppRouterProps) {
           void navigator.clipboard.writeText(password);
           toast.show({ title: text.ssh.actions.copyPassword, tone: "success" });
         }}
+        onCommandAdd={runSshCommandAdd}
+        onCommandInsert={runSshCommandInsert}
+        onCommandRemove={runSshCommandRemove}
+        onCommandUpdate={runSshCommandUpdate}
         onKeyGenerate={runSshKeyGenerate}
         onKeyRemove={runSshKeyRemove}
         onKeyPush={runSshKeyPush}

@@ -2,12 +2,16 @@ import type { AppText } from "../types";
 
 export const ruSsh = {
   actions: {
+    addCommand: "Добавить команду",
     addServer: "Добавить сервер",
     copyPassword: "Скопировать пароль",
+    deleteCommand: "Удалить команду",
     deleteServer: "Удалить сервер",
     generateKey: "Сгенерировать RSA",
+    insertCommand: "Вставить в терминал",
     keyRemove: "Удалить RSA",
     keyPush: "Отправить RSA",
+    saveCommand: "Сохранить команду",
     saveServer: "Сохранить",
     terminal: "Терминал",
   },
@@ -17,6 +21,7 @@ export const ruSsh = {
   eyebrow: "SSH",
   fields: {
     comment: "Комментарий",
+    command: "Команда",
     force: "Перезаписать ключ",
     host: "Host",
     keyPath: "Путь к ключу",
@@ -31,6 +36,10 @@ export const ruSsh = {
     addServer: "Добавить SSH сервер",
     generateKey: "Сгенерировать RSA ключ",
   },
+  messages: {
+    commandInserted: "Команда вставлена в SSH терминал",
+    connectFirst: "Сначала подключись к этому SSH серверу.",
+  },
   options: {
     key: "RSA ключ",
     manual: "Вводить вручную",
@@ -39,6 +48,7 @@ export const ruSsh = {
   },
   placeholders: {
     comment: "infrastructure-prod",
+    command: "docker ps",
     host: "1.2.3.4",
     keyPath: "~/.ssh/infrastructure/prod_rsa",
     name: "prod",
@@ -47,8 +57,15 @@ export const ruSsh = {
     user: "root",
   },
   sectionEyebrow: "Server",
+  sections: {
+    commandsEyebrow: "Commands",
+    commandsTitle: "Частые команды",
+    serverEyebrow: "Settings",
+    serverTitle: "Данные сервера",
+  },
   title: "SSH серверы",
   validation: {
+    command: "Укажи команду.",
     host: "Укажи host сервера.",
     name: "Укажи название сервера.",
     password: "Укажи пароль или выбери RSA ключ.",

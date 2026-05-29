@@ -24,6 +24,10 @@ type WorkspaceProps = {
   sshTerminal?: {
     action: SshTerminalAction;
     cwd: string;
+    input?: {
+      data: string;
+      id: number;
+    };
     serverId: number;
     title: string;
   } | null;
@@ -78,9 +82,11 @@ export function Workspace({
         {showTerminal && sshTerminal ? (
           <div className="sticky top-20 h-[calc(100vh-6rem)] min-h-[360px] max-[1180px]:static max-[1180px]:h-[420px]">
             <SshTerminalPanel
+              key={`${sshTerminal.action}:${sshTerminal.serverId}`}
               action={sshTerminal.action}
               actionLabels={terminalActionLabels}
               cwd={sshTerminal.cwd}
+              input={sshTerminal.input}
               serverId={sshTerminal.serverId}
               stateLabels={terminalStateLabels}
               title={sshTerminal.title}

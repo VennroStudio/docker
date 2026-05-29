@@ -70,6 +70,26 @@ export async function resolveTerminalRequest(request) {
       return ["make", ["ssh-add", ...serverArgs(request)]];
     case "ssh-key-generate":
       return ["make", ["ssh-key-generate", `ID=${validateId(request.id)}`, ...keyArgs(request)]];
+    case "ssh-command-add":
+      return [
+        "make",
+        [
+          "ssh-command-add",
+          `SERVER_ID=${validateId(request.serverId)}`,
+          valueArg("COMMAND", validateCommandText(request.command)),
+        ],
+      ];
+    case "ssh-command-remove":
+      return ["make", ["ssh-command-remove", `ID=${validateId(request.id)}`]];
+    case "ssh-command-update":
+      return [
+        "make",
+        [
+          "ssh-command-update",
+          `ID=${validateId(request.id)}`,
+          valueArg("COMMAND", validateCommandText(request.command)),
+        ],
+      ];
     case "ssh-remove":
       return ["make", ["ssh-remove", `ID=${validateId(request.id)}`]];
     case "ssh-update":
@@ -203,6 +223,12 @@ function validateHost(value) {
 function validateText(value, message) {
   assert(typeof value === "string" && value.trim(), message);
   return value.trim();
+}
+
+function validateCommandText(value) {
+  const command = validateText(value, "COMMAND is required");
+  assert(!command.includes("\0"), "Invalid COMMAND");
+  return command;
 }
 
 function validateEnum(value, allowed, message) {

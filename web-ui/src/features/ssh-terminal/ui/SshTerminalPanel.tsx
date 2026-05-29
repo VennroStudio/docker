@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { XtermPanel, type TerminalPanelState, type XtermPanelHandle } from "@/shared/ui";
 import {
   createSshTerminalSocket,
@@ -15,22 +15,44 @@ type SshTerminalPanelProps = {
   };
   action: SshTerminalAction;
   cwd: string;
+  input?: {
+    data: string;
+    id: number;
+  };
   serverId: number;
   stateLabels: Record<TerminalPanelState, string>;
   title: string;
 };
 
-export function SshTerminalPanel({ action, actionLabels, cwd, serverId, stateLabels, title }: SshTerminalPanelProps) {
+export function SshTerminalPanel({
+  action,
+  actionLabels,
+  cwd,
+  input,
+  serverId,
+  stateLabels,
+  title,
+}: SshTerminalPanelProps) {
+  const lastInputIdRef = useRef<number | null>(null);
   const panelRef = useRef<XtermPanelHandle | null>(null);
+  const pendingInputRef = useRef<null | string>(null);
   const socketRef = useRef<WebSocket | null>(null);
-  const [state, setState] = useState<TerminalPanelState>("ready");
+  const [state, setState] = useState<TerminalPanelState>("running");
+  const flushPendingInput = useCallback(() => {
+    const inputData = pendingInputRef.current;
+    const socket = socketRef.current;
+    if (!inputData || !socket || socket.readyState !== WebSocket.OPEN) return;
+
+    sendTerminalInput(socket, inputData);
+    pendingInputRef.current = null;
+    panelRef.current?.focus();
+  }, []);
 
   useEffect(() => {
-    setState("running");
-
     const socket = createSshTerminalSocket(serverId, action, 120, 32);
     socketRef.current = socket;
 
+    socket.addEventListener("open", flushPendingInput);
     socket.addEventListener("message", (event) => {
       const message = parseTerminalMessage(event);
       if (!message) return;
@@ -55,7 +77,14 @@ export function SshTerminalPanel({ action, actionLabels, cwd, serverId, stateLab
       socket.close();
       socketRef.current = null;
     };
-  }, [action, serverId]);
+  }, [action, flushPendingInput, serverId]);
+
+  useEffect(() => {
+    if (!input || input.id === lastInputIdRef.current) return;
+    lastInputIdRef.current = input.id;
+    pendingInputRef.current = input.data;
+    flushPendingInput();
+  }, [flushPendingInput, input]);
 
   const sendInput = (data: string) => {
     if (socketRef.current) sendTerminalInput(socketRef.current, data);

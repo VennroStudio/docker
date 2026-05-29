@@ -46,6 +46,7 @@ export function App() {
               ? {
                   action: sshTerminalSession.action,
                   cwd: `${sshTerminalSession.server.user}@${sshTerminalSession.server.host}:${sshTerminalSession.server.port}`,
+                  input: sshTerminalSession.input,
                   serverId: sshTerminalSession.server.id,
                   title: sshTerminalSession.server.name,
                 }

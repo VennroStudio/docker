@@ -1,8 +1,9 @@
 import { KeyRound, Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   AppText,
   SshKeyForm,
+  SshQuickCommand,
   SshServer,
   SshServerForm,
   useSshServers,
@@ -17,6 +18,10 @@ type SshPageProps = {
   text: AppText;
   view: ViewConfig;
   onCopyPassword: (password: string) => void;
+  onCommandAdd: (server: SshServer, command: string) => void;
+  onCommandInsert: (server: SshServer, command: string) => void;
+  onCommandRemove: (command: SshQuickCommand) => void;
+  onCommandUpdate: (command: SshQuickCommand, value: string) => void;
   onKeyGenerate: (form: SshKeyForm) => void;
   onKeyRemove: (server: SshServer) => void;
   onKeyPush: (server: SshServer) => void;
@@ -27,6 +32,10 @@ type SshPageProps = {
 };
 
 export function SshPage({
+  onCommandAdd,
+  onCommandInsert,
+  onCommandRemove,
+  onCommandUpdate,
   onCopyPassword,
   onKeyGenerate,
   onKeyRemove,
@@ -42,6 +51,15 @@ export function SshPage({
   const [serverModalOpen, setServerModalOpen] = useState(false);
   const [keyModalOpen, setKeyModalOpen] = useState(false);
   const copy = text.ssh;
+  const commandsByServer = useMemo(() => {
+    const map = new Map<number, SshQuickCommand[]>();
+    for (const command of sshServers.commands) {
+      const list = map.get(command.serverId) || [];
+      list.push(command);
+      map.set(command.serverId, list);
+    }
+    return map;
+  }, [sshServers.commands]);
 
   return (
     <ServicePageLayout view={view} eyebrow={copy.eyebrow} description={copy.description} title={copy.title}>
@@ -65,9 +83,14 @@ export function SshPage({
         <div className="space-y-4">
           {sshServers.servers.map((server) => (
             <SshServerAccordion
-              key={server.id}
+              key={serverKey(server)}
+              commands={commandsByServer.get(server.id) || []}
               copy={copy}
               server={server}
+              onCommandAdd={onCommandAdd}
+              onCommandInsert={onCommandInsert}
+              onCommandRemove={onCommandRemove}
+              onCommandUpdate={onCommandUpdate}
               onCopyPassword={onCopyPassword}
               onDelete={onServerDelete}
               onKeyRemove={onKeyRemove}
@@ -98,4 +121,17 @@ export function SshPage({
       ) : null}
     </ServicePageLayout>
   );
+}
+
+function serverKey(server: SshServer) {
+  return [
+    server.id,
+    server.name,
+    server.host,
+    server.port,
+    server.user,
+    server.authType,
+    server.keyPath,
+    server.passwordMode,
+  ].join(":");
 }

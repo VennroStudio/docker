@@ -1,6 +1,9 @@
-import type { AppText, SshKeyForm, SshServer, SshServerForm } from "@/entities/infrastructure";
+import type { AppText, SshKeyForm, SshQuickCommand, SshServer, SshServerForm } from "@/entities/infrastructure";
 import type { SshTerminalAction } from "@/features/ssh-terminal";
 import {
+  openSshCommandAddTerminal,
+  openSshCommandRemoveTerminal,
+  openSshCommandUpdateTerminal,
   openSshKeyGenerateTerminal,
   openSshServerAddTerminal,
   openSshServerRemoveTerminal,
@@ -10,6 +13,7 @@ import type { ConfirmDialogApi, RunWithTerminal } from "./operationTypes";
 
 type UseSshOperationsConfig = {
   confirmDialog: ConfirmDialogApi;
+  insertSshCommand: (server: SshServer, command: string) => void;
   openSshTerminal: (server: SshServer, action: SshTerminalAction) => void;
   refreshSshServers: () => Promise<void> | void;
   runWithTerminal: RunWithTerminal;
@@ -18,6 +22,7 @@ type UseSshOperationsConfig = {
 
 export function useSshOperations({
   confirmDialog,
+  insertSshCommand,
   openSshTerminal,
   refreshSshServers,
   runWithTerminal,
@@ -66,6 +71,49 @@ export function useSshOperations({
     openSshTerminal(server, "connect");
   };
 
+  const runSshCommandAdd = (server: SshServer, command: string) => {
+    runWithTerminal({
+      key: `ssh:command-add:${server.id}`,
+      label: text.ssh.actions.addCommand,
+      onSettled: refreshSshServers,
+      open: (handlers) => openSshCommandAddTerminal(server.id, command, handlers),
+      preview: `make ssh-command-add SERVER_ID=${server.id}`,
+    });
+  };
+
+  const runSshCommandUpdate = (quickCommand: SshQuickCommand, command: string) => {
+    runWithTerminal({
+      key: `ssh:command-update:${quickCommand.id}`,
+      label: text.ssh.actions.saveCommand,
+      onSettled: refreshSshServers,
+      open: (handlers) => openSshCommandUpdateTerminal(quickCommand.id, command, handlers),
+      preview: `make ssh-command-update ID=${quickCommand.id}`,
+    });
+  };
+
+  const runSshCommandRemove = async (quickCommand: SshQuickCommand) => {
+    const confirmed = await confirmDialog.confirm({
+      body: text.confirm.runCommand.body(`make ssh-command-remove ID=${quickCommand.id}`),
+      cancelLabel: text.common.cancel,
+      confirmLabel: text.confirm.runCommand.confirmLabel,
+      title: text.ssh.actions.deleteCommand,
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    runWithTerminal({
+      key: `ssh:command-remove:${quickCommand.id}`,
+      label: text.ssh.actions.deleteCommand,
+      onSettled: refreshSshServers,
+      open: (handlers) => openSshCommandRemoveTerminal(quickCommand.id, handlers),
+      preview: `make ssh-command-remove ID=${quickCommand.id}`,
+    });
+  };
+
+  const runSshCommandInsert = (server: SshServer, command: string) => {
+    insertSshCommand(server, command);
+  };
+
   const runSshKeyGenerate = (form: SshKeyForm) => {
     runWithTerminal({
       key: `ssh:key-generate:${form.serverId}`,
@@ -95,6 +143,10 @@ export function useSshOperations({
 
   return {
     runSshConnect,
+    runSshCommandAdd,
+    runSshCommandInsert,
+    runSshCommandRemove,
+    runSshCommandUpdate,
     runSshKeyGenerate,
     runSshKeyRemove,
     runSshKeyPush,
