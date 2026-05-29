@@ -56,6 +56,7 @@ export function App() {
           view={activeConfig}
           onClear={commandStream.clear}
           onInput={commandStream.sendInput}
+          onResize={commandStream.resize}
           onStop={controller.stopCommand}
           onToggleTerminal={controller.toggleTerminal}
         >

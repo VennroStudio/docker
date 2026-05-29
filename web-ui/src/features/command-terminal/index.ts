@@ -1,3 +1,3 @@
-export * from "./api/stream";
+export * from "./api/terminalActions";
 export * from "./lib/commandPreview";
 export * from "./model/useCommandStream";

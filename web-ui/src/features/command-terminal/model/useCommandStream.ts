@@ -1,16 +1,14 @@
 import { useRef, useState } from "react";
-import { sendShellInput, stopShellSession } from "../api/stream";
+import type { TerminalSession } from "../api/terminalClient";
 import type { StreamState } from "@/entities/infrastructure";
 
 type StreamHandlers = {
-  onPrompt?: (prompt: string) => void;
-  onSession?: (sessionId: string) => void;
   onMessage: (text: string) => void;
   onDone: (text: string, ok: boolean) => void;
   onError: (text: string) => void;
 };
 
-type OpenStream = (handlers: StreamHandlers) => () => void;
+type OpenStream = (handlers: StreamHandlers) => TerminalSession;
 type RunResult = {
   ok: boolean;
   text: string;
@@ -23,85 +21,65 @@ const idleOutput = "Waiting for action...";
 
 export function useCommandStream() {
   const [output, setOutput] = useState(idleOutput);
-  const [shellPrompt, setShellPrompt] = useState("$");
-  const [shellSessionId, setShellSessionId] = useState<null | string>(null);
   const [streamState, setStreamState] = useState<StreamState>("ready");
-  const stopStream = useRef<null | (() => void)>(null);
+  const terminalSession = useRef<null | TerminalSession>(null);
 
   const append = (text: string) => {
     setOutput((current) => `${current}${text}`);
   };
 
   const run = (preview: string, open: OpenStream, options: RunOptions = {}) => {
-    stopStream.current?.();
-    setShellSessionId(null);
-    setShellPrompt("$");
+    terminalSession.current?.stop();
+    terminalSession.current = null;
     setOutput(`${preview}\n\n`);
     setStreamState("running");
     const handlers: StreamHandlers = {
-      onPrompt: setShellPrompt,
-      onSession: (sessionId) => {
-        setShellSessionId(sessionId);
-        setShellPrompt(sessionId.startsWith("cmd:") ? "" : "$");
-      },
       onMessage: append,
       onDone: (text, ok) => {
         append(text);
-        stopStream.current = null;
-        setShellSessionId(null);
-        setShellPrompt("$");
+        terminalSession.current = null;
         setStreamState(ok ? "done" : "error");
         options.onSettled?.({ ok, text });
       },
       onError: (text) => {
         append(text);
-        stopStream.current = null;
-        setShellSessionId(null);
-        setShellPrompt("$");
+        terminalSession.current = null;
         setStreamState("error");
         options.onSettled?.({ ok: false, text });
       },
     };
 
     try {
-      stopStream.current = open(handlers);
+      terminalSession.current = open(handlers);
     } catch (error) {
       const text = `\n${error instanceof Error ? error.message : String(error)}\n`;
       append(text);
-      stopStream.current = null;
-      setShellSessionId(null);
-      setShellPrompt("$");
+      terminalSession.current = null;
       setStreamState("error");
       options.onSettled?.({ ok: false, text });
     }
   };
 
   const stop = () => {
-    if (shellSessionId) void stopShellSession(shellSessionId);
-    stopStream.current?.();
-    stopStream.current = null;
-    setShellSessionId(null);
-    setShellPrompt("$");
+    terminalSession.current?.stop();
+    terminalSession.current = null;
     setStreamState("stopped");
     append("\n[stopped]\n");
   };
 
   const sendInput = (input: string) => {
-    if (!shellSessionId) return;
-    append(shellSessionId.startsWith("cmd:") ? "[input sent]\n" : `${shellPrompt}${input}\n`);
-    void sendShellInput(shellSessionId, `${input}\n`).catch((error: unknown) => {
-      append(`\n${error instanceof Error ? error.message : String(error)}\n`);
-      setStreamState("error");
-    });
+    terminalSession.current?.send(input);
   };
 
+  const resize = (cols: number, rows: number) => terminalSession.current?.resize(cols, rows);
   const clear = () => setOutput(idleOutput);
 
   return {
     clear,
-    inputEnabled: Boolean(shellSessionId && streamState === "running"),
+    inputEnabled: Boolean(terminalSession.current && streamState === "running"),
     output,
-    prompt: shellPrompt,
+    prompt: "$",
+    resize,
     run,
     sendInput,
     stop,

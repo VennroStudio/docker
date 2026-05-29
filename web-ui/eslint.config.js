@@ -17,9 +17,9 @@ export default [
       globals: {
         console: "readonly",
         document: "readonly",
-        EventSource: "readonly",
         HTMLPreElement: "readonly",
         localStorage: "readonly",
+        WebSocket: "readonly",
         window: "readonly",
       },
       sourceType: "module",

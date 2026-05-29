@@ -24,6 +24,7 @@ type TerminalProps = {
   title: string;
   onClear: () => void;
   onInput?: (input: string) => void;
+  onResize?: (cols: number, rows: number) => void;
   onStop: () => void;
 };
 
@@ -33,6 +34,7 @@ export function Terminal({
   inputEnabled = false,
   onClear,
   onInput,
+  onResize,
   onStop,
   output,
   state,
@@ -41,10 +43,10 @@ export function Terminal({
 }: TerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const fitRef = useRef<FitAddon | null>(null);
-  const inputBufferRef = useRef("");
   const inputEnabledRef = useRef(inputEnabled);
   const lastOutputRef = useRef("");
   const onInputRef = useRef(onInput);
+  const onResizeRef = useRef(onResize);
   const terminalRef = useRef<XTerm | null>(null);
 
   useEffect(() => {
@@ -54,6 +56,10 @@ export function Terminal({
   useEffect(() => {
     onInputRef.current = onInput;
   }, [onInput]);
+
+  useEffect(() => {
+    onResizeRef.current = onResize;
+  }, [onResize]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -96,6 +102,7 @@ export function Terminal({
     terminal.open(containerRef.current);
     terminal.write(output);
     fit.fit();
+    onResizeRef.current?.(terminal.cols, terminal.rows);
 
     terminalRef.current = terminal;
     fitRef.current = fit;
@@ -103,22 +110,12 @@ export function Terminal({
 
     const inputDisposable = terminal.onData((data) => {
       if (!inputEnabledRef.current) return;
-
-      if (data === "\r") {
-        const input = inputBufferRef.current;
-        inputBufferRef.current = "";
-        if (input) onInputRef.current?.(input);
-        return;
-      }
-
-      if (data === "\u007F") {
-        inputBufferRef.current = inputBufferRef.current.slice(0, -1);
-        return;
-      }
-
-      if (data >= " ") inputBufferRef.current += data;
+      onInputRef.current?.(data);
     });
-    const resizeObserver = new ResizeObserver(() => fit.fit());
+    const resizeObserver = new ResizeObserver(() => {
+      fit.fit();
+      onResizeRef.current?.(terminal.cols, terminal.rows);
+    });
 
     resizeObserver.observe(containerRef.current);
 
@@ -128,7 +125,6 @@ export function Terminal({
       terminal.dispose();
       terminalRef.current = null;
       fitRef.current = null;
-      inputBufferRef.current = "";
       lastOutputRef.current = "";
     };
   }, []);

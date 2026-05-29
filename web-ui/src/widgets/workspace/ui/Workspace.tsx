@@ -32,6 +32,7 @@ type WorkspaceProps = {
   view: ViewConfig;
   onClear: () => void;
   onInput?: (input: string) => void;
+  onResize?: (cols: number, rows: number) => void;
   onToggleTerminal?: () => void;
   onStop: () => void;
 };
@@ -55,6 +56,7 @@ export function Workspace({
   terminalTitle,
   view,
   onInput,
+  onResize,
 }: WorkspaceProps) {
   const showTerminal = terminalOpen;
 
@@ -94,6 +96,7 @@ export function Workspace({
             title={terminalTitle}
             onClear={onClear}
             onInput={onInput}
+            onResize={onResize}
             onStop={onStop}
           />
         ) : null}
