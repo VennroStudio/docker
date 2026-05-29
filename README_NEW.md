@@ -1420,6 +1420,42 @@ make ssh-test ID=1
 make ssh-connect ID=1
 ```
 
+Сгенерировать RSA ключ для SSH сервера:
+
+```sh
+make ssh-key-generate ID=1
+```
+
+Сгенерировать RSA ключ с явным путем и комментарием:
+
+```sh
+make ssh-key-generate ID=1 KEY_PATH=~/.ssh/infrastructure/prod_rsa COMMENT=infrastructure-prod
+```
+
+Перезаписать существующий RSA ключ:
+
+```sh
+make ssh-key-generate ID=1 FORCE=1
+```
+
+Отправить публичный RSA ключ на SSH сервер:
+
+```sh
+make ssh-key-push ID=1
+```
+
+Показать публичный RSA ключ:
+
+```sh
+make ssh-key-show ID=1
+```
+
+Проверить подключение по RSA ключу:
+
+```sh
+make ssh-key-test ID=1
+```
+
 ### Utilities
 
 Создать архив `archives/NAME-DD-MM-YYYY.tar.gz` из папки:

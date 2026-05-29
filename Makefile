@@ -556,6 +556,18 @@ ssh-test: ## Проверить SSH подключение, передать ID=
 ssh-connect: ## Подключиться к SSH серверу, передать ID=1
 	@$(NODE_RUN) ./scripts/ssh/servers.mjs connect
 
+ssh-key-generate: ## Сгенерировать RSA ключ для SSH сервера, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/keys.mjs generate
+
+ssh-key-push: ## Отправить публичный RSA ключ на SSH сервер, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/keys.mjs push
+
+ssh-key-show: ## Показать публичный RSA ключ, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/keys.mjs show
+
+ssh-key-test: ## Проверить подключение по RSA ключу, передать ID=1
+	@$(NODE_RUN) ./scripts/ssh/keys.mjs test
+
 ##@ Utilities
 archive: ## Создать архив NAME-DD-MM-YYYY.tar.gz, передать NAME=archiveName FOLDER=folderName
 	@$(NODE_RUN) ./scripts/utilities/archive.mjs create --name "$(NAME)" --folder "$(FOLDER)"
@@ -587,5 +599,5 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
-.PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-test ssh-connect
+.PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-test ssh-connect ssh-key-generate ssh-key-push ssh-key-show ssh-key-test
 .PHONY: archive archive-list unarchive archive-delete
