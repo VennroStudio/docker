@@ -1363,3 +1363,29 @@ make registry-ui-logs
 ```sh
 make registry-ui-shell
 ```
+
+### Utilities
+
+Создать архив `archives/NAME-DD-MM-YYYY.tar.gz` из папки:
+
+```sh
+make archive NAME=archiveName FOLDER=folderName
+```
+
+Показать архивы из папки `archives`:
+
+```sh
+make archive-list
+```
+
+Распаковать выбранный архив в папку:
+
+```sh
+make unarchive NAME=archiveName-DD-MM-YYYY.tar.gz DEST=folderName
+```
+
+Удалить архив:
+
+```sh
+make archive-delete NAME=archiveName-DD-MM-YYYY.tar.gz
+```

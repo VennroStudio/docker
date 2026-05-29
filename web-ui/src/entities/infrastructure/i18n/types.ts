@@ -1,4 +1,4 @@
-import type { CommandId, ServiceRuntimeState, StreamState, ViewId } from "../model/types";
+import type { CommandId, ServiceRuntimeState, ServiceViewId, StreamState, ViewId } from "../model/types";
 
 export type Language = "en" | "ru";
 
@@ -55,10 +55,7 @@ export type AppText = {
       eyebrow: string;
       title: string;
     };
-    serviceCards: Record<
-      Exclude<ViewId, "home" | "network" | "settings">,
-      { description: string; meta: string; title: string }
-    >;
+    serviceCards: Record<ServiceViewId, { description: string; meta: string; title: string }>;
     workflow: {
       eyebrow: string;
       steps: Array<{ detail: string; title: string }>;
@@ -278,6 +275,37 @@ export type AppText = {
         target: string;
       };
     };
+  };
+  utilities: {
+    archive: {
+      archiveName: string;
+      archiveNamePlaceholder: string;
+      archiveSelect: string;
+      archiveSelectPlaceholder: string;
+      createAction: string;
+      createTitle: string;
+      deleteAction: string;
+      deleteTitle: string;
+      dest: string;
+      destPlaceholder: string;
+      emptyArchives: string;
+      extractAction: string;
+      extractTitle: string;
+      folder: string;
+      folderPlaceholder: string;
+      refresh: string;
+      title: string;
+      titleEyebrow: string;
+      validation: {
+        archive: string;
+        createDisabled: string;
+        dest: string;
+        folder: string;
+        name: string;
+      };
+    };
+    description: string;
+    eyebrow: string;
   };
   servicePages: Record<
     Exclude<ViewId, "home" | "settings">,

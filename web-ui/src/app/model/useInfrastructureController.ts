@@ -6,22 +6,31 @@ import {
   getViewById,
   getViewByPath,
   useAppMeta,
+  useArchives,
   useMinioStatus,
   useNginxStatus,
   useRedisStatus,
   useRegistryStatus,
   useServiceStatuses,
   type CommandAction,
+  type ArchiveCreateForm,
+  type ArchiveExtractForm,
   type ProxyFormState,
   type ShellAction,
   type ViewId,
 } from "@/entities/infrastructure";
 import {
   commandPreview,
+  archiveCreatePreview,
+  archiveDeletePreview,
+  archiveExtractPreview,
   hostPreview,
   proxyDeletePreview,
   proxyPreview,
   streamCommand,
+  streamArchiveCreate,
+  streamArchiveDelete,
+  streamArchiveExtract,
   streamHost,
   streamProxy,
   streamProxyDelete,
@@ -45,6 +54,7 @@ const initialProxyForm: ProxyFormState = {
 
 export function useInfrastructureController() {
   const { language, toggleLanguage } = useLanguage();
+  const [archivesRefreshSignal, setArchivesRefreshSignal] = useState(0);
   const [databaseRefreshSignal, setDatabaseRefreshSignal] = useState(0);
   const [proxyForm, setProxyForm] = useState(initialProxyForm);
   const confirmDialog = useConfirmDialog();
@@ -57,6 +67,7 @@ export function useInfrastructureController() {
   const redisView = activeView === "redis";
   const minioView = activeView === "minio";
   const registryView = activeView === "registry";
+  const utilitiesView = activeView === "utilities";
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const redisStatus = useRedisStatus(redisView);
   const minioStatus = useMinioStatus(minioView);
@@ -70,6 +81,7 @@ export function useInfrastructureController() {
         ? registryStatus.refresh
         : nginxStatus.refresh;
   const settings = useSettings();
+  const archives = useArchives(utilitiesView, archivesRefreshSignal);
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
   const postgresInstances = usePostgresInstances(activeView === "mariadb");
   const text = dictionaries[language];
@@ -90,6 +102,7 @@ export function useInfrastructureController() {
   });
 
   const refreshDatabaseCatalog = () => setDatabaseRefreshSignal((value) => value + 1);
+  const refreshArchives = () => setArchivesRefreshSignal((value) => value + 1);
   const databaseOperations = useDatabaseOperations({
     confirmDialog,
     refreshDatabaseCatalog,
@@ -191,11 +204,50 @@ export function useInfrastructureController() {
     });
   };
 
+  const runArchiveCreate = (form: ArchiveCreateForm) => {
+    runWithTerminal({
+      key: "archive:create",
+      label: text.utilities.archive.createAction,
+      onSettled: refreshArchives,
+      open: (handlers) => streamArchiveCreate(form, handlers),
+      preview: archiveCreatePreview(form),
+    });
+  };
+
+  const runArchiveExtract = (form: ArchiveExtractForm) => {
+    runWithTerminal({
+      key: "archive:extract",
+      label: text.utilities.archive.extractAction,
+      open: (handlers) => streamArchiveExtract(form, handlers),
+      preview: archiveExtractPreview(form),
+    });
+  };
+
+  const runArchiveDelete = async (name: string) => {
+    const confirmed = await confirmDialog.confirm({
+      body: text.confirm.runCommand.body(archiveDeletePreview(name)),
+      cancelLabel: text.common.cancel,
+      confirmLabel: text.confirm.runCommand.confirmLabel,
+      title: text.utilities.archive.deleteTitle,
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    runWithTerminal({
+      key: "archive:delete",
+      label: text.utilities.archive.deleteAction,
+      onSettled: refreshArchives,
+      open: (handlers) => streamArchiveDelete(name, handlers),
+      preview: archiveDeletePreview(name),
+    });
+  };
+
   return {
     activeConfig,
     activeOperationKey,
     activeView,
     appMeta,
+    archives,
     commandStream,
     confirmDialog,
     databaseRefreshSignal,
@@ -209,6 +261,9 @@ export function useInfrastructureController() {
     proxyForm,
     redisStatus,
     registryStatus,
+    runArchiveCreate,
+    runArchiveDelete,
+    runArchiveExtract,
     runCommand,
     runHost,
     ...databaseOperations,

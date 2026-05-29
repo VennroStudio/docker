@@ -10,8 +10,9 @@ export type ViewId =
   | "redis"
   | "minio"
   | "registry"
+  | "utilities"
   | "settings";
-export type ServiceViewId = Exclude<ViewId, "home" | "network" | "settings">;
+export type ServiceViewId = Exclude<ViewId, "home" | "network" | "settings" | "utilities">;
 export type CommandId = keyof typeof commandManifest.commands;
 export type CommandGroupId = keyof typeof commandManifest.groups;
 
@@ -165,6 +166,23 @@ export type PostgresExportForm = {
 export type PostgresDatabaseForm = {
   container: string;
   database: string;
+};
+
+export type ArchiveFile = {
+  modifiedAt: string;
+  name: string;
+  path: string;
+  size: number;
+};
+
+export type ArchiveCreateForm = {
+  folder: string;
+  name: string;
+};
+
+export type ArchiveExtractForm = {
+  dest: string;
+  name: string;
 };
 
 export type StreamState = "ready" | "running" | "done" | "error" | "stopped";

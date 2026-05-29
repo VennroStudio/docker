@@ -3,6 +3,7 @@
 # Runtime data
 /.runtime
 /build
+/archives
 /docker/nginx/data
 /docker/nginx/letsencrypt
 /docker/registry/data

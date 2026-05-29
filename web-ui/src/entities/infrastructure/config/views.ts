@@ -1,4 +1,4 @@
-import { Box, Database, HardDrive, House, Package, Route, Server, Settings, Shield } from "lucide-react";
+import { Box, Database, HardDrive, House, Package, Route, Server, Settings, Shield, Wrench } from "lucide-react";
 import type { ViewConfig } from "../model/types";
 
 const routeViews: ViewConfig[] = [
@@ -73,6 +73,14 @@ const routeViews: ViewConfig[] = [
     shortLabel: "RG",
     subtitle: "Docker images",
     icon: Package,
+  },
+  {
+    id: "utilities",
+    label: "Utilities",
+    path: "/utilities",
+    shortLabel: "UT",
+    subtitle: "Tools",
+    icon: Wrench,
   },
   {
     id: "settings",

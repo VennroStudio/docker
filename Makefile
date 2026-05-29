@@ -8,6 +8,7 @@ NODE_RUN := ./scripts/config/node-runtime.sh run
 WEB_UI_IMAGE := infrastructure-ui
 WEB_UI_RUNTIME_DIR := build/web-ui
 WEB_UI_STATIC_DIR := $(WEB_UI_RUNTIME_DIR)/dist
+ARCHIVE_DIR := archives
 
 compose-file = $(COMPOSE_DIR)/docker-compose-$(NAME).yml
 compose = docker compose $(COMPOSE_ENV) -f $(call compose-file)
@@ -536,6 +537,19 @@ registry-ui-logs: ## Логи Registry UI
 registry-ui-shell: ## Shell внутри контейнера Registry UI
 	$(MAKE) compose-shell NAME=registry-ui
 
+##@ Utilities
+archive: ## Создать архив NAME-DD-MM-YYYY.tar.gz, передать NAME=archiveName FOLDER=folderName
+	@$(NODE_RUN) ./scripts/utilities/archive.mjs create --name "$(NAME)" --folder "$(FOLDER)"
+
+archive-list: ## Показать архивы из папки archives
+	@$(NODE_RUN) ./scripts/utilities/archive.mjs list
+
+unarchive: ## Распаковать архив в папку, передать NAME=archive.tar.gz DEST=folderName
+	@$(NODE_RUN) ./scripts/utilities/archive.mjs extract --name "$(NAME)" --dest "$(DEST)"
+
+archive-delete: ## Удалить архив из папки archives, передать NAME=archive.tar.gz
+	@$(NODE_RUN) ./scripts/utilities/archive.mjs delete --name "$(NAME)"
+
 .PHONY: help init settings-show settings-set settings-env
 .PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
 .PHONY: proxy-network-ensure add-proxy delete-proxy
@@ -554,3 +568,4 @@ registry-ui-shell: ## Shell внутри контейнера Registry UI
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
+.PHONY: archive archive-list unarchive archive-delete

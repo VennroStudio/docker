@@ -12,6 +12,7 @@ export const commandPageRegistry: Record<CommandPageId, { actions: CommandAction
   postgres: { actions: postgresActions, shells: serviceShells.postgres },
   redis: { actions: redisActions, shells: serviceShells.redis },
   registry: { actions: registryActions, shells: serviceShells.registry },
+  utilities: { actions: [] },
 };
 
 export const proxyShells = serviceShells.proxy;

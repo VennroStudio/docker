@@ -391,6 +391,37 @@ export const ru: AppText = {
       },
     },
   },
+  utilities: {
+    archive: {
+      archiveName: "Имя архива",
+      archiveNamePlaceholder: "project-backup",
+      archiveSelect: "Архив",
+      archiveSelectPlaceholder: "Выбрать архив",
+      createAction: "Создать архив",
+      createTitle: "Архивирование",
+      deleteAction: "Удалить архив",
+      deleteTitle: "Удалить выбранный архив",
+      dest: "Куда распаковать",
+      destPlaceholder: "restore/project",
+      emptyArchives: "Архивы пока не найдены",
+      extractAction: "Распаковать",
+      extractTitle: "Распаковка",
+      folder: "Папка",
+      folderPlaceholder: "config",
+      refresh: "Обновить список",
+      title: "Архиватор",
+      titleEyebrow: "Utilities",
+      validation: {
+        archive: "Выбери архив из списка.",
+        createDisabled: "Укажи имя архива и папку.",
+        dest: "Укажи папку для распаковки.",
+        folder: "Укажи папку, которую нужно архивировать.",
+        name: "Используй буквы, цифры, точку, подчёркивание или дефис.",
+      },
+    },
+    description: "Создавай архивы папок проекта, распаковывай выбранные архивы и удаляй лишнее.",
+    eyebrow: "Utilities",
+  },
   servicePages: {
     mariadb: {
       description: "Управляй MariaDB, PostgreSQL, phpMyAdmin и pgAdmin на одной странице.",
@@ -440,6 +471,12 @@ export const ru: AppText = {
       panelEyebrow: "Registry",
       panelTitle: "Команды Registry",
     },
+    utilities: {
+      description: "Локальные инструменты проекта.",
+      eyebrow: "Utilities",
+      panelEyebrow: "Utilities",
+      panelTitle: "Утилиты",
+    },
   },
   settings: {
     clean: "Все сохранено",
@@ -476,6 +513,7 @@ export const ru: AppText = {
     proxy: "Nginx Proxy Manager",
     redis: "Redis",
     registry: "Registry",
+    utilities: "Утилиты",
     settings: "Настройки",
   },
 };

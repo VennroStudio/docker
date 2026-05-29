@@ -1,5 +1,7 @@
 import type {
   CommandId,
+  ArchiveCreateForm,
+  ArchiveExtractForm,
   MariaDbDatabaseForm,
   MariaDbExportForm,
   MariaDbImportForm,
@@ -51,6 +53,18 @@ export function streamProxyDelete(domain: string, handlers: StreamHandlers): () 
 export function streamShell(container: string, handlers: StreamHandlers): () => void {
   const url = streamUrl("/api/stream/shell", { container });
   return openStream(url, handlers);
+}
+
+export function streamArchiveCreate(form: ArchiveCreateForm, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/archive-create", { folder: form.folder, name: form.name }, handlers);
+}
+
+export function streamArchiveExtract(form: ArchiveExtractForm, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/archive-extract", { dest: form.dest, name: form.name }, handlers);
+}
+
+export function streamArchiveDelete(name: string, handlers: StreamHandlers): () => void {
+  return openPostStream("/api/stream/archive-delete", { name }, handlers);
 }
 
 export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers: StreamHandlers): () => void {

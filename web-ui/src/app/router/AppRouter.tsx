@@ -4,6 +4,7 @@ import { HomePage } from "@/pages/home";
 import { ProxyPage } from "@/pages/proxy";
 import { getServiceModulesPageModel, ServiceModulesPage } from "@/pages/service-modules";
 import { SettingsPage } from "@/pages/settings";
+import { UtilitiesPage } from "@/pages/utilities";
 import type { InfrastructureController } from "../model/useInfrastructureController";
 
 type AppRouterProps = {
@@ -15,6 +16,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     activeConfig,
     activeOperationKey,
     activeView,
+    archives,
     databaseRefreshSignal,
     mariaDbInstances,
     minioStatus,
@@ -25,6 +27,9 @@ export function AppRouter({ controller }: AppRouterProps) {
     proxyForm,
     redisStatus,
     registryStatus,
+    runArchiveCreate,
+    runArchiveDelete,
+    runArchiveExtract,
     runCommand,
     runHost,
     runMariaDbDatabaseCreate,
@@ -116,6 +121,22 @@ export function AppRouter({ controller }: AppRouterProps) {
 
   if (activeView === "settings") {
     return <SettingsPage settingsState={settings} text={text} view={activeConfig} />;
+  }
+
+  if (activeView === "utilities") {
+    return (
+      <UtilitiesPage
+        activeOperationKey={activeOperationKey}
+        archivesState={archives}
+        operationDisabled={operationRunning}
+        operationDisabledTitle={operationBlockTitle}
+        text={text}
+        view={activeConfig}
+        onArchiveCreate={runArchiveCreate}
+        onArchiveDelete={runArchiveDelete}
+        onArchiveExtract={runArchiveExtract}
+      />
+    );
   }
 
   const serviceModulesPage = getServiceModulesPageModel({
