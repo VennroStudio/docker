@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchArchives } from "../api/archives";
-import type { ArchiveFile } from "./types";
+
+type ArchiveFile = Awaited<ReturnType<typeof fetchArchives>>["archives"][number];
 
 export function useArchives(enabled: boolean, refreshSignal = 0) {
   const [archives, setArchives] = useState<ArchiveFile[]>([]);
