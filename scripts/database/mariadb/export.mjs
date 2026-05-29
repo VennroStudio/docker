@@ -5,6 +5,7 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { createGzip } from "node:zlib";
+import { waitForExit } from "../../common/process.mjs";
 import {
   assert,
   assertRunningContainer,
@@ -70,11 +71,4 @@ async function exportDump({ container, database, filePath, password }) {
   const code = await exitPromise;
   assert(code === 0, `MariaDB export failed with exit code ${code}`);
   console.log("MariaDB export completed");
-}
-
-function waitForExit(child) {
-  return new Promise((resolve, reject) => {
-    child.on("error", reject);
-    child.on("close", resolve);
-  });
 }

@@ -3,10 +3,13 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import {
+  deepMerge,
+  defaultSettingsFile as defaultsFile,
+  settingsFile,
+} from "../common/settings.mjs";
 
 const command = process.argv[2];
-const settingsFile = process.env.INFRA_SETTINGS_FILE || "config/settings.json";
-const defaultsFile = process.env.INFRA_DEFAULT_SETTINGS_FILE || "config/default-settings.json";
 
 try {
   if (command === "init") await initSettings();
@@ -132,21 +135,6 @@ function normalizeSettings(settings = {}) {
       registryPassword: source.registry?.registryPassword || "",
     },
   };
-}
-
-function deepMerge(base, override) {
-  if (!isPlainObject(base)) return override;
-  if (!isPlainObject(override)) return base;
-
-  const result = { ...base };
-  for (const [key, value] of Object.entries(override)) {
-    result[key] = isPlainObject(value) ? deepMerge(base[key], value) : value;
-  }
-  return result;
-}
-
-function isPlainObject(value) {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function envEntries(settings) {

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { assert } from "../../common/cli.mjs";
 import { containerStatus, parseArgs, printJson, settingsUrl } from "../../common/status.mjs";
 
 const cwd = process.cwd();
@@ -106,8 +107,4 @@ function readInstances() {
 function ensureInstancesFile() {
   mkdirSync(path.dirname(instancesPath), { recursive: true });
   if (!existsSync(instancesPath)) writeFileSync(instancesPath, "[]\n");
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
 }

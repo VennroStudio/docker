@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
+import { assert, parseArgs, required } from "../../common/cli.mjs";
+import { runInherit } from "../../common/process.mjs";
 
 const cwd = process.cwd();
 const instancesPath = path.join(cwd, "docker/mariadb/instances.json");
@@ -139,11 +140,16 @@ async function runInstance(options) {
   const instance = findTargetInstance(options);
 
   if (action === "shell") {
-    return await run("docker", ["exec", ...shellFlags(), instance.container, "sh"]);
+    return await runInherit("docker", [
+      "exec",
+      ...shellFlags(),
+      instance.container,
+      "sh",
+    ]);
   }
 
   if (action === "clean") {
-    return await run("sh", [
+    return await runInherit("sh", [
       "-lc",
       `docker compose -f ${quoteShell(instance.composeFile)} down && docker rmi mariadb:${quoteShell(
         instance.version,
@@ -156,7 +162,7 @@ async function runInstance(options) {
   else if (action === "logs") args.push("logs", "-f");
   else args.push(action);
 
-  await run("docker", args);
+  await runInherit("docker", args);
 }
 
 function findTargetInstance(options) {
@@ -284,42 +290,6 @@ function composeFileFor(name) {
   return `${composeDir}/docker-compose-mariadb-${name}.yml`;
 }
 
-function parseArgs(args) {
-  const options = {};
-
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-    if (!arg.startsWith("--")) continue;
-
-    const key = arg.slice(2);
-    const next = args[index + 1];
-    if (!next || next.startsWith("--")) options[key] = "1";
-    else {
-      options[key] = next;
-      index += 1;
-    }
-  }
-
-  return options;
-}
-
-function run(command, args) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: "inherit" });
-
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) resolve();
-      else
-        reject(
-          new Error(
-            `${command} ${args.join(" ")} failed with exit code ${code}`,
-          ),
-        );
-    });
-  });
-}
-
 function shellFlags() {
   return (process.env.SHELL_FLAGS || "-it")
     .split(/\s+/)
@@ -337,13 +307,4 @@ function quoteShell(value) {
 
 function quoteYaml(value) {
   return `"${String(value).replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
-}
-
-function required(value, message) {
-  assert(value, message);
-  return value;
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
 }

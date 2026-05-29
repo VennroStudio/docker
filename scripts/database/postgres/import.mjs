@@ -4,6 +4,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { createGunzip } from "node:zlib";
+import { waitForExit } from "../../common/process.mjs";
 import {
   assert,
   assertRunningContainer,
@@ -117,11 +118,4 @@ function isSupportedDumpFile(filePath) {
     filePath.endsWith(".sql.gz") ||
     filePath.endsWith(".dump")
   );
-}
-
-function waitForExit(child) {
-  return new Promise((resolve, reject) => {
-    child.on("error", reject);
-    child.on("close", resolve);
-  });
 }

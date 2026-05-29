@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
+import { collect } from "../../common/process.mjs";
 import {
   assert,
   assertRunningContainer,
@@ -104,25 +104,4 @@ async function executeSql({ container, password, sql }) {
 
 function quoteIdentifier(identifier) {
   return `\`${String(identifier).replaceAll("`", "``")}\``;
-}
-
-function collect(commandName, args) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(commandName, args, {
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    const stdout = [];
-    const stderr = [];
-
-    child.stdout.on("data", (chunk) => stdout.push(chunk));
-    child.stderr.on("data", (chunk) => stderr.push(chunk));
-    child.on("error", reject);
-    child.on("close", (code) => {
-      resolve({
-        code,
-        stderr: Buffer.concat(stderr).toString("utf8"),
-        stdout: Buffer.concat(stdout).toString("utf8"),
-      });
-    });
-  });
 }

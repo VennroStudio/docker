@@ -3,14 +3,14 @@ import { execFileSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { assert, bool, parseArgs } from "../common/cli.mjs";
+import { defaultSettingsFile, readJson, readSettings, settingsValue, writeSettings } from "../common/settings.mjs";
 
 process.on("uncaughtException", fail);
 process.on("unhandledRejection", fail);
 
 const args = parseArgs(process.argv.slice(2));
 const deleting = bool(args.delete ?? args.remove ?? process.env.DELETE_PROXY);
-const settingsFile = process.env.INFRA_SETTINGS_FILE || "config/settings.json";
-const defaultsFile = process.env.INFRA_DEFAULT_SETTINGS_FILE || "config/default-settings.json";
 const settings = await readSettings();
 const publicTargets = {
   "nginx-container": {
@@ -89,21 +89,6 @@ async function main() {
   console.log(`Open: ${config.ssl ? "https" : "http"}://${config.domain}`);
 }
 
-function parseArgs(values) {
-  const result = {};
-
-  for (let i = 0; i < values.length; i += 1) {
-    if (!values[i].startsWith("--")) continue;
-
-    const key = values[i].slice(2);
-    const value = values[i + 1];
-    result[key] = value === undefined || value.startsWith("--") ? "1" : value;
-    if (result[key] === value) i += 1;
-  }
-
-  return result;
-}
-
 function validate({ delete: deleting, domain, target, port }) {
   assert(/^[a-zA-Z0-9.-]+$/.test(domain), `Invalid DOMAIN: ${domain}`);
   if (deleting) return;
@@ -120,16 +105,8 @@ function need(value, name) {
   return value;
 }
 
-function bool(value) {
-  return ["1", "true", "yes", "on"].includes(String(value || "").toLowerCase());
-}
-
 function trimSlash(value) {
   return value.replace(/\/+$/, "");
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
 }
 
 function fail(error) {
@@ -323,7 +300,7 @@ async function resetPublicUrlsForDomain() {
   for (const binding of Object.values(publicTargets)) {
     if (!shouldResetPublicUrl(binding)) continue;
 
-    const defaultUrl = getByPath(await readDefaults(), binding.name);
+    const defaultUrl = settingsValue(await readJson(defaultSettingsFile), binding.name);
     settings[binding.group] = {
       ...(settings[binding.group] || {}),
       [binding.key]: defaultUrl,
@@ -341,46 +318,6 @@ function shouldResetPublicUrl(binding) {
   } catch {
     return false;
   }
-}
-
-async function readSettings() {
-  try {
-    return deepMerge(await readDefaults(), JSON.parse(await readFile(settingsFile, "utf8")));
-  } catch {
-    return readDefaults();
-  }
-}
-
-async function readDefaults() {
-  try {
-    return JSON.parse(await readFile(defaultsFile, "utf8"));
-  } catch {
-    return {};
-  }
-}
-
-function getByPath(source, key) {
-  return key.split(".").reduce((value, part) => value?.[part], source) || "";
-}
-
-function deepMerge(base, override) {
-  if (!isPlainObject(base)) return override;
-  if (!isPlainObject(override)) return base;
-
-  const result = { ...base };
-  for (const [key, value] of Object.entries(override)) {
-    result[key] = isPlainObject(value) ? deepMerge(base[key], value) : value;
-  }
-  return result;
-}
-
-function isPlainObject(value) {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-async function writeSettings(payload) {
-  await mkdir(path.dirname(settingsFile), { recursive: true });
-  await writeFile(settingsFile, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
 async function upsertProxyHost(certificateId) {

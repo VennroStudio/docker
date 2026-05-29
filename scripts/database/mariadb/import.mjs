@@ -4,6 +4,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { createGunzip } from "node:zlib";
+import { waitForExit } from "../../common/process.mjs";
 import {
   assert,
   assertRunningContainer,
@@ -71,11 +72,4 @@ async function importDump({ container, database, filePath, password }) {
   const code = await exitPromise;
   assert(code === 0, `MariaDB import failed with exit code ${code}`);
   console.log("MariaDB import completed");
-}
-
-function waitForExit(child) {
-  return new Promise((resolve, reject) => {
-    child.on("error", reject);
-    child.on("close", resolve);
-  });
 }

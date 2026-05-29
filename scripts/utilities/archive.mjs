@@ -2,12 +2,13 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
 import path from "node:path";
+import { assert, parseArgs, required } from "../common/cli.mjs";
 
 const action = process.argv[2] || "";
 const rootDir = process.cwd();
 const archiveDir = path.resolve(rootDir, process.env.ARCHIVE_DIR || "archives");
 
-const options = parseOptions(process.argv.slice(3));
+const options = parseArgs(process.argv.slice(3));
 
 try {
   switch (action) {
@@ -34,7 +35,7 @@ try {
 
 function createArchive() {
   const name = requireArchiveBaseName(options.name);
-  const folder = requireValue(options.folder, "FOLDER is required");
+  const folder = required(options.folder, "FOLDER is required");
   const sourcePath = path.resolve(rootDir, folder);
   if (!existsSync(sourcePath)) throw new Error(`FOLDER does not exist: ${folder}`);
 
@@ -68,7 +69,7 @@ function listArchives() {
 
 function extractArchive() {
   const name = requireArchiveFileName(options.name);
-  const dest = requireValue(options.dest, "DEST is required");
+  const dest = required(options.dest, "DEST is required");
   const archivePath = archivePathFor(name);
   if (!existsSync(archivePath)) throw new Error(`Archive does not exist: ${name}`);
 
@@ -91,20 +92,15 @@ function archivePathFor(name) {
 }
 
 function requireArchiveBaseName(value) {
-  const name = requireValue(value, "NAME is required");
-  if (!/^[A-Za-z0-9._-]+$/.test(name)) throw new Error("Invalid NAME");
+  const name = required(value, "NAME is required");
+  assert(/^[A-Za-z0-9._-]+$/.test(name), "Invalid NAME");
   return name.replace(/\.t(ar\.)?gz$/, "");
 }
 
 function requireArchiveFileName(value) {
-  const name = requireValue(value, "NAME is required");
-  if (!/^[A-Za-z0-9._-]+\.t(ar\.)?gz$/.test(name)) throw new Error("Invalid NAME");
+  const name = required(value, "NAME is required");
+  assert(/^[A-Za-z0-9._-]+\.t(ar\.)?gz$/.test(name), "Invalid NAME");
   return name;
-}
-
-function requireValue(value, message) {
-  if (!value) throw new Error(message);
-  return value;
 }
 
 function runTar(args) {
@@ -119,18 +115,6 @@ function dateStamp() {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
   return `${day}-${month}-${year}`;
-}
-
-function parseOptions(args) {
-  const parsed = {};
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-    if (!arg.startsWith("--")) continue;
-    const key = arg.slice(2);
-    parsed[key] = args[index + 1] || "";
-    index += 1;
-  }
-  return parsed;
 }
 
 function usage() {

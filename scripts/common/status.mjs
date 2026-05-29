@@ -1,5 +1,6 @@
-import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { parseArgs, printJson } from "./cli.mjs";
+import { execFileText } from "./process.mjs";
+import { readSettings, settingsValue } from "./settings.mjs";
 
 export async function containerStatus(container) {
   const item = await dockerContainer(container);
@@ -26,34 +27,10 @@ export async function containerStatus(container) {
   };
 }
 
-export function parseArgs(args) {
-  const options = {};
-
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-    if (!arg.startsWith("--")) continue;
-
-    const key = arg.slice(2);
-    const next = args[index + 1];
-
-    if (!next || next.startsWith("--")) {
-      options[key] = true;
-      continue;
-    }
-
-    options[key] = next;
-    index += 1;
-  }
-
-  return options;
-}
-
-export function printJson(value) {
-  console.log(JSON.stringify(value, null, 2));
-}
+export { parseArgs, printJson };
 
 export async function settingsUrl(path) {
-  return getByPath(await readSettings(), path);
+  return settingsValue(await readSettings(), path);
 }
 
 async function dockerContainer(container) {
@@ -78,46 +55,4 @@ async function dockerContainer(container) {
   } catch {
     return null;
   }
-}
-
-function execFileText(command, args) {
-  return new Promise((resolve, reject) => {
-    execFile(command, args, { encoding: "utf8" }, (error, stdout, stderr) => {
-      if (error) reject(new Error(stderr || stdout || error.message));
-      else resolve(stdout);
-    });
-  });
-}
-
-async function readSettings() {
-  const defaults = await readJson("config/default-settings.json");
-  const settings = await readJson(process.env.INFRA_SETTINGS_FILE || "config/settings.json");
-  return deepMerge(defaults, settings);
-}
-
-async function readJson(file) {
-  try {
-    return JSON.parse(await readFile(file, "utf8"));
-  } catch {
-    return {};
-  }
-}
-
-function deepMerge(base, override) {
-  if (!isPlainObject(base)) return override;
-  if (!isPlainObject(override)) return base;
-
-  const result = { ...base };
-  for (const [key, value] of Object.entries(override)) {
-    result[key] = isPlainObject(value) ? deepMerge(base[key], value) : value;
-  }
-  return result;
-}
-
-function isPlainObject(value) {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function getByPath(source, key) {
-  return key.split(".").reduce((value, part) => value?.[part], source) || "";
 }
