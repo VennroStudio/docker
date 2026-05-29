@@ -11,8 +11,6 @@
 /certs
 
 # Generated MariaDB/phpMyAdmin local state
-/docker/services/links.json
-/docker/services/settings.json
 /config/settings.json
 /docker/mariadb/instances.json
 /docker/postgres/instances.json

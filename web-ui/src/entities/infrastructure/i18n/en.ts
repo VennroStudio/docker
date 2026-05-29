@@ -89,7 +89,7 @@ export const en: AppText = {
     success: (label) => `${label}: completed`,
   },
   shell: {
-    detail: (container) => `docker exec: ${container}`,
+    detail: (container) => `make shell: ${container}`,
     inputPlaceholder: "Type a command inside the container and press Enter",
     openLabel: (label) => `${label} shell`,
     panelEyebrow: "Interactive access",
@@ -181,7 +181,7 @@ export const en: AppText = {
       clean: { label: "Clean", detail: "remove image" },
       down: { label: "Down", detail: "remove container" },
       logs: { label: "Logs", detail: "live stream" },
-      shell: { label: "Shell", detail: "docker exec" },
+      shell: { label: "Shell", detail: "make shell" },
       start: { label: "Start", detail: "start container" },
       stop: { label: "Stop", detail: "stop service" },
       up: { label: "Up", detail: "docker compose up" },

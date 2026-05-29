@@ -89,7 +89,7 @@ export const ru: AppText = {
     success: (label) => `${label}: выполнено`,
   },
   shell: {
-    detail: (container) => `docker exec: ${container}`,
+    detail: (container) => `make shell: ${container}`,
     inputPlaceholder: "Введи команду внутри контейнера и нажми Enter",
     openLabel: (label) => `${label} shell`,
     panelEyebrow: "Интерактивный доступ",
@@ -180,7 +180,7 @@ export const ru: AppText = {
       clean: { label: "Clean", detail: "удалить образ" },
       down: { label: "Down", detail: "удалить контейнер" },
       logs: { label: "Logs", detail: "поток логов" },
-      shell: { label: "Shell", detail: "docker exec" },
+      shell: { label: "Shell", detail: "make shell" },
       start: { label: "Start", detail: "запустить контейнер" },
       stop: { label: "Stop", detail: "остановить сервис" },
       up: { label: "Up", detail: "docker compose up" },

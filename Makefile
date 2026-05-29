@@ -43,10 +43,6 @@ node-runtime: ## Скачать локальный Node.js runtime в .runtime/n
 	@./scripts/config/node-runtime.sh ensure
 
 ui: node-runtime web-ui-dist proxy-network-ensure ## Запустить Web UI на хосте
-	@if docker ps --format '{{.Names}}' | grep -qx 'web-ui'; then \
-		echo "Stopping legacy web-ui container..."; \
-		docker stop web-ui >/dev/null; \
-	fi
 	@$(NODE_RUN) "$(WEB_UI_RUNTIME_DIR)/server.mjs"
 
 web-ui-build: ## Собрать frontend dist через Docker
