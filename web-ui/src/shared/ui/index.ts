@@ -11,3 +11,4 @@ export * from "./SelectField";
 export * from "./Switch";
 export * from "./Terminal";
 export * from "./ToastViewport";
+export * from "./XtermPanel";

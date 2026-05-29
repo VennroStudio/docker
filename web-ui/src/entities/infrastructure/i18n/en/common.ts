@@ -14,7 +14,7 @@ export const enCommon = {
     unknown: "unknown",
   },
   stop: "Stop",
-  streamLabels: {
+  terminalStateLabels: {
     done: "done",
     error: "error",
     ready: "ready",

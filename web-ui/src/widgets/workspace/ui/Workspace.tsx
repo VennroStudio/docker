@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { StreamState, ViewConfig } from "@/entities/infrastructure";
+import type { TerminalState, ViewConfig } from "@/entities/infrastructure";
 import { SshTerminalPanel } from "@/features/ssh-terminal";
 import type { SshTerminalAction } from "@/features/ssh-terminal";
 import { Terminal } from "@/shared/ui";
@@ -18,7 +18,7 @@ type WorkspaceProps = {
   terminalInputEnabled?: boolean;
   terminalOpen?: boolean;
   terminalPrompt?: string;
-  terminalStateLabels: Record<StreamState, string>;
+  terminalStateLabels: Record<TerminalState, string>;
   terminalLabel: string;
   terminalTitle: string;
   sshTerminal?: {
@@ -28,7 +28,7 @@ type WorkspaceProps = {
     title: string;
   } | null;
   output: string;
-  streamState: StreamState;
+  terminalState: TerminalState;
   view: ViewConfig;
   onClear: () => void;
   onInput?: (input: string) => void;
@@ -45,13 +45,13 @@ export function Workspace({
   output,
   pageTitle,
   sshTerminal = null,
-  streamState,
   terminalActionLabels,
   terminalCwd,
   terminalInputEnabled = false,
   terminalLabel,
   terminalOpen = true,
   terminalPrompt,
+  terminalState,
   terminalStateLabels,
   terminalTitle,
   view,
@@ -89,7 +89,7 @@ export function Workspace({
             actionLabels={terminalActionLabels}
             cwd={terminalCwd}
             output={output}
-            state={streamState}
+            state={terminalState}
             stateLabels={terminalStateLabels}
             inputEnabled={terminalInputEnabled}
             prompt={terminalPrompt}

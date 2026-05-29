@@ -1,14 +1,14 @@
 import { useRef, useState } from "react";
+import type { TerminalState } from "@/entities/infrastructure";
 import type { TerminalSession } from "../api/terminalClient";
-import type { StreamState } from "@/entities/infrastructure";
 
-type StreamHandlers = {
+type TerminalHandlers = {
   onMessage: (text: string) => void;
   onDone: (text: string, ok: boolean) => void;
   onError: (text: string) => void;
 };
 
-type OpenStream = (handlers: StreamHandlers) => TerminalSession;
+type OpenTerminal = (handlers: TerminalHandlers) => TerminalSession;
 type RunResult = {
   ok: boolean;
   text: string;
@@ -19,32 +19,32 @@ type RunOptions = {
 
 const idleOutput = "Waiting for action...";
 
-export function useCommandStream() {
+export function useTerminalSession() {
   const [output, setOutput] = useState(idleOutput);
-  const [streamState, setStreamState] = useState<StreamState>("ready");
+  const [terminalState, setTerminalState] = useState<TerminalState>("ready");
   const terminalSession = useRef<null | TerminalSession>(null);
 
   const append = (text: string) => {
     setOutput((current) => `${current}${text}`);
   };
 
-  const run = (preview: string, open: OpenStream, options: RunOptions = {}) => {
+  const run = (preview: string, open: OpenTerminal, options: RunOptions = {}) => {
     terminalSession.current?.stop();
     terminalSession.current = null;
     setOutput(`${preview}\n\n`);
-    setStreamState("running");
-    const handlers: StreamHandlers = {
+    setTerminalState("running");
+    const handlers: TerminalHandlers = {
       onMessage: append,
       onDone: (text, ok) => {
         append(text);
         terminalSession.current = null;
-        setStreamState(ok ? "done" : "error");
+        setTerminalState(ok ? "done" : "error");
         options.onSettled?.({ ok, text });
       },
       onError: (text) => {
         append(text);
         terminalSession.current = null;
-        setStreamState("error");
+        setTerminalState("error");
         options.onSettled?.({ ok: false, text });
       },
     };
@@ -55,7 +55,7 @@ export function useCommandStream() {
       const text = `\n${error instanceof Error ? error.message : String(error)}\n`;
       append(text);
       terminalSession.current = null;
-      setStreamState("error");
+      setTerminalState("error");
       options.onSettled?.({ ok: false, text });
     }
   };
@@ -63,7 +63,7 @@ export function useCommandStream() {
   const stop = () => {
     terminalSession.current?.stop();
     terminalSession.current = null;
-    setStreamState("stopped");
+    setTerminalState("stopped");
     append("\n[stopped]\n");
   };
 
@@ -76,13 +76,13 @@ export function useCommandStream() {
 
   return {
     clear,
-    inputEnabled: Boolean(terminalSession.current && streamState === "running"),
+    inputEnabled: Boolean(terminalSession.current && terminalState === "running"),
     output,
     prompt: "$",
     resize,
     run,
     sendInput,
     stop,
-    streamState,
+    terminalState,
   };
 }

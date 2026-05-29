@@ -8,12 +8,12 @@ import type {
   MariaDbInstanceForm,
 } from "@/entities/infrastructure";
 import {
-  streamMariaDbDatabase,
-  streamMariaDbExport,
-  streamMariaDbImport,
-  streamMariaDbInstanceAction,
-  streamMariaDbInstanceCreate,
-  streamShell,
+  openMariaDbDatabaseTerminal,
+  openMariaDbExportTerminal,
+  openMariaDbImportTerminal,
+  openMariaDbInstanceActionTerminal,
+  openMariaDbInstanceCreateTerminal,
+  openShellTerminal,
 } from "@/features/command-terminal";
 import type { ConfirmDialogApi, RunWithTerminal } from "./operationTypes";
 
@@ -37,7 +37,7 @@ export function useMariaDbOperations({
       key: "mariadb:create",
       label: text.mariadbInstances.create,
       onSettled: refreshMariaDbInstances,
-      open: (handlers) => streamMariaDbInstanceCreate(form, handlers),
+      open: (handlers) => openMariaDbInstanceCreateTerminal(form, handlers),
       preview: `make mariadb-instance-add VERSION=${form.version} DB_USER=${form.user} PASSWORD=******** ROOT_PASSWORD=********`,
     });
   };
@@ -47,7 +47,7 @@ export function useMariaDbOperations({
       key: "mariadb:import",
       label: text.mariadbInstances.import.action,
       onSettled: refreshMariaDbInstances,
-      open: (handlers) => streamMariaDbImport(form, handlers),
+      open: (handlers) => openMariaDbImportTerminal(form, handlers),
       preview: `make mariadb-import CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
@@ -57,7 +57,7 @@ export function useMariaDbOperations({
       key: "mariadb:export",
       label: text.mariadbInstances.export.action,
       onSettled: refreshMariaDbInstances,
-      open: (handlers) => streamMariaDbExport(form, handlers),
+      open: (handlers) => openMariaDbExportTerminal(form, handlers),
       preview: `make mariadb-export CONTAINER=${form.container} DATABASE=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
@@ -67,7 +67,7 @@ export function useMariaDbOperations({
       key: "mariadb:database:create",
       label: text.mariadbInstances.databaseManager.createAction,
       onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamMariaDbDatabase(form, "create", handlers),
+      open: (handlers) => openMariaDbDatabaseTerminal(form, "create", handlers),
       preview: `make mariadb-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
@@ -86,7 +86,7 @@ export function useMariaDbOperations({
       key: "mariadb:database:drop",
       label: text.mariadbInstances.databaseManager.deleteAction,
       onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamMariaDbDatabase(form, "drop", handlers),
+      open: (handlers) => openMariaDbDatabaseTerminal(form, "drop", handlers),
       preview: `make mariadb-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
@@ -107,7 +107,7 @@ export function useMariaDbOperations({
       key: `mariadb:${instance.name}:${action}`,
       label: text.mariadbInstances.actions[action].label,
       onSettled: refreshMariaDbInstances,
-      open: (handlers) => streamMariaDbInstanceAction(instance.name, action, handlers),
+      open: (handlers) => openMariaDbInstanceActionTerminal(instance.name, action, handlers),
       preview: `make mariadb-instance-${action} NAME=${instance.name}`,
     });
   };
@@ -116,7 +116,7 @@ export function useMariaDbOperations({
     runWithTerminal({
       key: `shell:${instance.container}`,
       label: text.mariadbInstances.actions.shell.label,
-      open: (handlers) => streamShell(instance.container, handlers),
+      open: (handlers) => openShellTerminal(instance.container, handlers),
       preview: `make mariadb-instance-shell NAME=${instance.name}`,
     });
   };

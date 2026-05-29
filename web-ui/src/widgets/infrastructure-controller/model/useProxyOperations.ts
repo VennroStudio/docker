@@ -3,9 +3,9 @@ import {
   hostPreview,
   proxyDeletePreview,
   proxyPreview,
-  streamHost,
-  streamProxy,
-  streamProxyDelete,
+  openHostTerminal,
+  openProxyTerminal,
+  openProxyDeleteTerminal,
 } from "@/features/command-terminal";
 import type { ConfirmDialogApi, OperationTextConfig, RunWithTerminal } from "./operationTypes";
 
@@ -28,7 +28,7 @@ export function useProxyOperations({
       key: "proxy:create",
       label: text.panels.proxy.createProxy,
       onSettled: refreshNginxStatus,
-      open: (handlers) => streamProxy(proxyForm, handlers),
+      open: (handlers) => openProxyTerminal(proxyForm, handlers),
       preview: proxyPreview(proxyForm),
     });
   };
@@ -47,7 +47,7 @@ export function useProxyOperations({
       key: "proxy:delete",
       label: text.panels.proxy.deleteProxy,
       onSettled: refreshNginxStatus,
-      open: (handlers) => streamProxyDelete(proxyForm.domain, handlers),
+      open: (handlers) => openProxyDeleteTerminal(proxyForm.domain, handlers),
       preview: proxyDeletePreview(proxyForm.domain),
     });
   };
@@ -68,7 +68,7 @@ export function useProxyOperations({
       key: `host:${action}`,
       label: action === "add" ? text.panels.proxy.addHost : text.panels.proxy.removeHost,
       onSettled: refreshNginxStatus,
-      open: (handlers) => streamHost(action, proxyForm.domain, handlers),
+      open: (handlers) => openHostTerminal(action, proxyForm.domain, handlers),
       preview: hostPreview(action, proxyForm.domain),
     });
   };

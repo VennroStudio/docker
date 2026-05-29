@@ -14,7 +14,7 @@ export const ruCommon = {
     unknown: "неизвестно",
   },
   stop: "Стоп",
-  streamLabels: {
+  terminalStateLabels: {
     done: "готово",
     error: "ошибка",
     ready: "готов",

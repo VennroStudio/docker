@@ -1,4 +1,4 @@
-export type StreamHandlers = {
+export type TerminalHandlers = {
   onOpen?: () => void;
   onMessage: (text: string) => void;
   onDone: (text: string, ok: boolean) => void;
@@ -13,11 +13,23 @@ export type TerminalSession = {
   stop: () => void;
 };
 
-export function openTerminal(request: TerminalRequest, handlers: StreamHandlers): TerminalSession {
+export function openTerminal(request: TerminalRequest, handlers: TerminalHandlers): TerminalSession {
   const socket = new WebSocket(terminalUrl());
   let closedByClient = false;
   const pendingMessages: Array<Record<string, number | string>> = [];
+  let settled = false;
   let started = false;
+
+  const done = (text: string, ok: boolean) => {
+    if (settled) return;
+    settled = true;
+    handlers.onDone(text, ok);
+  };
+  const error = (text: string) => {
+    if (settled) return;
+    settled = true;
+    handlers.onError(text);
+  };
 
   socket.addEventListener("open", () => {
     started = true;
@@ -36,15 +48,17 @@ export function openTerminal(request: TerminalRequest, handlers: StreamHandlers)
     }
 
     const text = `\r\n[exit ${message.code}]\r\n`;
-    handlers.onDone(text, message.code === 0);
+    done(text, message.code === 0);
   });
 
   socket.addEventListener("error", () => {
-    handlers.onError("Terminal connection error");
+    error("Terminal connection error");
   });
 
   socket.addEventListener("close", () => {
-    if (!closedByClient && !started) handlers.onError("Terminal connection closed");
+    if (!closedByClient && !settled) {
+      error(started ? "Terminal connection closed before exit" : "Terminal connection closed");
+    }
   });
 
   return {

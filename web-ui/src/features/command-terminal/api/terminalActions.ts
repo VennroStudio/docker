@@ -16,17 +16,17 @@ import type {
   SshKeyForm,
   SshServerForm,
 } from "@/entities/infrastructure";
-import { openTerminal, type StreamHandlers, type TerminalSession } from "./terminalClient";
+import { openTerminal, type TerminalHandlers, type TerminalSession } from "./terminalClient";
 
-export function streamCommand(command: CommandId, handlers: StreamHandlers): TerminalSession {
+export function openCommandTerminal(command: CommandId, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ command, type: "command" }, handlers);
 }
 
-export function streamHost(action: "add" | "remove", domain: string, handlers: StreamHandlers): TerminalSession {
+export function openHostTerminal(action: "add" | "remove", domain: string, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ action, domain, type: "host" }, handlers);
 }
 
-export function streamProxy(form: ProxyFormState, handlers: StreamHandlers): TerminalSession {
+export function openProxyTerminal(form: ProxyFormState, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     {
       domain: form.domain,
@@ -39,46 +39,46 @@ export function streamProxy(form: ProxyFormState, handlers: StreamHandlers): Ter
   );
 }
 
-export function streamProxyDelete(domain: string, handlers: StreamHandlers): TerminalSession {
+export function openProxyDeleteTerminal(domain: string, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ domain, type: "proxy-delete" }, handlers);
 }
 
-export function streamShell(container: string, handlers: StreamHandlers): TerminalSession {
+export function openShellTerminal(container: string, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ container, type: "shell" }, handlers);
 }
 
-export function streamArchiveCreate(form: ArchiveCreateForm, handlers: StreamHandlers): TerminalSession {
+export function openArchiveCreateTerminal(form: ArchiveCreateForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ folder: form.folder, name: form.name, type: "archive-create" }, handlers);
 }
 
-export function streamArchiveExtract(form: ArchiveExtractForm, handlers: StreamHandlers): TerminalSession {
+export function openArchiveExtractTerminal(form: ArchiveExtractForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ dest: form.dest, name: form.name, type: "archive-extract" }, handlers);
 }
 
-export function streamArchiveDelete(name: string, handlers: StreamHandlers): TerminalSession {
+export function openArchiveDeleteTerminal(name: string, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ name, type: "archive-delete" }, handlers);
 }
 
-export function streamSshServerAdd(form: SshServerForm, handlers: StreamHandlers): TerminalSession {
+export function openSshServerAddTerminal(form: SshServerForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ ...form, type: "ssh-add" }, handlers);
 }
 
-export function streamSshServerUpdate(id: number, form: SshServerForm, handlers: StreamHandlers): TerminalSession {
+export function openSshServerUpdateTerminal(id: number, form: SshServerForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ ...form, id, type: "ssh-update" }, handlers);
 }
 
-export function streamSshServerRemove(id: number, handlers: StreamHandlers): TerminalSession {
+export function openSshServerRemoveTerminal(id: number, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ id, type: "ssh-remove" }, handlers);
 }
 
-export function streamSshKeyGenerate(form: SshKeyForm, handlers: StreamHandlers): TerminalSession {
+export function openSshKeyGenerateTerminal(form: SshKeyForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     { comment: form.comment, force: form.force, id: form.serverId, keyPath: form.keyPath, type: "ssh-key-generate" },
     handlers,
   );
 }
 
-export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers: StreamHandlers): TerminalSession {
+export function openMariaDbInstanceCreateTerminal(form: MariaDbInstanceForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     {
       authMode: form.authMode,
@@ -93,15 +93,15 @@ export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers:
   );
 }
 
-export function streamMariaDbInstanceAction(
+export function openMariaDbInstanceActionTerminal(
   name: string,
   action: MariaDbInstanceAction,
-  handlers: StreamHandlers,
+  handlers: TerminalHandlers,
 ): TerminalSession {
   return openTerminal({ action, name, type: "mariadb-instance" }, handlers);
 }
 
-export function streamMariaDbImport(form: MariaDbImportForm, handlers: StreamHandlers): TerminalSession {
+export function openMariaDbImportTerminal(form: MariaDbImportForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     {
       container: form.container,
@@ -113,7 +113,7 @@ export function streamMariaDbImport(form: MariaDbImportForm, handlers: StreamHan
   );
 }
 
-export function streamMariaDbExport(form: MariaDbExportForm, handlers: StreamHandlers): TerminalSession {
+export function openMariaDbExportTerminal(form: MariaDbExportForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     {
       container: form.container,
@@ -125,10 +125,10 @@ export function streamMariaDbExport(form: MariaDbExportForm, handlers: StreamHan
   );
 }
 
-export function streamMariaDbDatabase(
+export function openMariaDbDatabaseTerminal(
   form: MariaDbDatabaseForm,
   action: "create" | "drop",
-  handlers: StreamHandlers,
+  handlers: TerminalHandlers,
 ): TerminalSession {
   return openTerminal(
     {
@@ -141,7 +141,7 @@ export function streamMariaDbDatabase(
   );
 }
 
-export function streamPostgresInstanceCreate(form: PostgresInstanceForm, handlers: StreamHandlers): TerminalSession {
+export function openPostgresInstanceCreateTerminal(form: PostgresInstanceForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     {
       database: form.database,
@@ -154,15 +154,15 @@ export function streamPostgresInstanceCreate(form: PostgresInstanceForm, handler
   );
 }
 
-export function streamPostgresInstanceAction(
+export function openPostgresInstanceActionTerminal(
   name: string,
   action: PostgresInstanceAction,
-  handlers: StreamHandlers,
+  handlers: TerminalHandlers,
 ): TerminalSession {
   return openTerminal({ action, name, type: "postgres-instance" }, handlers);
 }
 
-export function streamPostgresImport(form: PostgresImportForm, handlers: StreamHandlers): TerminalSession {
+export function openPostgresImportTerminal(form: PostgresImportForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     {
       container: form.container,
@@ -174,7 +174,7 @@ export function streamPostgresImport(form: PostgresImportForm, handlers: StreamH
   );
 }
 
-export function streamPostgresExport(form: PostgresExportForm, handlers: StreamHandlers): TerminalSession {
+export function openPostgresExportTerminal(form: PostgresExportForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(
     {
       container: form.container,
@@ -186,10 +186,10 @@ export function streamPostgresExport(form: PostgresExportForm, handlers: StreamH
   );
 }
 
-export function streamPostgresDatabase(
+export function openPostgresDatabaseTerminal(
   form: PostgresDatabaseForm,
   action: "create" | "drop",
-  handlers: StreamHandlers,
+  handlers: TerminalHandlers,
 ): TerminalSession {
   return openTerminal(
     {

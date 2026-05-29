@@ -1,5 +1,5 @@
 import type { CommandAction } from "@/entities/infrastructure";
-import { commandPreview, streamCommand } from "@/features/command-terminal";
+import { commandPreview, openCommandTerminal } from "@/features/command-terminal";
 import type { ConfirmDialogApi, OperationTextConfig, RunWithTerminal } from "./operationTypes";
 
 type UseCommandOperationsConfig = OperationTextConfig & {
@@ -30,7 +30,7 @@ export function useCommandOperations({
       key: action.id,
       label: action.label,
       onSettled: action.id.startsWith("npm:") ? refreshNginxStatus : undefined,
-      open: (handlers) => streamCommand(action.id, handlers),
+      open: (handlers) => openCommandTerminal(action.id, handlers),
       preview: commandPreview(action.id),
     });
   };

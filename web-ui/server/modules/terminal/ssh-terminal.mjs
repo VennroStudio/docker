@@ -1,4 +1,7 @@
 import { WebSocketServer } from "ws";
+import { projectRoot } from "../../config.mjs";
+import { sendTerminalMessage, validateDimension } from "./protocol.mjs";
+import { attachPtyControls, startPtySession } from "./pty-session.mjs";
 
 const sshTerminalPath = "/api/terminal/ssh";
 const sshTerminalWss = new WebSocketServer({ noServer: true });
@@ -19,76 +22,52 @@ export function terminalUpgrade(req, socket, head) {
 }
 
 async function openSshTerminal(ws, req) {
-  let pty;
+  let pty = null;
+  let size = readTerminalSize(req);
+
+  attachPtyControls(
+    ws,
+    () => pty,
+    () => size,
+    (nextSize) => {
+      size = nextSize;
+    },
+  );
 
   try {
     const url = new URL(req.url, "http://localhost");
     const id = validateId(url.searchParams.get("id"));
     const action = validateAction(url.searchParams.get("action"));
     const command = action === "key-push" ? "ssh-key-push" : "ssh-connect";
-    const cols = validateDimension(url.searchParams.get("cols"), 120);
-    const rows = validateDimension(url.searchParams.get("rows"), 32);
-    const ptyModule = await import("node-pty");
 
-    send(ws, {
+    sendTerminalMessage(ws, {
       data: `$ make ${command} ID=${id}\r\n\r\n`,
       type: "output",
     });
 
-    pty = ptyModule.spawn("make", [command, `ID=${id}`], {
-      cols,
-      cwd: process.cwd(),
-      env: process.env,
-      name: "xterm-color",
-      rows,
+    pty = await startPtySession(ws, {
+      args: [command, `ID=${id}`],
+      cols: size.cols,
+      command: "make",
+      cwd: projectRoot,
+      rows: size.rows,
     });
   } catch (error) {
-    send(ws, {
+    sendTerminalMessage(ws, {
       data: `${error instanceof Error ? error.message : String(error)}\r\n`,
       type: "output",
     });
-    send(ws, { code: 1, type: "exit" });
+    sendTerminalMessage(ws, { code: 1, type: "exit" });
     ws.close();
-    return;
   }
-
-  pty.onData((data) => send(ws, { data, type: "output" }));
-  pty.onExit(({ exitCode }) => {
-    send(ws, { code: exitCode, type: "exit" });
-    ws.close();
-  });
-
-  ws.on("message", (payload) => {
-    const message = parseMessage(payload);
-    if (!message) return;
-
-    if (message.type === "input") {
-      pty.write(String(message.data || ""));
-      return;
-    }
-
-    if (message.type === "resize") {
-      const cols = validateDimension(message.cols, 120);
-      const rows = validateDimension(message.rows, 32);
-      pty.resize(cols, rows);
-    }
-  });
-
-  ws.on("close", () => {
-    if (pty) pty.kill();
-  });
 }
 
-function send(ws, payload) {
-  if (ws.readyState === 1) ws.send(JSON.stringify(payload));
-}
-
-function parseMessage(payload) {
-  try {
-    return JSON.parse(payload.toString("utf8"));
-  } catch {
-    return null;
-  }
+function readTerminalSize(req) {
+  const params = new URL(req.url, "http://localhost").searchParams;
+  return {
+    cols: validateDimension(params.get("cols"), 120),
+    rows: validateDimension(params.get("rows"), 32),
+  };
 }
 
 function validateId(value) {
@@ -103,13 +82,4 @@ function validateAction(value) {
   if (!value) return "connect";
   if (value === "connect" || value === "key-push") return value;
   throw new Error("Invalid SSH terminal action");
-}
-
-function validateDimension(value, fallback) {
-  const dimension = Number(value);
-  if (!Number.isInteger(dimension) || dimension < 1 || dimension > 1000) {
-    return fallback;
-  }
-
-  return dimension;
 }

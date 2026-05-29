@@ -209,7 +209,7 @@ export type SshKeyForm = {
   serverId: string;
 };
 
-export type StreamState = "ready" | "running" | "done" | "error" | "stopped";
+export type TerminalState = "ready" | "running" | "done" | "error" | "stopped";
 export type ServiceRuntimeState = "missing" | "partial" | "running" | "stopped" | "unknown";
 
 export type ServiceStatus = {

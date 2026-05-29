@@ -9,11 +9,11 @@ export function App() {
     activeConfig,
     activeView,
     appMeta,
-    commandStream,
     confirmDialog,
     language,
     sshTerminalSession,
     terminalOpen,
+    terminalSession,
     text,
   } = controller;
 
@@ -27,9 +27,9 @@ export function App() {
         onToggleLanguage={controller.toggleLanguage}
       >
         <Workspace
-          output={commandStream.output}
+          output={terminalSession.output}
           pageTitle={text.views[activeView]}
-          streamState={commandStream.streamState}
+          terminalState={terminalSession.terminalState}
           terminalActionLabels={{
             clear: text.common.clear,
             hide: text.common.hide,
@@ -37,10 +37,10 @@ export function App() {
             stop: text.common.stop,
           }}
           terminalCwd={appMeta.projectRoot}
-          terminalInputEnabled={commandStream.inputEnabled}
+          terminalInputEnabled={terminalSession.inputEnabled}
           terminalLabel={text.common.terminal}
           terminalOpen={terminalOpen}
-          terminalPrompt={commandStream.prompt}
+          terminalPrompt={terminalSession.prompt}
           sshTerminal={
             sshTerminalSession
               ? {
@@ -51,12 +51,12 @@ export function App() {
                 }
               : null
           }
-          terminalStateLabels={text.common.streamLabels}
+          terminalStateLabels={text.common.terminalStateLabels}
           terminalTitle={appMeta.projectName}
           view={activeConfig}
-          onClear={commandStream.clear}
-          onInput={commandStream.sendInput}
-          onResize={commandStream.resize}
+          onClear={terminalSession.clear}
+          onInput={terminalSession.sendInput}
+          onResize={terminalSession.resize}
           onStop={controller.stopCommand}
           onToggleTerminal={controller.toggleTerminal}
         >

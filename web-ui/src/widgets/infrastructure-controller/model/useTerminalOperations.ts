@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { AppText } from "@/entities/infrastructure";
-import { useCommandStream } from "@/features/command-terminal";
+import { useTerminalSession } from "@/features/command-terminal";
 import type { useToast } from "@/shared/lib/hooks";
 
 type OperationState = {
@@ -9,13 +9,13 @@ type OperationState = {
 };
 
 type ToastApi = Pick<ReturnType<typeof useToast>, "show">;
-type CommandStream = ReturnType<typeof useCommandStream>;
+type CommandTerminalSession = ReturnType<typeof useTerminalSession>;
 
 export type RunWithTerminalConfig = {
   key: string;
   label: string;
   onSettled?: () => void;
-  open: Parameters<CommandStream["run"]>[1];
+  open: Parameters<CommandTerminalSession["run"]>[1];
   preview: string;
 };
 
@@ -37,8 +37,8 @@ export function useTerminalOperations({
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [activeOperation, setActiveOperation] = useState<OperationState | null>(null);
   const activeOperationRef = useRef<OperationState | null>(null);
-  const commandStream = useCommandStream();
-  const operationRunning = commandStream.streamState === "running" && Boolean(activeOperation);
+  const terminalSession = useTerminalSession();
+  const operationRunning = terminalSession.terminalState === "running" && Boolean(activeOperation);
   const activeOperationKey = operationRunning ? activeOperation?.key : null;
   const operationBlockTitle =
     operationRunning && activeOperation ? text.operationToast.blocked(activeOperation.label) : undefined;
@@ -60,7 +60,7 @@ export function useTerminalOperations({
     setTerminalOpen(true);
 
     try {
-      commandStream.run(preview, open, {
+      terminalSession.run(preview, open, {
         onSettled: ({ ok }) => {
           serviceStatusesRefresh();
           void statusRefresh();
@@ -87,7 +87,7 @@ export function useTerminalOperations({
   const stopCommand = () => {
     const stoppedOperation = activeOperationRef.current ?? activeOperation;
 
-    commandStream.stop();
+    terminalSession.stop();
     activeOperationRef.current = null;
     setActiveOperation(null);
     if (stoppedOperation) toast.show({ title: text.operationToast.stopped(stoppedOperation.label), tone: "info" });
@@ -95,13 +95,13 @@ export function useTerminalOperations({
 
   return {
     activeOperationKey,
-    commandStream,
     operationBlockTitle,
     operationRunning,
     runWithTerminal,
     showTerminal,
     stopCommand,
     terminalOpen,
+    terminalSession,
     toggleTerminal,
   };
 }

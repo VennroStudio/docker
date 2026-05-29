@@ -3,9 +3,9 @@ import {
   archiveCreatePreview,
   archiveDeletePreview,
   archiveExtractPreview,
-  streamArchiveCreate,
-  streamArchiveDelete,
-  streamArchiveExtract,
+  openArchiveCreateTerminal,
+  openArchiveDeleteTerminal,
+  openArchiveExtractTerminal,
 } from "@/features/command-terminal";
 import type { ConfirmDialogApi, OperationTextConfig, RunWithTerminal } from "./operationTypes";
 
@@ -26,7 +26,7 @@ export function useArchiveOperations({
       key: "archive:create",
       label: text.utilities.archive.createAction,
       onSettled: refreshArchives,
-      open: (handlers) => streamArchiveCreate(form, handlers),
+      open: (handlers) => openArchiveCreateTerminal(form, handlers),
       preview: archiveCreatePreview(form),
     });
   };
@@ -35,7 +35,7 @@ export function useArchiveOperations({
     runWithTerminal({
       key: "archive:extract",
       label: text.utilities.archive.extractAction,
-      open: (handlers) => streamArchiveExtract(form, handlers),
+      open: (handlers) => openArchiveExtractTerminal(form, handlers),
       preview: archiveExtractPreview(form),
     });
   };
@@ -54,7 +54,7 @@ export function useArchiveOperations({
       key: "archive:delete",
       label: text.utilities.archive.deleteAction,
       onSettled: refreshArchives,
-      open: (handlers) => streamArchiveDelete(name, handlers),
+      open: (handlers) => openArchiveDeleteTerminal(name, handlers),
       preview: archiveDeletePreview(name),
     });
   };

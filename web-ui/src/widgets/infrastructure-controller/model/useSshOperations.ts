@@ -1,10 +1,10 @@
 import type { AppText, SshKeyForm, SshServer, SshServerForm } from "@/entities/infrastructure";
 import type { SshTerminalAction } from "@/features/ssh-terminal";
 import {
-  streamSshKeyGenerate,
-  streamSshServerAdd,
-  streamSshServerRemove,
-  streamSshServerUpdate,
+  openSshKeyGenerateTerminal,
+  openSshServerAddTerminal,
+  openSshServerRemoveTerminal,
+  openSshServerUpdateTerminal,
 } from "@/features/command-terminal";
 import type { ConfirmDialogApi, RunWithTerminal } from "./operationTypes";
 
@@ -28,7 +28,7 @@ export function useSshOperations({
       key: "ssh:add",
       label: text.ssh.actions.addServer,
       onSettled: refreshSshServers,
-      open: (handlers) => streamSshServerAdd(form, handlers),
+      open: (handlers) => openSshServerAddTerminal(form, handlers),
       preview: `make ssh-add NAME=${form.name} HOST=${form.host} PORT=${form.port} USER=${form.user}`,
     });
   };
@@ -38,7 +38,7 @@ export function useSshOperations({
       key: `ssh:update:${server.id}`,
       label: text.ssh.actions.saveServer,
       onSettled: refreshSshServers,
-      open: (handlers) => streamSshServerUpdate(server.id, form, handlers),
+      open: (handlers) => openSshServerUpdateTerminal(server.id, form, handlers),
       preview: `make ssh-update ID=${server.id}`,
     });
   };
@@ -57,7 +57,7 @@ export function useSshOperations({
       key: `ssh:remove:${server.id}`,
       label: text.ssh.actions.deleteServer,
       onSettled: refreshSshServers,
-      open: (handlers) => streamSshServerRemove(server.id, handlers),
+      open: (handlers) => openSshServerRemoveTerminal(server.id, handlers),
       preview: `make ssh-remove ID=${server.id}`,
     });
   };
@@ -71,7 +71,7 @@ export function useSshOperations({
       key: `ssh:key-generate:${form.serverId}`,
       label: text.ssh.actions.generateKey,
       onSettled: refreshSshServers,
-      open: (handlers) => streamSshKeyGenerate(form, handlers),
+      open: (handlers) => openSshKeyGenerateTerminal(form, handlers),
       preview: `make ssh-key-generate ID=${form.serverId}`,
     });
   };

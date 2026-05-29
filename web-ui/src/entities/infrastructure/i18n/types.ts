@@ -1,4 +1,4 @@
-import type { CommandId, ServiceRuntimeState, ServiceViewId, StreamState, ViewId } from "../model/types";
+import type { CommandId, ServiceRuntimeState, ServiceViewId, TerminalState, ViewId } from "../model/types";
 
 export type Language = "en" | "ru";
 
@@ -12,7 +12,7 @@ export type AppText = {
     panels: string;
     statusLabels: Record<ServiceRuntimeState, string>;
     stop: string;
-    streamLabels: Record<StreamState, string>;
+    terminalStateLabels: Record<TerminalState, string>;
     terminal: string;
   };
   operationToast: {

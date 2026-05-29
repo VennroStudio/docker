@@ -8,12 +8,12 @@ import type {
   PostgresInstanceForm,
 } from "@/entities/infrastructure";
 import {
-  streamPostgresDatabase,
-  streamPostgresExport,
-  streamPostgresImport,
-  streamPostgresInstanceAction,
-  streamPostgresInstanceCreate,
-  streamShell,
+  openPostgresDatabaseTerminal,
+  openPostgresExportTerminal,
+  openPostgresImportTerminal,
+  openPostgresInstanceActionTerminal,
+  openPostgresInstanceCreateTerminal,
+  openShellTerminal,
 } from "@/features/command-terminal";
 import type { ConfirmDialogApi, RunWithTerminal } from "./operationTypes";
 
@@ -37,7 +37,7 @@ export function usePostgresOperations({
       key: "postgres:create",
       label: text.postgresInstances.create,
       onSettled: refreshPostgresInstances,
-      open: (handlers) => streamPostgresInstanceCreate(form, handlers),
+      open: (handlers) => openPostgresInstanceCreateTerminal(form, handlers),
       preview: `make postgres-instance-add VERSION=${form.version} DB_USER=${form.user} PASSWORD=******** DATABASE=${form.database}`,
     });
   };
@@ -47,7 +47,7 @@ export function usePostgresOperations({
       key: "postgres:import",
       label: text.postgresInstances.import.action,
       onSettled: refreshPostgresInstances,
-      open: (handlers) => streamPostgresImport(form, handlers),
+      open: (handlers) => openPostgresImportTerminal(form, handlers),
       preview: `make postgres-import CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
@@ -57,7 +57,7 @@ export function usePostgresOperations({
       key: "postgres:export",
       label: text.postgresInstances.export.action,
       onSettled: refreshPostgresInstances,
-      open: (handlers) => streamPostgresExport(form, handlers),
+      open: (handlers) => openPostgresExportTerminal(form, handlers),
       preview: `make postgres-export CONTAINER=${form.container} POSTGRES_DB=${form.database} DUMP_FILE=${form.filePath}`,
     });
   };
@@ -67,7 +67,7 @@ export function usePostgresOperations({
       key: "postgres:database:create",
       label: text.postgresInstances.databaseManager.createAction,
       onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamPostgresDatabase(form, "create", handlers),
+      open: (handlers) => openPostgresDatabaseTerminal(form, "create", handlers),
       preview: `make postgres-db-create CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
@@ -86,7 +86,7 @@ export function usePostgresOperations({
       key: "postgres:database:drop",
       label: text.postgresInstances.databaseManager.deleteAction,
       onSettled: refreshDatabaseCatalog,
-      open: (handlers) => streamPostgresDatabase(form, "drop", handlers),
+      open: (handlers) => openPostgresDatabaseTerminal(form, "drop", handlers),
       preview: `make postgres-db-drop CONTAINER=${form.container} DATABASE=${form.database}`,
     });
   };
@@ -107,7 +107,7 @@ export function usePostgresOperations({
       key: `postgres:${instance.name}:${action}`,
       label: text.mariadbInstances.actions[action].label,
       onSettled: refreshPostgresInstances,
-      open: (handlers) => streamPostgresInstanceAction(instance.name, action, handlers),
+      open: (handlers) => openPostgresInstanceActionTerminal(instance.name, action, handlers),
       preview: `make postgres-instance-${action} NAME=${instance.name}`,
     });
   };
@@ -116,7 +116,7 @@ export function usePostgresOperations({
     runWithTerminal({
       key: `shell:${instance.container}`,
       label: text.mariadbInstances.actions.shell.label,
-      open: (handlers) => streamShell(instance.container, handlers),
+      open: (handlers) => openShellTerminal(instance.container, handlers),
       preview: `make postgres-instance-shell NAME=${instance.name}`,
     });
   };

@@ -19,7 +19,7 @@ import {
   type SshServer,
   type ViewId,
 } from "@/entities/infrastructure";
-import { streamShell } from "@/features/command-terminal";
+import { openShellTerminal } from "@/features/command-terminal";
 import type { SshTerminalAction } from "@/features/ssh-terminal";
 import { useMariaDbInstances } from "@/features/manage-mariadb";
 import { usePostgresInstances } from "@/features/manage-postgres";
@@ -85,12 +85,12 @@ export function useInfrastructureController() {
   const text = dictionaries[language];
   const {
     activeOperationKey,
-    commandStream,
     operationBlockTitle,
     operationRunning,
     runWithTerminal,
     showTerminal,
     stopCommand,
+    terminalSession,
     terminalOpen,
     toggleTerminal,
   } = useTerminalOperations({
@@ -162,7 +162,7 @@ export function useInfrastructureController() {
     runWithTerminal({
       key: `shell:${action.container}`,
       label: action.label,
-      open: (handlers) => streamShell(action.container, handlers),
+      open: (handlers) => openShellTerminal(action.container, handlers),
       preview: shellPreview(action.container),
     });
   };
@@ -173,7 +173,6 @@ export function useInfrastructureController() {
     activeView,
     appMeta,
     archives,
-    commandStream,
     confirmDialog,
     databaseRefreshSignal,
     language,
@@ -199,6 +198,7 @@ export function useInfrastructureController() {
     settings,
     setProxyForm,
     stopCommand,
+    terminalSession,
     terminalOpen,
     text,
     toggleLanguage,

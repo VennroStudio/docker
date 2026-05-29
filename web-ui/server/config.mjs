@@ -6,7 +6,10 @@ const manifestUrl = new URL("../commands.manifest.json", import.meta.url);
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 
 export const commandManifest = JSON.parse(readFileSync(manifestUrl, "utf8"));
+export const host = process.env.UI_HOST || "127.0.0.1";
 export const port = Number(process.env.UI_PORT || 8088);
+export const publicHost = host === "0.0.0.0" ? "127.0.0.1" : host;
+export const terminalSessionLimit = Number(process.env.UI_TERMINAL_SESSION_LIMIT || 8);
 export const projectRoot = process.cwd();
 export const staticRoot = path.resolve(process.env.UI_STATIC_DIR || path.join(moduleDir, "../dist"));
 export const commandMap = Object.fromEntries(
@@ -14,11 +17,6 @@ export const commandMap = Object.fromEntries(
 );
 export const serviceContainers = commandManifest.services;
 export const shellGroups = commandManifest.shells;
-export const shellContainers = new Set(
-  Object.values(shellGroups)
-    .flat()
-    .map((shell) => shell.container),
-);
 
 export const staticTypes = {
   ".css": "text/css; charset=utf-8",
