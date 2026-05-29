@@ -183,7 +183,10 @@ export const XtermPanel = forwardRef<XtermPanelHandle, XtermPanelProps>(function
   };
 
   return (
-    <section className="flex min-h-[320px] flex-col overflow-hidden rounded-lg border border-sky-900/70 bg-[#070806] shadow-[0_18px_50px_rgba(14,165,233,0.18),0_10px_30px_rgba(168,85,247,0.12)]">
+    <section
+      data-terminal-panel="true"
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-sky-900/70 bg-[#070806] shadow-[0_18px_50px_rgba(14,165,233,0.18),0_10px_30px_rgba(168,85,247,0.12)]"
+    >
       <header className="flex min-h-16 flex-wrap items-center gap-3 border-b border-zinc-800 bg-zinc-950/95 px-4 py-3">
         <div className="flex gap-1.5" aria-hidden="true">
           <span className="h-3 w-3 rounded-full bg-red-400/90" />

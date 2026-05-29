@@ -70,35 +70,39 @@ export function Workspace({
         onToggleTerminal={onToggleTerminal}
       />
       <div
-        className={`grid h-[calc(100vh-64px)] min-h-0 gap-4 p-4 ${
+        className={`grid min-h-0 gap-4 p-4 ${
           children && showTerminal ? "grid-cols-[minmax(0,1fr)_minmax(360px,42vw)]" : "grid-cols-1"
-        } max-[1180px]:h-auto max-[1180px]:grid-cols-1`}
+        } max-[1180px]:grid-cols-1`}
       >
-        {children ? <div className="min-h-0 overflow-auto pr-1 max-[1180px]:overflow-visible">{children}</div> : null}
+        {children ? <div className="min-h-0 pr-1">{children}</div> : null}
         {showTerminal && sshTerminal ? (
-          <SshTerminalPanel
-            action={sshTerminal.action}
-            actionLabels={terminalActionLabels}
-            cwd={sshTerminal.cwd}
-            serverId={sshTerminal.serverId}
-            stateLabels={terminalStateLabels}
-            title={sshTerminal.title}
-          />
+          <div className="sticky top-20 h-[calc(100vh-6rem)] min-h-[360px] max-[1180px]:static max-[1180px]:h-[420px]">
+            <SshTerminalPanel
+              action={sshTerminal.action}
+              actionLabels={terminalActionLabels}
+              cwd={sshTerminal.cwd}
+              serverId={sshTerminal.serverId}
+              stateLabels={terminalStateLabels}
+              title={sshTerminal.title}
+            />
+          </div>
         ) : showTerminal ? (
-          <Terminal
-            actionLabels={terminalActionLabels}
-            cwd={terminalCwd}
-            output={output}
-            state={terminalState}
-            stateLabels={terminalStateLabels}
-            inputEnabled={terminalInputEnabled}
-            prompt={terminalPrompt}
-            title={terminalTitle}
-            onClear={onClear}
-            onInput={onInput}
-            onResize={onResize}
-            onStop={onStop}
-          />
+          <div className="sticky top-20 h-[calc(100vh-6rem)] min-h-[360px] max-[1180px]:static max-[1180px]:h-[420px]">
+            <Terminal
+              actionLabels={terminalActionLabels}
+              cwd={terminalCwd}
+              output={output}
+              state={terminalState}
+              stateLabels={terminalStateLabels}
+              inputEnabled={terminalInputEnabled}
+              prompt={terminalPrompt}
+              title={terminalTitle}
+              onClear={onClear}
+              onInput={onInput}
+              onResize={onResize}
+              onStop={onStop}
+            />
+          </div>
         ) : null}
       </div>
     </section>

@@ -13,7 +13,7 @@ export function TopBar({ onToggleTerminal, pageTitle, terminalLabel, terminalOpe
   const Icon = view.icon;
 
   return (
-    <header className="flex min-h-16 items-center justify-between gap-4 border-b border-sky-100/90 bg-white/82 px-5 py-3 shadow-[0_10px_28px_rgba(14,165,233,0.10)] backdrop-blur">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-4 border-b border-sky-100/90 bg-white/82 px-5 py-3 shadow-[0_10px_28px_rgba(14,165,233,0.10)] backdrop-blur">
       <div className="flex min-w-0 items-center gap-3">
         <Icon size={18} />
         <strong className="truncate text-sm font-bold text-slate-900">{pageTitle}</strong>
