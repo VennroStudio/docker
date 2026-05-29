@@ -20,6 +20,7 @@ export type RunWithTerminalConfig = {
 };
 
 type UseTerminalOperationsConfig = {
+  onBeforeRun?: () => void;
   statusRefresh: () => Promise<void> | void;
   serviceStatusesRefresh: () => void;
   text: AppText;
@@ -27,6 +28,7 @@ type UseTerminalOperationsConfig = {
 };
 
 export function useTerminalOperations({
+  onBeforeRun,
   statusRefresh,
   serviceStatusesRefresh,
   text,
@@ -42,6 +44,7 @@ export function useTerminalOperations({
     operationRunning && activeOperation ? text.operationToast.blocked(activeOperation.label) : undefined;
 
   const toggleTerminal = () => setTerminalOpen((value) => !value);
+  const showTerminal = () => setTerminalOpen(true);
 
   const runWithTerminal = ({ key, label, onSettled, open, preview }: RunWithTerminalConfig) => {
     const lockedOperation = activeOperationRef.current;
@@ -53,6 +56,7 @@ export function useTerminalOperations({
     const nextOperation = { key, label };
     activeOperationRef.current = nextOperation;
     setActiveOperation(nextOperation);
+    onBeforeRun?.();
     setTerminalOpen(true);
 
     try {
@@ -95,6 +99,7 @@ export function useTerminalOperations({
     operationBlockTitle,
     operationRunning,
     runWithTerminal,
+    showTerminal,
     stopCommand,
     terminalOpen,
     toggleTerminal,

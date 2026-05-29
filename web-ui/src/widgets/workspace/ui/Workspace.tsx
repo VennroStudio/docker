@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import type { StreamState, ViewConfig } from "@/entities/infrastructure";
+import { SshTerminalPanel } from "@/features/ssh-terminal";
+import type { SshTerminalAction } from "@/features/ssh-terminal";
 import { Terminal } from "@/shared/ui";
 import { TopBar } from "./TopBar";
 
@@ -19,6 +21,12 @@ type WorkspaceProps = {
   terminalStateLabels: Record<StreamState, string>;
   terminalLabel: string;
   terminalTitle: string;
+  sshTerminal?: {
+    action: SshTerminalAction;
+    cwd: string;
+    serverId: number;
+    title: string;
+  } | null;
   output: string;
   streamState: StreamState;
   view: ViewConfig;
@@ -35,6 +43,7 @@ export function Workspace({
   onToggleTerminal,
   output,
   pageTitle,
+  sshTerminal = null,
   streamState,
   terminalActionLabels,
   terminalCwd,
@@ -64,7 +73,16 @@ export function Workspace({
         } max-[1180px]:h-auto max-[1180px]:grid-cols-1`}
       >
         {children ? <div className="min-h-0 overflow-auto pr-1 max-[1180px]:overflow-visible">{children}</div> : null}
-        {showTerminal ? (
+        {showTerminal && sshTerminal ? (
+          <SshTerminalPanel
+            action={sshTerminal.action}
+            actionLabels={terminalActionLabels}
+            cwd={sshTerminal.cwd}
+            serverId={sshTerminal.serverId}
+            stateLabels={terminalStateLabels}
+            title={sshTerminal.title}
+          />
+        ) : showTerminal ? (
           <Terminal
             actionLabels={terminalActionLabels}
             cwd={terminalCwd}

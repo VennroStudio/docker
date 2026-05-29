@@ -8,6 +8,7 @@ NODE_RUN := ./scripts/config/node-runtime.sh run
 WEB_UI_IMAGE := infrastructure-ui
 WEB_UI_RUNTIME_DIR := build/web-ui
 WEB_UI_STATIC_DIR := $(WEB_UI_RUNTIME_DIR)/dist
+WEB_UI_RUNTIME_NODE_PTY := $(WEB_UI_RUNTIME_DIR)/node_modules/node-pty/package.json
 ARCHIVE_DIR := archives
 
 compose-file = $(COMPOSE_DIR)/docker-compose-$(NAME).yml
@@ -46,7 +47,7 @@ node-runtime: ## Скачать локальный Node.js runtime в .runtime/n
 ui: node-runtime web-ui-dist proxy-network-ensure ## Запустить Web UI на хосте
 	@$(NODE_RUN) "$(WEB_UI_RUNTIME_DIR)/server.mjs"
 
-web-ui-build: ## Собрать frontend dist через Docker
+web-ui-build: node-runtime ## Собрать frontend dist через Docker
 	docker build -t $(WEB_UI_IMAGE) -f web-ui/Dockerfile .
 	@container="$$(docker create $(WEB_UI_IMAGE))"; \
 		rm -rf "$(WEB_UI_RUNTIME_DIR)"; \
@@ -56,9 +57,17 @@ web-ui-build: ## Собрать frontend dist через Docker
 		cp web-ui/server.mjs "$(WEB_UI_RUNTIME_DIR)/server.mjs"; \
 		cp web-ui/commands.manifest.json "$(WEB_UI_RUNTIME_DIR)/commands.manifest.json"; \
 		cp -R web-ui/server "$(WEB_UI_RUNTIME_DIR)/server"
+	@printf '%s\n' '{"type":"module","dependencies":{"node-pty":"^1.0.0","ws":"^8.21.0"}}' > "$(WEB_UI_RUNTIME_DIR)/package.json"
+	@node_bin="$$(./scripts/config/node-runtime.sh path)"; \
+		case "$$node_bin" in \
+			*.exe) npm_bin="$$(dirname "$$node_bin")/npm.cmd" ;; \
+			*) npm_bin="$$(dirname "$$node_bin")/npm" ;; \
+		esac; \
+		"$$npm_bin" install --prefix "$(WEB_UI_RUNTIME_DIR)" --omit=dev --no-audit --no-fund
+	@find "$(WEB_UI_RUNTIME_DIR)/node_modules/node-pty/prebuilds" -name spawn-helper -type f -exec chmod +x {} \; 2>/dev/null || true
 
 web-ui-dist: ## Создать build/web-ui, если его нет
-	@if [ ! -f "$(WEB_UI_STATIC_DIR)/index.html" ] || [ ! -f "$(WEB_UI_RUNTIME_DIR)/server.mjs" ]; then \
+	@if [ ! -f "$(WEB_UI_STATIC_DIR)/index.html" ] || [ ! -f "$(WEB_UI_RUNTIME_DIR)/server.mjs" ] || [ ! -f "$(WEB_UI_RUNTIME_NODE_PTY)" ]; then \
 		$(MAKE) web-ui-build; \
 	fi
 
@@ -556,17 +565,11 @@ ssh-test: ## Проверить SSH подключение, передать ID=
 ssh-connect: ## Подключиться к SSH серверу, передать ID=1
 	@$(NODE_RUN) ./scripts/ssh/servers.mjs connect
 
-ssh-connect-ui: ## Подключиться к SSH серверу из Web UI, передать ID=1
-	@SSH_UI=1 $(NODE_RUN) ./scripts/ssh/servers.mjs connect
-
 ssh-key-generate: ## Сгенерировать RSA ключ для SSH сервера, передать ID=1
 	@$(NODE_RUN) ./scripts/ssh/keys.mjs generate
 
 ssh-key-push: ## Отправить публичный RSA ключ на SSH сервер, передать ID=1
 	@$(NODE_RUN) ./scripts/ssh/keys.mjs push
-
-ssh-key-push-ui: ## Отправить публичный RSA ключ из Web UI, передать ID=1
-	@SSH_UI=1 $(NODE_RUN) ./scripts/ssh/keys.mjs push
 
 ssh-key-show: ## Показать публичный RSA ключ, передать ID=1
 	@$(NODE_RUN) ./scripts/ssh/keys.mjs show
@@ -605,5 +608,5 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
-.PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-test ssh-connect ssh-connect-ui ssh-key-generate ssh-key-push ssh-key-push-ui ssh-key-show ssh-key-test
+.PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-test ssh-connect ssh-key-generate ssh-key-push ssh-key-show ssh-key-test
 .PHONY: archive archive-list unarchive archive-delete

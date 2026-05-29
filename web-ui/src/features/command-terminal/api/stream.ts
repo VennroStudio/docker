@@ -70,20 +70,12 @@ export function streamSshServerRemove(id: number, handlers: StreamHandlers): () 
   return openPostStream("/api/stream/ssh-remove", { id }, handlers);
 }
 
-export function streamSshConnect(id: number, handlers: StreamHandlers): () => void {
-  return openPostStream("/api/stream/ssh-connect", { id }, handlers);
-}
-
 export function streamSshKeyGenerate(form: SshKeyForm, handlers: StreamHandlers): () => void {
   return openPostStream(
     "/api/stream/ssh-key-generate",
     { comment: form.comment, force: form.force, id: form.serverId, keyPath: form.keyPath },
     handlers,
   );
-}
-
-export function streamSshKeyPush(id: number, handlers: StreamHandlers): () => void {
-  return openPostStream("/api/stream/ssh-key-push", { id }, handlers);
 }
 
 export function streamMariaDbInstanceCreate(form: MariaDbInstanceForm, handlers: StreamHandlers): () => void {

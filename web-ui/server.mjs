@@ -22,8 +22,9 @@ import { runCommand } from "./server/run-route.mjs";
 import { generateEnv, settings } from "./server/settings-route.mjs";
 import { shellInput, shellStop } from "./server/shell-router.mjs";
 import { serveStatic } from "./server/static.mjs";
+import { isTerminalUpgrade, terminalUpgrade } from "./server/modules/terminal/ssh-terminal.mjs";
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
   try {
     if (req.method === "POST" && req.url === "/api/stream/shell/input") return await shellInput(req, res);
     if (req.method === "POST" && req.url === "/api/stream/shell/stop") return await shellStop(req, res);
@@ -62,6 +63,17 @@ createServer(async (req, res) => {
   } catch (error) {
     sendJson(res, 500, { ok: false, output: getErrorMessage(error) });
   }
-}).listen(port, "0.0.0.0", () => {
+});
+
+server.on("upgrade", (req, socket, head) => {
+  if (isTerminalUpgrade(req)) {
+    terminalUpgrade(req, socket, head);
+    return;
+  }
+
+  socket.destroy();
+});
+
+server.listen(port, "0.0.0.0", () => {
   console.log(`Infrastructure UI: http://127.0.0.1:${port}`);
 });

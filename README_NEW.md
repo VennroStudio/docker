@@ -1420,12 +1420,6 @@ make ssh-test ID=1
 make ssh-connect ID=1
 ```
 
-Подключиться к SSH серверу из Web UI без перехвата пароля терминалом IDE:
-
-```sh
-make ssh-connect-ui ID=1
-```
-
 Сгенерировать RSA ключ для SSH сервера:
 
 ```sh
@@ -1448,12 +1442,6 @@ make ssh-key-generate ID=1 FORCE=1
 
 ```sh
 make ssh-key-push ID=1
-```
-
-Отправить публичный RSA ключ из Web UI без перехвата пароля терминалом IDE:
-
-```sh
-make ssh-key-push-ui ID=1
 ```
 
 Показать публичный RSA ключ:

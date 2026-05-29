@@ -98,21 +98,8 @@ function removeServer() {
 
 function runSsh(remoteCommand = []) {
   const server = getServer(readId(input(options, "ID")));
-  assertUiCanRunSsh(server);
   const { command, args } = sshCommand(server, remoteCommand);
   runInherit(command, args);
-}
-
-function assertUiCanRunSsh(server) {
-  if (
-    process.env.SSH_UI === "1" &&
-    server.authType === "password" &&
-    server.passwordMode === "manual"
-  ) {
-    throw new Error(
-      "PASSWORD_MODE=manual cannot be used from Web UI terminal: ssh asks the password in the host TTY. Switch this server to PASSWORD_MODE=sshpass or AUTH_TYPE=key, or run make ssh-connect ID=... in your host terminal.",
-    );
-  }
 }
 
 function usage() {

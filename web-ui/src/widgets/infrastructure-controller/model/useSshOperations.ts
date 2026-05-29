@@ -1,8 +1,7 @@
 import type { AppText, SshKeyForm, SshServer, SshServerForm } from "@/entities/infrastructure";
+import type { SshTerminalAction } from "@/features/ssh-terminal";
 import {
-  streamSshConnect,
   streamSshKeyGenerate,
-  streamSshKeyPush,
   streamSshServerAdd,
   streamSshServerRemove,
   streamSshServerUpdate,
@@ -11,12 +10,19 @@ import type { ConfirmDialogApi, RunWithTerminal } from "./operationTypes";
 
 type UseSshOperationsConfig = {
   confirmDialog: ConfirmDialogApi;
+  openSshTerminal: (server: SshServer, action: SshTerminalAction) => void;
   refreshSshServers: () => Promise<void> | void;
   runWithTerminal: RunWithTerminal;
   text: AppText;
 };
 
-export function useSshOperations({ confirmDialog, refreshSshServers, runWithTerminal, text }: UseSshOperationsConfig) {
+export function useSshOperations({
+  confirmDialog,
+  openSshTerminal,
+  refreshSshServers,
+  runWithTerminal,
+  text,
+}: UseSshOperationsConfig) {
   const runSshServerAdd = (form: SshServerForm) => {
     runWithTerminal({
       key: "ssh:add",
@@ -57,12 +63,7 @@ export function useSshOperations({ confirmDialog, refreshSshServers, runWithTerm
   };
 
   const runSshConnect = (server: SshServer) => {
-    runWithTerminal({
-      key: `ssh:connect:${server.id}`,
-      label: `${text.ssh.actions.terminal}: ${server.name}`,
-      open: (handlers) => streamSshConnect(server.id, handlers),
-      preview: `make ssh-connect-ui ID=${server.id}`,
-    });
+    openSshTerminal(server, "connect");
   };
 
   const runSshKeyGenerate = (form: SshKeyForm) => {
@@ -76,12 +77,7 @@ export function useSshOperations({ confirmDialog, refreshSshServers, runWithTerm
   };
 
   const runSshKeyPush = (server: SshServer) => {
-    runWithTerminal({
-      key: `ssh:key-push:${server.id}`,
-      label: text.ssh.actions.keyPush,
-      open: (handlers) => streamSshKeyPush(server.id, handlers),
-      preview: `make ssh-key-push-ui ID=${server.id}`,
-    });
+    openSshTerminal(server, "key-push");
   };
 
   return {

@@ -5,7 +5,17 @@ import { AppRouter } from "./router/AppRouter";
 
 export function App() {
   const controller = useInfrastructureController();
-  const { activeConfig, activeView, appMeta, commandStream, confirmDialog, language, terminalOpen, text } = controller;
+  const {
+    activeConfig,
+    activeView,
+    appMeta,
+    commandStream,
+    confirmDialog,
+    language,
+    sshTerminalSession,
+    terminalOpen,
+    text,
+  } = controller;
 
   return (
     <>
@@ -31,6 +41,16 @@ export function App() {
           terminalLabel={text.common.terminal}
           terminalOpen={terminalOpen}
           terminalPrompt={commandStream.prompt}
+          sshTerminal={
+            sshTerminalSession
+              ? {
+                  action: sshTerminalSession.action,
+                  cwd: `${sshTerminalSession.server.user}@${sshTerminalSession.server.host}:${sshTerminalSession.server.port}`,
+                  serverId: sshTerminalSession.server.id,
+                  title: sshTerminalSession.server.name,
+                }
+              : null
+          }
           terminalStateLabels={text.common.streamLabels}
           terminalTitle={appMeta.projectName}
           view={activeConfig}

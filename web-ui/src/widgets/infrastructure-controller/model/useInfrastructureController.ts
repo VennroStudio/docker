@@ -16,9 +16,11 @@ import {
   type CommandAction,
   type ProxyFormState,
   type ShellAction,
+  type SshServer,
   type ViewId,
 } from "@/entities/infrastructure";
 import { streamShell } from "@/features/command-terminal";
+import type { SshTerminalAction } from "@/features/ssh-terminal";
 import { useMariaDbInstances } from "@/features/manage-mariadb";
 import { usePostgresInstances } from "@/features/manage-postgres";
 import { useSettings } from "@/entities/settings";
@@ -45,6 +47,10 @@ export function useInfrastructureController() {
   const [archivesRefreshSignal, setArchivesRefreshSignal] = useState(0);
   const [databaseRefreshSignal, setDatabaseRefreshSignal] = useState(0);
   const [proxyForm, setProxyForm] = useState(initialProxyForm);
+  const [sshTerminalSession, setSshTerminalSession] = useState<{
+    action: SshTerminalAction;
+    server: SshServer;
+  } | null>(null);
   const confirmDialog = useConfirmDialog();
   const toast = useToast();
   const appMeta = useAppMeta();
@@ -83,10 +89,12 @@ export function useInfrastructureController() {
     operationBlockTitle,
     operationRunning,
     runWithTerminal,
+    showTerminal,
     stopCommand,
     terminalOpen,
     toggleTerminal,
   } = useTerminalOperations({
+    onBeforeRun: () => setSshTerminalSession(null),
     statusRefresh,
     serviceStatusesRefresh: serviceStatuses.refresh,
     text,
@@ -124,6 +132,15 @@ export function useInfrastructureController() {
   });
   const sshOperations = useSshOperations({
     confirmDialog,
+    openSshTerminal: (server, action) => {
+      if (operationRunning) {
+        toast.show({ title: operationBlockTitle || text.operationToast.blocked(server.name), tone: "info" });
+        return;
+      }
+
+      setSshTerminalSession({ action, server });
+      showTerminal();
+    },
     refreshSshServers: sshServers.refresh,
     runWithTerminal,
     text,
@@ -170,6 +187,7 @@ export function useInfrastructureController() {
     redisStatus,
     registryStatus,
     sshServers,
+    sshTerminalSession,
     ...archiveOperations,
     ...commandOperations,
     ...databaseOperations,
