@@ -9,9 +9,13 @@ export const ruPanels = {
   },
   serviceControl: {
     adminPanel: "Панель администрирования",
+    auth: "Доступ",
     cache: "Cache service",
     database: "База данных",
     interface: "Интерфейс",
+    port: "Порт",
+    registryCredentialsRequired: "Сначала заполни Registry user и Registry password.",
+    registryRequired: "Сначала запусти Registry.",
   },
   proxy: {
     addHost: "Добавить host",

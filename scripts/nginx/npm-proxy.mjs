@@ -296,11 +296,12 @@ async function updatePublicUrl() {
 
 async function resetPublicUrlsForDomain() {
   let changed = false;
+  const defaultSettings = await readJson(defaultSettingsFile);
 
   for (const binding of Object.values(publicTargets)) {
     if (!shouldResetPublicUrl(binding)) continue;
 
-    const defaultUrl = settingsValue(await readJson(defaultSettingsFile), binding.name);
+    const defaultUrl = resetUrlForBinding(binding, defaultSettings);
     settings[binding.group] = {
       ...(settings[binding.group] || {}),
       [binding.key]: defaultUrl,
@@ -310,6 +311,18 @@ async function resetPublicUrlsForDomain() {
   }
 
   if (changed) await writeSettings(settings);
+}
+
+function resetUrlForBinding(binding, defaultSettings) {
+  if (binding.name === "registry.registryUrl") {
+    return `http://localhost:${settings.registry?.registryPort || defaultSettings.registry?.registryPort || "5051"}`;
+  }
+
+  if (binding.name === "registry.registryUiUrl") {
+    return `http://localhost:${settings.registry?.registryUiPort || defaultSettings.registry?.registryUiPort || "5081"}`;
+  }
+
+  return settingsValue(defaultSettings, binding.name);
 }
 
 function shouldResetPublicUrl(binding) {

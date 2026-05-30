@@ -102,6 +102,8 @@ async function migrateSettings() {
 
 function normalizeSettings(settings = {}) {
   const source = settings && typeof settings === "object" ? settings : {};
+  const registryPort = normalizePort(source.registry?.registryPort, "5051");
+  const registryUiPort = normalizePort(source.registry?.registryUiPort, "5081");
 
   return {
     proxy: {
@@ -129,8 +131,10 @@ function normalizeSettings(settings = {}) {
       minioRootPassword: source.minio?.minioRootPassword || "minioadmin",
     },
     registry: {
-      registryUrl: source.registry?.registryUrl || "http://localhost:5000",
-      registryUiUrl: source.registry?.registryUiUrl || "http://localhost:5081",
+      registryPort,
+      registryUiPort,
+      registryUrl: localUrlForPort(source.registry?.registryUrl, registryPort),
+      registryUiUrl: localUrlForPort(source.registry?.registryUiUrl, registryUiPort),
       registryUser: source.registry?.registryUser || "",
       registryPassword: source.registry?.registryPassword || "",
     },
@@ -144,9 +148,32 @@ function envEntries(settings) {
     ["REDIS_PASSWORD", settings.redis?.redisPassword],
     ["MINIO_ROOT_USER", settings.minio?.minioRootUser],
     ["MINIO_ROOT_PASSWORD", settings.minio?.minioRootPassword],
+    ["REGISTRY_PORT", settings.registry?.registryPort],
+    ["REGISTRY_UI_PORT", settings.registry?.registryUiPort],
     ["REGISTRY_USER", settings.registry?.registryUser],
     ["REGISTRY_PASSWORD", settings.registry?.registryPassword],
   ];
+}
+
+function localUrlForPort(value, port) {
+  if (!value) return `http://localhost:${port}`;
+
+  try {
+    const url = new URL(value);
+    if (!["localhost", "127.0.0.1", "::1"].includes(url.hostname)) return value;
+
+    url.port = String(port);
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return `http://localhost:${port}`;
+  }
+}
+
+function normalizePort(value, fallback) {
+  const port = String(value || fallback).trim();
+  const parsed = Number(port);
+
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 65535 ? String(parsed) : fallback;
 }
 
 function usage(code) {

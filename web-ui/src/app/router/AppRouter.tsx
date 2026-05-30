@@ -183,6 +183,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     minioStatus: minioStatus.status,
     redisStatus: redisStatus.status,
     registryStatus: registryStatus.status,
+    settings: settings.settings,
     text,
     translateActions,
     translateShells,

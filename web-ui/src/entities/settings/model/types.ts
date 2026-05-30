@@ -24,6 +24,8 @@ export type AppSettings = {
     minioRootPassword: string;
   };
   registry: {
+    registryPort: string;
+    registryUiPort: string;
     registryUrl: string;
     registryUiUrl: string;
     registryUser: string;

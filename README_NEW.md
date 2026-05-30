@@ -46,6 +46,8 @@ make settings-set KEY=minio.minioRootPassword VALUE=secret
 Изменить настройки Registry:
 
 ```sh
+make settings-set KEY=registry.registryPort VALUE=5051
+make settings-set KEY=registry.registryUiPort VALUE=5081
 make settings-set KEY=registry.registryUser VALUE=admin
 make settings-set KEY=registry.registryPassword VALUE=secret
 ```
@@ -459,12 +461,16 @@ make app-proxy-remove DOMAIN=minio.local
 
 ### Пример: Registry и Registry UI
 
-Задать логин и пароль Registry в settings:
+Задать порты, логин и пароль Registry в settings:
 
 ```sh
+make settings-set KEY=registry.registryPort VALUE=5051
+make settings-set KEY=registry.registryUiPort VALUE=5081
 make settings-set KEY=registry.registryUser VALUE=admin
 make settings-set KEY=registry.registryPassword VALUE=secret
 ```
+
+Внутри Docker network Registry всегда слушает `5000`, а `registry.registryPort` меняет только внешний порт на хосте. По умолчанию используется `5051`, потому что на macOS порт `5000` часто занят AirPlay.
 
 Сгенерировать `.env` и htpasswd:
 
@@ -479,6 +485,9 @@ make registry-auth-generate
 make registry-up
 make registry-ui-up
 ```
+
+`make registry-up` не запустится без `registry.registryUser` и `registry.registryPassword`.
+`make registry-ui-up` не запустится, пока `registry-container` не находится в состоянии `running`.
 
 Проверить статусы. URL возвращается в каждом status-ответе:
 
@@ -1248,6 +1257,13 @@ make minio-shell
 
 ### Registry
 
+Изменить внешний порт Registry на хосте:
+
+```sh
+make settings-set KEY=registry.registryPort VALUE=5051
+make settings-env
+```
+
 Показать статус Registry и URL:
 
 ```sh
@@ -1266,13 +1282,13 @@ make registry-auth-generate
 make registry-pull
 ```
 
-Создать и запустить контейнер Registry:
+Создать и запустить контейнер Registry. Перед запуском генерирует `htpasswd`, поэтому нужны `registry.registryUser` и `registry.registryPassword`:
 
 ```sh
 make registry-up
 ```
 
-Запустить уже созданный контейнер Registry:
+Запустить уже созданный контейнер Registry. Перед запуском также проверяет логин и пароль:
 
 ```sh
 make registry-start
@@ -1310,6 +1326,13 @@ make registry-shell
 
 ### Registry UI
 
+Изменить внешний порт Registry UI на хосте:
+
+```sh
+make settings-set KEY=registry.registryUiPort VALUE=5081
+make settings-env
+```
+
 Показать статус Registry UI и URL:
 
 ```sh
@@ -1322,13 +1345,13 @@ make registry-ui-status
 make registry-ui-pull
 ```
 
-Создать и запустить контейнер Registry UI:
+Создать и запустить контейнер Registry UI. Работает только если `registry-container` уже запущен:
 
 ```sh
 make registry-ui-up
 ```
 
-Запустить уже созданный контейнер Registry UI:
+Запустить уже созданный контейнер Registry UI. Работает только если `registry-container` уже запущен:
 
 ```sh
 make registry-ui-start

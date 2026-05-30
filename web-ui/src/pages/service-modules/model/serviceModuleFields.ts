@@ -26,7 +26,17 @@ export const minioConfigFields = [
   },
 ] satisfies ServiceModuleConfigSection["fields"];
 
-export const registryConfigFields = [
+export const registryPortFields = [
+  {
+    group: "registry",
+    label: "Registry port",
+    name: "registryPort",
+    placeholder: "5051",
+    type: "number",
+  },
+] satisfies ServiceModuleConfigSection["fields"];
+
+export const registryAuthFields = [
   {
     autocomplete: "username",
     group: "registry",
@@ -39,5 +49,15 @@ export const registryConfigFields = [
     label: "Registry password",
     name: "registryPassword",
     type: "password",
+  },
+] satisfies ServiceModuleConfigSection["fields"];
+
+export const registryUiPortFields = [
+  {
+    group: "registry",
+    label: "Registry UI port",
+    name: "registryUiPort",
+    placeholder: "5081",
+    type: "number",
   },
 ] satisfies ServiceModuleConfigSection["fields"];

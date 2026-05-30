@@ -7,6 +7,7 @@ import type {
   ShellAction,
   ViewId,
 } from "@/entities/infrastructure";
+import type { AppSettings } from "@/entities/settings";
 import { getMinioPageModel } from "./minioPageModel";
 import { getRedisPageModel } from "./redisPageModel";
 import { getRegistryPageModel } from "./registryPageModel";
@@ -17,6 +18,7 @@ export type ServiceModulesModelSource = {
   minioStatus: null | MinioStatusResponse;
   redisStatus: null | RedisStatusResponse;
   registryStatus: null | RegistryStatusResponse;
+  settings: AppSettings | null;
   text: AppText;
   translateActions: (actions: CommandAction[]) => CommandAction[];
   translateShells: (actions: ShellAction[]) => ShellAction[];

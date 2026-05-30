@@ -9,9 +9,13 @@ export const enPanels = {
   },
   serviceControl: {
     adminPanel: "Admin panel",
+    auth: "Access",
     cache: "Cache service",
     database: "Database",
     interface: "Interface",
+    port: "Port",
+    registryCredentialsRequired: "Fill Registry user and Registry password first.",
+    registryRequired: "Start Registry first.",
   },
   proxy: {
     addHost: "Add host",

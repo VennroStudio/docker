@@ -10,7 +10,7 @@ export type SettingsFieldDefinition = {
   label: string;
   name: string;
   placeholder?: string;
-  type?: "password" | "text";
+  type?: "number" | "password" | "text";
 };
 
 export type SettingsSectionDefinition = {
@@ -89,6 +89,22 @@ export const settingsSections: SettingsSectionDefinition[] = [
   {
     id: "registry",
     fields: [
+      {
+        env: "REGISTRY_PORT",
+        group: "registry",
+        label: "Registry port",
+        name: "registryPort",
+        placeholder: "5051",
+        type: "number",
+      },
+      {
+        env: "REGISTRY_UI_PORT",
+        group: "registry",
+        label: "Registry UI port",
+        name: "registryUiPort",
+        placeholder: "5081",
+        type: "number",
+      },
       {
         autocomplete: "username",
         env: "REGISTRY_USER",

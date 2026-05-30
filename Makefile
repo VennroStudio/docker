@@ -496,7 +496,7 @@ registry-up: registry-auth-generate ## Запустить контейнер Reg
 registry-pull: ## Скачать/обновить образ Registry
 	$(MAKE) compose-pull NAME=registry
 
-registry-start: ## Запустить существующий контейнер Registry
+registry-start: registry-auth-generate ## Запустить существующий контейнер Registry
 	$(MAKE) compose-start NAME=registry
 
 registry-stop: ## Остановить контейнер Registry
@@ -515,17 +515,24 @@ registry-logs: ## Логи Registry
 registry-shell: ## Shell внутри контейнера Registry
 	$(MAKE) compose-shell NAME=registry
 
+registry-require-running:
+	@running="$$(docker inspect -f '{{.State.Running}}' registry-container 2>/dev/null || true)"; \
+		if [ "$$running" != "true" ]; then \
+			echo "Registry container is not running. Run: make registry-up"; \
+			exit 1; \
+		fi
+
 ##@ Registry UI
 registry-ui-status: ## Показать статус Registry UI
 	@$(NODE_RUN) ./scripts/registry/status.mjs registry-ui
 
-registry-ui-up: ## Запустить контейнер Registry UI
+registry-ui-up: registry-require-running ## Запустить контейнер Registry UI
 	$(MAKE) compose-up NAME=registry-ui
 
 registry-ui-pull: ## Скачать/обновить образ Registry UI
 	$(MAKE) compose-pull NAME=registry-ui
 
-registry-ui-start: ## Запустить существующий контейнер Registry UI
+registry-ui-start: registry-require-running ## Запустить существующий контейнер Registry UI
 	$(MAKE) compose-start NAME=registry-ui
 
 registry-ui-stop: ## Остановить контейнер Registry UI
@@ -617,7 +624,7 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: redis-status redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs redis-shell
 .PHONY: redisinsight-status redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs redisinsight-shell
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
-.PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell
+.PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell registry-require-running
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
 .PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-connect ssh-key-generate ssh-key-push ssh-key-remove ssh-key-show ssh-command-list ssh-command-add ssh-command-update ssh-command-remove
 .PHONY: archive archive-list unarchive archive-delete

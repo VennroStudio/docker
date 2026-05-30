@@ -24,7 +24,9 @@
     "minioRootPassword": "minioadmin"
   },
   "registry": {
-    "registryUrl": "http://localhost:5000",
+    "registryPort": "5051",
+    "registryUiPort": "5081",
+    "registryUrl": "http://localhost:5051",
     "registryUiUrl": "http://localhost:5081",
     "registryUser": "",
     "registryPassword": ""

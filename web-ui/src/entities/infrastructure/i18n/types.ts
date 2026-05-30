@@ -247,9 +247,13 @@ export type AppText = {
     };
     serviceControl: {
       adminPanel: string;
+      auth: string;
       cache: string;
       database: string;
       interface: string;
+      port: string;
+      registryCredentialsRequired: string;
+      registryRequired: string;
     };
     proxy: {
       addHost: string;

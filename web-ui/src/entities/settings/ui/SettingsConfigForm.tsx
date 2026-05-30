@@ -11,6 +11,7 @@ export type SettingsConfigField = {
   group: keyof AppSettings;
   label: string;
   name: string;
+  placeholder?: string;
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
 };
 
@@ -74,6 +75,7 @@ export function SettingsConfigForm({
             key={key}
             autoComplete={field.autocomplete}
             label={field.label}
+            placeholder={field.placeholder}
             type={field.type}
             value={values[key]}
             onChange={(event) => {

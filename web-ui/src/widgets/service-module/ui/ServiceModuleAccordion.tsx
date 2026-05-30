@@ -70,11 +70,17 @@ export function ServiceModuleAccordion({
           {orderedActions.map(({ action, suffix }) => (
             <ModuleActionButton
               key={action.id}
-              disabled={operationDisabled}
+              disabled={operationDisabled || action.disabled}
               label={action.label}
               loading={operationDisabled && activeOperationKey === action.id}
               tone={moduleActionTone[suffix]}
-              title={operationDisabled && activeOperationKey !== action.id ? operationDisabledTitle : action.label}
+              title={
+                operationDisabled && activeOperationKey !== action.id
+                  ? operationDisabledTitle
+                  : action.disabled
+                    ? action.disabledTitle
+                    : action.label
+              }
               onClick={() => onRun(action)}
             >
               {moduleActionIcon[suffix]}
