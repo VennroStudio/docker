@@ -151,6 +151,15 @@ function removeKey() {
     "if [ \"$match_count\" -gt 0 ]; then echo \"Removed RSA key from ~/.ssh/authorized_keys\"; else echo \"RSA key is not present in ~/.ssh/authorized_keys\"; fi";
   const { command, args } = sshCommand(server, [remoteCommand]);
   runInherit(command, args);
+
+  const next = updateServerById(server.id, (current) => ({
+    ...current,
+    authType: "password",
+    keyPath: "",
+    passwordMode: "manual",
+  }));
+  console.log("Updated SSH server auth type to password and cleared KEY_PATH");
+  printJson(next);
 }
 
 function showKey() {

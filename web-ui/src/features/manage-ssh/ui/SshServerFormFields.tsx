@@ -26,6 +26,14 @@ export function SshServerFormFields({
   value,
 }: SshServerFormFieldsProps) {
   const update = (key: keyof SshServerForm, nextValue: string) => onChange({ ...value, [key]: nextValue });
+  const updateAuthType = (nextValue: string) => {
+    onChange({
+      ...value,
+      authType: nextValue as SshServerForm["authType"],
+      keyPath: nextValue === "password" ? "" : value.keyPath,
+      passwordMode: nextValue === "key" ? "manual" : value.passwordMode,
+    });
+  };
 
   return (
     <div className="grid gap-4">
@@ -61,7 +69,7 @@ export function SshServerFormFields({
             { label: copy.options.key, value: "key" },
           ]}
           value={value.authType}
-          onChange={(event) => update("authType", event.target.value)}
+          onChange={(event) => updateAuthType(event.target.value)}
         />
         <SelectField
           disabled={value.authType === "key"}
@@ -94,6 +102,7 @@ export function SshServerFormFields({
       </div>
 
       <Field
+        disabled={value.authType === "password"}
         label={copy.fields.keyPath}
         placeholder={copy.placeholders.keyPath}
         value={value.keyPath}

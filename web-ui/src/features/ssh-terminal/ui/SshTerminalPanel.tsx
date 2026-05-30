@@ -22,6 +22,7 @@ type SshTerminalPanelProps = {
   serverId: number;
   stateLabels: Record<TerminalPanelState, string>;
   title: string;
+  onExit?: (code: number) => void;
 };
 
 export function SshTerminalPanel({
@@ -32,12 +33,19 @@ export function SshTerminalPanel({
   serverId,
   stateLabels,
   title,
+  onExit,
 }: SshTerminalPanelProps) {
   const lastInputIdRef = useRef<number | null>(null);
+  const onExitRef = useRef(onExit);
   const panelRef = useRef<XtermPanelHandle | null>(null);
   const pendingInputRef = useRef<null | string>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const [state, setState] = useState<TerminalPanelState>("running");
+
+  useEffect(() => {
+    onExitRef.current = onExit;
+  }, [onExit]);
+
   const flushPendingInput = useCallback(() => {
     const inputData = pendingInputRef.current;
     const socket = socketRef.current;
@@ -64,6 +72,7 @@ export function SshTerminalPanel({
 
       panelRef.current?.writeln(`\r\n[exit ${message.code}]`);
       setState(message.code === 0 ? "done" : "error");
+      onExitRef.current?.(message.code);
     });
     socket.addEventListener("close", () => {
       setState((current) => (current === "running" ? "stopped" : current));

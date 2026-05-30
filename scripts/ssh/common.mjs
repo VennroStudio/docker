@@ -89,10 +89,10 @@ export function normalizeServer(server) {
     throw new Error("PASSWORD_MODE must be manual or sshpass");
   }
 
-  if (normalized.authType === "password") {
+  if (normalized.authType === "password" && normalized.passwordMode === "sshpass") {
     requiredString(
       normalized.password,
-      "PASSWORD is required for AUTH_TYPE=password",
+      "PASSWORD is required for AUTH_TYPE=password and PASSWORD_MODE=sshpass",
     );
   }
 

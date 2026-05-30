@@ -37,6 +37,7 @@ type WorkspaceProps = {
   onClear: () => void;
   onInput?: (input: string) => void;
   onResize?: (cols: number, rows: number) => void;
+  onSshTerminalExit?: (code: number) => void;
   onToggleTerminal?: () => void;
   onStop: () => void;
 };
@@ -45,6 +46,7 @@ export function Workspace({
   children,
   onClear,
   onStop,
+  onSshTerminalExit,
   onToggleTerminal,
   output,
   pageTitle,
@@ -90,6 +92,7 @@ export function Workspace({
               serverId={sshTerminal.serverId}
               stateLabels={terminalStateLabels}
               title={sshTerminal.title}
+              onExit={onSshTerminalExit}
             />
           </div>
         ) : showTerminal ? (

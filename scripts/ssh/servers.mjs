@@ -69,17 +69,32 @@ function updateServer() {
   const id = readId(input(options, "ID"));
   const next = updateServerById(id, (current) => ({
     ...current,
-    name: input(options, "NAME", current.name),
-    host: input(options, "HOST", current.host),
-    port: input(options, "PORT", current.port),
-    user: input(options, "USER", current.user),
-    authType: input(options, "AUTH_TYPE", current.authType),
-    keyPath: input(options, "KEY_PATH", current.keyPath),
-    password: input(options, "PASSWORD", current.password),
-    passwordMode: input(options, "PASSWORD_MODE", current.passwordMode),
+    name: nullableInput("NAME", current.name),
+    host: nullableInput("HOST", current.host),
+    port: nullableInput("PORT", current.port),
+    user: nullableInput("USER", current.user),
+    authType: nullableInput("AUTH_TYPE", current.authType),
+    keyPath: nullableInput("KEY_PATH", current.keyPath),
+    password: nullableInput("PASSWORD", current.password),
+    passwordMode: nullableInput("PASSWORD_MODE", current.passwordMode),
   }));
 
   printJson(next);
+}
+
+function nullableInput(name, fallback = "") {
+  const optionKey = name.toLowerCase().replaceAll("_", "-");
+  if (Object.prototype.hasOwnProperty.call(options, optionKey))
+    return options[optionKey] ?? "";
+  if (hasMakeVariable(name) && Object.prototype.hasOwnProperty.call(process.env, name))
+    return process.env[name] ?? "";
+  return fallback;
+}
+
+function hasMakeVariable(name) {
+  return String(process.env.MAKEFLAGS || "")
+    .split(/\s+/)
+    .some((item) => item === name || item.startsWith(`${name}=`));
 }
 
 function removeServer() {

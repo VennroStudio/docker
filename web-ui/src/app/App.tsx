@@ -58,6 +58,7 @@ export function App() {
           onClear={terminalSession.clear}
           onInput={terminalSession.sendInput}
           onResize={terminalSession.resize}
+          onSshTerminalExit={controller.refreshSshAfterTerminalExit}
           onStop={controller.stopCommand}
           onToggleTerminal={controller.toggleTerminal}
         >

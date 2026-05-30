@@ -182,6 +182,9 @@ export function useInfrastructureController() {
       detail: text.shell.detail(action.container),
       label: text.shell.openLabel(action.label),
     }));
+  const refreshSshAfterTerminalExit = () => {
+    if (sshView) void sshServers.refresh();
+  };
 
   const runShell = (action: ShellAction) => {
     runWithTerminal({
@@ -222,6 +225,7 @@ export function useInfrastructureController() {
     serviceStatuses,
     settings,
     setProxyForm,
+    refreshSshAfterTerminalExit,
     stopCommand,
     terminalSession,
     terminalOpen,

@@ -1,5 +1,5 @@
 import { KeyRound, Send, TerminalSquare, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { AppText, SshQuickCommand, SshServer, SshServerForm } from "@/entities/infrastructure";
 import { AccordionPanel, IconButton } from "@/shared/ui";
 import { validateSshServerForm } from "../model/validation";
@@ -40,6 +40,20 @@ export function SshServerAccordion({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<SshServerForm>(serverForm(server));
   const [error, setError] = useState("");
+  const keyActionsDisabled = form.authType !== "key" || !server.keyPath;
+
+  useEffect(() => {
+    setForm(serverForm(server));
+  }, [
+    server.authType,
+    server.host,
+    server.keyPath,
+    server.name,
+    server.password,
+    server.passwordMode,
+    server.port,
+    server.user,
+  ]);
 
   const save = () => {
     const nextError = validateSshServerForm(form, copy);
@@ -51,7 +65,7 @@ export function SshServerAccordion({
   return (
     <AccordionPanel
       contentClassName="p-4"
-      eyebrow={<AuthBadge copy={copy} server={server} />}
+      eyebrow={<AuthBadge authType={form.authType} copy={copy} />}
       open={open}
       title={server.name}
       actions={
@@ -59,11 +73,11 @@ export function SshServerAccordion({
           <IconButton label={copy.actions.terminal} tone="primary" onClick={() => onTerminalOpen(server)}>
             <TerminalSquare size={16} strokeWidth={2.5} />
           </IconButton>
-          <IconButton label={copy.actions.keyPush} tone="primary" onClick={() => onKeyPush(server)}>
+          <IconButton disabled={keyActionsDisabled} label={copy.actions.keyPush} tone="primary" onClick={() => onKeyPush(server)}>
             <Send size={16} strokeWidth={2.5} />
           </IconButton>
           <IconButton
-            disabled={!server.keyPath}
+            disabled={keyActionsDisabled}
             label={copy.actions.keyRemove}
             tone="danger"
             onClick={() => onKeyRemove(server)}
@@ -106,10 +120,10 @@ export function SshServerAccordion({
   );
 }
 
-function AuthBadge({ copy, server }: { copy: AppText["ssh"]; server: SshServer }) {
+function AuthBadge({ authType, copy }: { authType: SshServer["authType"]; copy: AppText["ssh"] }) {
   return (
     <span className="inline-flex rounded-md border border-sky-100 bg-sky-50 px-2 py-1 text-xs font-bold uppercase text-slate-500 shadow-[0_4px_10px_rgba(14,165,233,0.10)]">
-      {server.authType === "key" ? copy.options.key : copy.options.password}
+      {authType === "key" ? copy.options.key : copy.options.password}
     </span>
   );
 }
