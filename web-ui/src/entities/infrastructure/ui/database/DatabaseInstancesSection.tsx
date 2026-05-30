@@ -8,6 +8,7 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
   activeOperationKey,
   actionLabels,
   children,
+  containerRequiredTitle,
   copy,
   error,
   instances,
@@ -56,6 +57,7 @@ export function DatabaseInstancesSection<Instance extends DatabaseInstanceRuntim
             key={instance.name}
             activeOperationKey={activeOperationKey}
             actionLabels={actionLabels}
+            containerRequiredTitle={containerRequiredTitle}
             copy={copy}
             instance={instance}
             operationDisabled={operationDisabled}

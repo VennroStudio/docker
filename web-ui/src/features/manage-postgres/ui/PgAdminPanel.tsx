@@ -18,6 +18,8 @@ type PgAdminPanelProps = {
   overview: PgAdminOverview;
   settingsState: ReturnType<typeof useSettings>;
   shell?: ShellAction;
+  shellDisabled?: boolean;
+  shellDisabledTitle?: string;
   text: AppText;
   onRun: (action: CommandAction) => void;
   onShellOpen: (action: ShellAction) => void;
@@ -45,6 +47,8 @@ export function PgAdminPanel({
   overview,
   settingsState,
   shell,
+  shellDisabled,
+  shellDisabledTitle,
   text,
 }: PgAdminPanelProps) {
   const [open, setOpen] = useState(false);
@@ -67,6 +71,8 @@ export function PgAdminPanel({
       operationDisabledTitle={operationDisabledTitle}
       overview={overview}
       shell={shell}
+      shellDisabled={shellDisabled}
+      shellDisabledTitle={shellDisabledTitle}
       title="pgAdmin"
       onOpenChange={setOpen}
       onRun={onRun}

@@ -21,6 +21,8 @@ type ServiceModuleAccordionProps = {
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
   shell?: ShellAction;
+  shellDisabled?: boolean;
+  shellDisabledTitle?: string;
   status?: ContainerStateInfo;
   stateEyebrow?: boolean;
   statusLabel?: string;
@@ -42,6 +44,8 @@ export function ServiceModuleAccordion({
   operationDisabled = false,
   operationDisabledTitle,
   shell,
+  shellDisabled = false,
+  shellDisabledTitle,
   status,
   stateEyebrow = false,
   statusLabel = "Status",
@@ -77,9 +81,11 @@ export function ServiceModuleAccordion({
               title={
                 operationDisabled && activeOperationKey !== action.id
                   ? operationDisabledTitle
-                  : action.disabled
-                    ? action.disabledTitle
-                    : action.label
+                  : action.blockedTitle
+                    ? action.blockedTitle
+                    : action.disabled
+                      ? action.disabledTitle
+                      : action.label
               }
               onClick={() => onRun(action)}
             >
@@ -88,12 +94,16 @@ export function ServiceModuleAccordion({
           ))}
           {shell ? (
             <ModuleActionButton
-              disabled={operationDisabled}
+              disabled={operationDisabled || shellDisabled}
               label={shell.label}
               loading={operationDisabled && activeOperationKey === shellOperationKey}
               tone={moduleActionTone.shell}
               title={
-                operationDisabled && activeOperationKey !== shellOperationKey ? operationDisabledTitle : shell.label
+                operationDisabled && activeOperationKey !== shellOperationKey
+                  ? operationDisabledTitle
+                  : shellDisabled
+                    ? shellDisabledTitle
+                    : shell.label
               }
               onClick={() => onShellOpen?.(shell)}
             >

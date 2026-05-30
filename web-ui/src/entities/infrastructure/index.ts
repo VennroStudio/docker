@@ -11,6 +11,7 @@ export * from "./config/pageRegistry";
 export * from "./config/shells";
 export * from "./config/views";
 export * from "./i18n";
+export * from "./model/containerActions";
 export * from "./model/types";
 export * from "./model/useArchives";
 export * from "./model/useAppMeta";

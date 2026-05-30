@@ -111,6 +111,7 @@ export function useInfrastructureController() {
     refreshNginxStatus: nginxStatus.refresh,
     runWithTerminal,
     text,
+    toast,
   });
   const proxyOperations = useProxyOperations({
     confirmDialog,

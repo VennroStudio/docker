@@ -48,6 +48,8 @@ export type DatabaseAdminSectionProps = {
   operationDisabledTitle?: string;
   overview: DatabaseAdminOverview;
   shell?: ShellAction;
+  shellDisabled?: boolean;
+  shellDisabledTitle?: string;
   title: string;
   onOpenChange: (open: boolean) => void;
   onRun: (action: CommandAction) => void;
@@ -58,6 +60,7 @@ export type DatabaseInstancesSectionProps<Instance extends DatabaseInstanceRunti
   activeOperationKey?: null | string;
   actionLabels: Record<DatabaseRuntimeAction | "shell", string>;
   children?: ReactNode;
+  containerRequiredTitle?: string;
   copy: DatabaseInstancesCopy;
   error: string | null;
   instances: Instance[];

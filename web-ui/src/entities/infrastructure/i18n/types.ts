@@ -249,9 +249,16 @@ export type AppText = {
       adminPanel: string;
       auth: string;
       cache: string;
+      containerRequired: string;
       database: string;
       interface: string;
+      mariadbRequired: string;
       port: string;
+      pgadminCredentialsRequired: string;
+      postgresRequired: string;
+      minioCredentialsRequired: string;
+      redisPasswordRequired: string;
+      redisRequired: string;
       registryCredentialsRequired: string;
       registryRequired: string;
     };

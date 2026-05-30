@@ -16,6 +16,8 @@ export type ServiceModuleDescriptor = {
   eyebrow: string;
   link?: ServiceLink;
   shell?: ShellAction;
+  shellDisabled?: boolean;
+  shellDisabledTitle?: string;
   stateEyebrow?: boolean;
   status?: ContainerStateInfo;
   statusLabel: string;

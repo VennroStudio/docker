@@ -69,6 +69,7 @@ export function MariaDbInstancesPanel({
           up: copy.actions.up.label,
         }}
         activeOperationKey={activeOperationKey}
+        containerRequiredTitle={text.panels.serviceControl.containerRequired}
         copy={copy}
         error={error}
         instances={instances}

@@ -1,11 +1,13 @@
 import { ContainerStateBadge } from "../ContainerStateBadge";
 import { DatabaseAction, ShellIconButton, StatusDot } from "../DatabaseControls";
+import { isContainerRunning } from "../../model/containerActions";
 import { databaseActionOrder } from "../../model/database/types";
 import type { DatabaseInstanceRuntime, DatabaseInstancesCopy, DatabaseRuntimeAction } from "../../model/database/types";
 
 type DatabaseInstanceRowProps<Instance extends DatabaseInstanceRuntime> = {
   activeOperationKey?: null | string;
   actionLabels: Record<DatabaseRuntimeAction | "shell", string>;
+  containerRequiredTitle?: string;
   copy: DatabaseInstancesCopy;
   instance: Instance;
   operationDisabled?: boolean;
@@ -19,6 +21,7 @@ type DatabaseInstanceRowProps<Instance extends DatabaseInstanceRuntime> = {
 export function DatabaseInstanceRow<Instance extends DatabaseInstanceRuntime>({
   activeOperationKey,
   actionLabels,
+  containerRequiredTitle,
   copy,
   instance,
   operationDisabled = false,
@@ -29,8 +32,15 @@ export function DatabaseInstanceRow<Instance extends DatabaseInstanceRuntime>({
   onShellOpen,
 }: DatabaseInstanceRowProps<Instance>) {
   const shellOperationKey = operationKeyForShell(instance);
-  const actionTitle = (label: string, operationKey: string) =>
-    operationDisabled && activeOperationKey !== operationKey ? operationDisabledTitle : label;
+  const running = isContainerRunning(instance.state);
+  const actionDisabled = (action: DatabaseRuntimeAction) => operationDisabled || (!running && action !== "up");
+  const actionTitle = (label: string, operationKey: string, action: DatabaseRuntimeAction) =>
+    operationDisabled && activeOperationKey !== operationKey
+      ? operationDisabledTitle
+      : !running && action !== "up"
+        ? containerRequiredTitle
+        : label;
+  const shellDisabled = operationDisabled || !running;
 
   return (
     <article className="flex items-center gap-3 rounded-lg border border-sky-100 bg-white/84 p-3 shadow-[0_10px_24px_rgba(14,165,233,0.12),0_4px_14px_rgba(168,85,247,0.07)]">
@@ -51,19 +61,25 @@ export function DatabaseInstanceRow<Instance extends DatabaseInstanceRuntime>({
             <DatabaseAction
               key={action}
               action={action}
-              disabled={operationDisabled}
+              disabled={actionDisabled(action)}
               label={actionLabels[action]}
               loading={operationDisabled && activeOperationKey === operationKey}
-              title={actionTitle(actionLabels[action], operationKey)}
+              title={actionTitle(actionLabels[action], operationKey, action)}
               onClick={() => onRun(instance, action)}
             />
           );
         })}
         <ShellIconButton
-          disabled={operationDisabled}
+          disabled={shellDisabled}
           label={actionLabels.shell}
           loading={operationDisabled && activeOperationKey === shellOperationKey}
-          title={actionTitle(actionLabels.shell, shellOperationKey)}
+          title={
+            operationDisabled && activeOperationKey !== shellOperationKey
+              ? operationDisabledTitle
+              : !running
+                ? containerRequiredTitle
+                : actionLabels.shell
+          }
           onClick={() => onShellOpen(instance)}
         />
       </div>

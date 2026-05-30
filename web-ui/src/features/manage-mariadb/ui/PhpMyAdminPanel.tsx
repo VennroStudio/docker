@@ -16,6 +16,8 @@ type PhpMyAdminPanelProps = {
   operationDisabledTitle?: string;
   overview: PhpMyAdminOverview;
   shell?: ShellAction;
+  shellDisabled?: boolean;
+  shellDisabledTitle?: string;
   text: AppText;
   onRun: (action: CommandAction) => void;
   onShellOpen: (action: ShellAction) => void;
@@ -31,6 +33,8 @@ export function PhpMyAdminPanel({
   operationDisabledTitle,
   overview,
   shell,
+  shellDisabled,
+  shellDisabledTitle,
   text,
 }: PhpMyAdminPanelProps) {
   const [open, setOpen] = useState(false);
@@ -52,6 +56,8 @@ export function PhpMyAdminPanel({
       operationDisabledTitle={operationDisabledTitle}
       overview={overview}
       shell={shell}
+      shellDisabled={shellDisabled}
+      shellDisabledTitle={shellDisabledTitle}
       title="phpMyAdmin"
       onOpenChange={setOpen}
       onRun={onRun}

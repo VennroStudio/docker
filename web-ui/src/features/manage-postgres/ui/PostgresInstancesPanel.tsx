@@ -74,6 +74,7 @@ export function PostgresInstancesPanel({
           up: actionLabels.up.label,
         }}
         activeOperationKey={activeOperationKey}
+        containerRequiredTitle={text.panels.serviceControl.containerRequired}
         copy={copy}
         error={error}
         instances={instances}

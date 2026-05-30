@@ -810,13 +810,13 @@ make phpmyadmin-status
 make phpmyadmin-pull
 ```
 
-Создать и запустить контейнер phpMyAdmin:
+Создать и запустить контейнер phpMyAdmin. Требуется запущенный MariaDB instance:
 
 ```sh
 make phpmyadmin-up
 ```
 
-Запустить уже созданный контейнер phpMyAdmin:
+Запустить уже созданный контейнер phpMyAdmin. Требуется запущенный MariaDB instance:
 
 ```sh
 make phpmyadmin-start
@@ -1045,13 +1045,13 @@ make pgadmin-status
 make pgadmin-pull
 ```
 
-Создать и запустить контейнер pgAdmin:
+Создать и запустить контейнер pgAdmin. Требуется запущенный Postgres instance:
 
 ```sh
 make pgadmin-up
 ```
 
-Запустить уже созданный контейнер pgAdmin:
+Запустить уже созданный контейнер pgAdmin. Требуется запущенный Postgres instance:
 
 ```sh
 make pgadmin-start
@@ -1157,13 +1157,13 @@ make redisinsight-status
 make redisinsight-pull
 ```
 
-Создать и запустить контейнер RedisInsight:
+Создать и запустить контейнер RedisInsight. Требуется запущенный Redis:
 
 ```sh
 make redisinsight-up
 ```
 
-Запустить уже созданный контейнер RedisInsight:
+Запустить уже созданный контейнер RedisInsight. Требуется запущенный Redis:
 
 ```sh
 make redisinsight-start

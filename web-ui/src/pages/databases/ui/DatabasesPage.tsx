@@ -1,6 +1,8 @@
 import {
+  applyContainerActionRules,
   pgadminActions,
   phpmyadminActions,
+  shellDisabledForContainerState,
   type AppText,
   type CommandAction,
   type MariaDbDatabaseForm,
@@ -93,6 +95,27 @@ export function DatabasesPage({
   view,
 }: DatabasesPageProps) {
   const page = text.servicePages.mariadb;
+  const mariaDbRunning = mariaDb.instances.some((instance) => instance.state === "running");
+  const postgresRunning = postgres.instances.some((instance) => instance.state === "running");
+  const pgAdminConfigReady = Boolean(
+    settingsState.settings?.pgadmin?.pgaEmail?.trim() && settingsState.settings.pgadmin.pgaPassword?.trim(),
+  );
+  const phpMyAdminRuntimeActions = applyContainerActionRules(
+    translateActions(phpmyadminActions),
+    mariaDb.phpmyadmin.state,
+    {
+      disabledTitle: text.panels.serviceControl.containerRequired,
+      upBlockedTitle: mariaDbRunning ? undefined : text.panels.serviceControl.mariadbRequired,
+    },
+  );
+  const pgAdminUpBlockedTitle = blockedTitle([
+    postgresRunning ? undefined : text.panels.serviceControl.postgresRequired,
+    pgAdminConfigReady ? undefined : text.panels.serviceControl.pgadminCredentialsRequired,
+  ]);
+  const pgAdminRuntimeActions = applyContainerActionRules(translateActions(pgadminActions), postgres.pgadmin.state, {
+    disabledTitle: text.panels.serviceControl.containerRequired,
+    upBlockedTitle: pgAdminUpBlockedTitle,
+  });
 
   return (
     <ServicePageLayout view={view} eyebrow={page.eyebrow} description={page.description} title={text.views.mariadb}>
@@ -132,26 +155,30 @@ export function DatabasesPage({
           onShellOpen={onPostgresShellOpen}
         />
         <PhpMyAdminPanel
-          actions={translateActions(phpmyadminActions)}
+          actions={phpMyAdminRuntimeActions}
           activeOperationKey={activeOperationKey}
-          link={serviceLink(mariaDb.phpmyadmin.url, "phpMyAdmin")}
+          link={mariaDb.phpmyadmin.state === "running" ? serviceLink(mariaDb.phpmyadmin.url, "phpMyAdmin") : undefined}
           operationDisabled={operationDisabled}
           operationDisabledTitle={operationDisabledTitle}
           overview={mariaDb.phpmyadmin}
           shell={shellAction(mariaDb.phpmyadmin.container, "phpMyAdmin", text)}
+          shellDisabled={shellDisabledForContainerState(mariaDb.phpmyadmin.state)}
+          shellDisabledTitle={text.panels.serviceControl.containerRequired}
           text={text}
           onRun={onCommandRun}
           onShellOpen={onShellOpen}
         />
         <PgAdminPanel
-          actions={translateActions(pgadminActions)}
+          actions={pgAdminRuntimeActions}
           activeOperationKey={activeOperationKey}
-          link={serviceLink(postgres.pgadmin.url, "pgAdmin")}
+          link={postgres.pgadmin.state === "running" ? serviceLink(postgres.pgadmin.url, "pgAdmin") : undefined}
           operationDisabled={operationDisabled}
           operationDisabledTitle={operationDisabledTitle}
           overview={postgres.pgadmin}
           settingsState={settingsState}
           shell={shellAction(postgres.pgadmin.container, "pgAdmin", text)}
+          shellDisabled={shellDisabledForContainerState(postgres.pgadmin.state)}
+          shellDisabledTitle={text.panels.serviceControl.containerRequired}
           text={text}
           onRun={onCommandRun}
           onShellOpen={onShellOpen}
@@ -159,6 +186,11 @@ export function DatabasesPage({
       </div>
     </ServicePageLayout>
   );
+}
+
+function blockedTitle(messages: Array<string | undefined>) {
+  const activeMessages = messages.filter(Boolean);
+  return activeMessages.length > 0 ? activeMessages.join(" ") : undefined;
 }
 
 function shellAction(container: string, label: string, text: AppText): ShellAction | undefined {

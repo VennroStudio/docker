@@ -20,12 +20,21 @@ export function DatabaseAdminSection({
   operationDisabledTitle,
   overview,
   shell,
+  shellDisabled = false,
+  shellDisabledTitle,
   title,
 }: DatabaseAdminSectionProps) {
   const actionsBySuffix = useMemo(() => commandActionsBySuffix(actions), [actions]);
   const shellOperationKey = shell ? `shell:${shell.container}` : undefined;
-  const actionTitle = (label: string, operationKey: string | undefined) =>
-    operationDisabled && activeOperationKey !== operationKey ? operationDisabledTitle : label;
+  const actionTitle = (
+    label: string,
+    operationKey: string | undefined,
+    blockedTitle?: string,
+    disabledTitle?: string,
+  ) =>
+    operationDisabled && activeOperationKey !== operationKey
+      ? operationDisabledTitle
+      : blockedTitle || disabledTitle || label;
 
   return (
     <AccordionPanel
@@ -46,20 +55,31 @@ export function DatabaseAdminSection({
               <DatabaseAction
                 key={action}
                 action={action}
-                disabled={operationDisabled}
+                disabled={operationDisabled || commandAction.disabled}
                 label={commandAction.label}
                 loading={operationDisabled && activeOperationKey === commandAction.id}
-                title={actionTitle(commandAction.label, commandAction.id)}
+                title={actionTitle(
+                  commandAction.label,
+                  commandAction.id,
+                  commandAction.blockedTitle,
+                  commandAction.disabledTitle,
+                )}
                 onClick={() => onRun(commandAction)}
               />
             ) : null;
           })}
           {shell ? (
             <ShellIconButton
-              disabled={operationDisabled}
+              disabled={operationDisabled || shellDisabled}
               label={copy.shellLabel}
               loading={operationDisabled && activeOperationKey === shellOperationKey}
-              title={actionTitle(copy.shellLabel, shellOperationKey)}
+              title={
+                operationDisabled && activeOperationKey !== shellOperationKey
+                  ? operationDisabledTitle
+                  : shellDisabled
+                    ? shellDisabledTitle
+                    : copy.shellLabel
+              }
               onClick={() => onShellOpen(shell)}
             />
           ) : null}

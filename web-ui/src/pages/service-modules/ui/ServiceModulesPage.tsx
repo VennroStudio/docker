@@ -49,6 +49,8 @@ export function ServiceModulesPage({
               operationDisabled={operationDisabled}
               operationDisabledTitle={operationDisabledTitle}
               shell={module.shell}
+              shellDisabled={module.shellDisabled}
+              shellDisabledTitle={module.shellDisabledTitle}
               status={module.status}
               statusLabel={module.statusLabel}
               stateEyebrow={module.stateEyebrow}

@@ -1,11 +1,12 @@
 import type { CommandAction } from "@/entities/infrastructure";
 import { commandPreview, openCommandTerminal } from "@/features/command-terminal";
-import type { ConfirmDialogApi, OperationTextConfig, RunWithTerminal } from "./operationTypes";
+import type { ConfirmDialogApi, OperationTextConfig, RunWithTerminal, ToastApi } from "./operationTypes";
 
 type UseCommandOperationsConfig = OperationTextConfig & {
   confirmDialog: ConfirmDialogApi;
   refreshNginxStatus: () => Promise<void> | void;
   runWithTerminal: RunWithTerminal;
+  toast: ToastApi;
 };
 
 export function useCommandOperations({
@@ -13,8 +14,14 @@ export function useCommandOperations({
   refreshNginxStatus,
   runWithTerminal,
   text,
+  toast,
 }: UseCommandOperationsConfig) {
   const runCommand = async (action: CommandAction) => {
+    if (action.blockedTitle) {
+      toast.show({ title: action.blockedTitle, tone: "info" });
+      return;
+    }
+
     if (action.confirm) {
       const confirmed = await confirmDialog.confirm({
         body: text.confirm.runCommand.body(commandPreview(action.id)),

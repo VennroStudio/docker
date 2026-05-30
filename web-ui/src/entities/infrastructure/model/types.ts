@@ -24,6 +24,7 @@ export type CommandAction = {
   detail: string;
   tone?: CommandTone;
   confirm?: boolean;
+  blockedTitle?: string;
   disabled?: boolean;
   disabledTitle?: string;
 };

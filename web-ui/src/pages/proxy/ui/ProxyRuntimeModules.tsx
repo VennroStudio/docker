@@ -1,5 +1,12 @@
 import { ServiceModuleAccordion } from "@/widgets/service-module";
-import type { AppText, CommandAction, ShellAction, useNginxStatus } from "@/entities/infrastructure";
+import {
+  applyContainerActionRules,
+  shellDisabledForContainerState,
+  type AppText,
+  type CommandAction,
+  type ShellAction,
+  type useNginxStatus,
+} from "@/entities/infrastructure";
 import { SettingsConfigAccordion, type SettingsConfigField, type useSettings } from "@/entities/settings";
 
 const npmConfigFields: SettingsConfigField[] = [
@@ -34,17 +41,24 @@ export function ProxyRuntimeModules({
 }: ProxyRuntimeModulesProps) {
   const status = nginxStatus.status;
   const container = status?.container || shellAction?.container;
+  const actions = applyContainerActionRules(nginxActions, status?.state, {
+    disabledTitle: text.panels.serviceControl.containerRequired,
+  });
 
   return (
     <div className="space-y-4">
       <ServiceModuleAccordion
-        actions={nginxActions}
+        actions={actions}
         activeOperationKey={activeOperationKey}
         eyebrow={text.panels.npm.nginxEyebrow}
-        link={status?.url ? { label: "NPM", source: "local", url: status.url } : undefined}
+        link={
+          status?.state === "running" && status.url ? { label: "NPM", source: "local", url: status.url } : undefined
+        }
         operationDisabled={operationDisabled}
         operationDisabledTitle={operationDisabledTitle}
         shell={shellAction}
+        shellDisabled={shellDisabledForContainerState(status?.state)}
+        shellDisabledTitle={text.panels.serviceControl.containerRequired}
         status={status ? { state: status.state, status: status.uptime } : undefined}
         stateEyebrow
         statusLabel={text.mariadbInstances.statusLabel}

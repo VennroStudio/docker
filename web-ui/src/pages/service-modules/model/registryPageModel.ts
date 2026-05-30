@@ -1,4 +1,10 @@
-import { commandPageRegistry, type CommandAction, registryActions, registryUiActions } from "@/entities/infrastructure";
+import {
+  applyContainerActionRules,
+  commandPageRegistry,
+  registryActions,
+  registryUiActions,
+  shellDisabledForContainerState,
+} from "@/entities/infrastructure";
 import type { ServiceModulesModelSource } from "./serviceModulesModel";
 import { registryAuthFields, registryPortFields, registryUiPortFields } from "./serviceModuleFields";
 import { findShell, serviceLink } from "./serviceModuleHelpers";
@@ -16,8 +22,8 @@ export function getRegistryPageModel({
   const registryUiShell = findShell(shells, "registry-ui-container");
   const registry = registryStatus?.registry;
   const registryUi = registryStatus?.registryUi;
-  const registryLink = serviceLink("Registry", registry?.url);
-  const registryUiLink = serviceLink("Registry UI", registryUi?.url);
+  const registryLink = registry?.state === "running" ? serviceLink("Registry", registry?.url) : undefined;
+  const registryUiLink = registryUi?.state === "running" ? serviceLink("Registry UI", registryUi?.url) : undefined;
   const registryCredentialsReady = Boolean(
     settings?.registry?.registryUser?.trim() && settings.registry.registryPassword?.trim(),
   );
@@ -28,12 +34,10 @@ export function getRegistryPageModel({
     eyebrow: page.eyebrow,
     modules: [
       {
-        actions: disableActionSuffixes(
-          translateActions(registryActions),
-          !registryCredentialsReady,
-          ["up", "start"],
-          text.panels.serviceControl.registryCredentialsRequired,
-        ),
+        actions: applyContainerActionRules(translateActions(registryActions), registry?.state, {
+          disabledTitle: text.panels.serviceControl.containerRequired,
+          upBlockedTitle: registryCredentialsReady ? undefined : text.panels.serviceControl.registryCredentialsRequired,
+        }),
         configSections: [
           {
             eyebrow: text.panels.npm.configEyebrow,
@@ -55,18 +59,18 @@ export function getRegistryPageModel({
         eyebrow: page.panelEyebrow,
         link: registryLink,
         shell: registryShell,
+        shellDisabled: shellDisabledForContainerState(registry?.state),
+        shellDisabledTitle: text.panels.serviceControl.containerRequired,
         stateEyebrow: true,
         status: registry,
         statusLabel: text.mariadbInstances.statusLabel,
         title: "Registry",
       },
       {
-        actions: disableActionSuffixes(
-          translateActions(registryUiActions),
-          !registryRunning,
-          ["up", "start"],
-          text.panels.serviceControl.registryRequired,
-        ),
+        actions: applyContainerActionRules(translateActions(registryUiActions), registryUi?.state, {
+          disabledTitle: text.panels.serviceControl.containerRequired,
+          upBlockedTitle: registryRunning ? undefined : text.panels.serviceControl.registryRequired,
+        }),
         configSections: [
           {
             eyebrow: text.panels.npm.configEyebrow,
@@ -82,6 +86,8 @@ export function getRegistryPageModel({
         eyebrow: "Registry UI",
         link: registryUiLink,
         shell: registryUiShell,
+        shellDisabled: shellDisabledForContainerState(registryUi?.state),
+        shellDisabledTitle: text.panels.serviceControl.containerRequired,
         stateEyebrow: true,
         status: registryUi,
         statusLabel: text.mariadbInstances.statusLabel,
@@ -89,24 +95,4 @@ export function getRegistryPageModel({
       },
     ],
   };
-}
-
-function disableActionSuffixes(
-  actions: CommandAction[],
-  disabled: boolean,
-  suffixes: string[],
-  disabledTitle: string,
-) {
-  if (!disabled) return actions;
-
-  return actions.map((action) => {
-    const suffix = action.id.split(":").at(-1) || "";
-    if (!suffixes.includes(suffix)) return action;
-
-    return {
-      ...action,
-      disabled: true,
-      disabledTitle,
-    };
-  });
 }

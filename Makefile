@@ -243,13 +243,19 @@ mariadb-instance-shell: ## Shell MariaDB instance, передать NAME=11-4 и
 phpmyadmin-status: ## Показать статус phpMyAdmin
 	@$(NODE_RUN) ./scripts/database/mariadb/status.mjs phpmyadmin
 
-phpmyadmin-up: ## Запустить контейнер phpMyAdmin
+phpmyadmin-require-running:
+	@if ! docker ps --format '{{.Names}}' | grep -Eq '^mariadb-.+-container$$'; then \
+		echo "MariaDB container is not running. Run a MariaDB instance first."; \
+		exit 1; \
+	fi
+
+phpmyadmin-up: phpmyadmin-require-running ## Запустить контейнер phpMyAdmin
 	$(MAKE) compose-up NAME=phpmyadmin
 
 phpmyadmin-pull: ## Скачать/обновить образ phpMyAdmin
 	$(MAKE) compose-pull NAME=phpmyadmin
 
-phpmyadmin-start: ## Запустить существующий контейнер phpMyAdmin
+phpmyadmin-start: phpmyadmin-require-running ## Запустить существующий контейнер phpMyAdmin
 	$(MAKE) compose-start NAME=phpmyadmin
 
 phpmyadmin-stop: ## Остановить контейнер phpMyAdmin
@@ -371,13 +377,19 @@ postgres-instance-shell: ## Shell Postgres instance, передать NAME=17 и
 pgadmin-status: ## Показать статус pgAdmin
 	@$(NODE_RUN) ./scripts/database/postgres/status.mjs pgadmin
 
-pgadmin-up: ## Запустить контейнер pgAdmin
+pgadmin-require-running:
+	@if ! docker ps --format '{{.Names}}' | grep -Eq '^postgres-.+-container$$'; then \
+		echo "PostgreSQL container is not running. Run a PostgreSQL instance first."; \
+		exit 1; \
+	fi
+
+pgadmin-up: pgadmin-require-running ## Запустить контейнер pgAdmin
 	$(MAKE) compose-up NAME=pgadmin
 
 pgadmin-pull: ## Скачать/обновить образ pgAdmin
 	$(MAKE) compose-pull NAME=pgadmin
 
-pgadmin-start: ## Запустить существующий контейнер pgAdmin
+pgadmin-start: pgadmin-require-running ## Запустить существующий контейнер pgAdmin
 	$(MAKE) compose-start NAME=pgadmin
 
 pgadmin-stop: ## Остановить контейнер pgAdmin
@@ -429,13 +441,20 @@ redis-shell: ## Shell внутри контейнера Redis
 redisinsight-status: ## Показать статус RedisInsight
 	@$(NODE_RUN) ./scripts/redis/status.mjs redisinsight
 
-redisinsight-up: ## Запустить контейнер RedisInsight
+redis-require-running:
+	@running="$$(docker inspect -f '{{.State.Running}}' redis-container 2>/dev/null || true)"; \
+		if [ "$$running" != "true" ]; then \
+			echo "Redis container is not running. Run: make redis-up"; \
+			exit 1; \
+		fi
+
+redisinsight-up: redis-require-running ## Запустить контейнер RedisInsight
 	$(MAKE) compose-up NAME=redisinsight
 
 redisinsight-pull: ## Скачать/обновить образ RedisInsight
 	$(MAKE) compose-pull NAME=redisinsight
 
-redisinsight-start: ## Запустить существующий контейнер RedisInsight
+redisinsight-start: redis-require-running ## Запустить существующий контейнер RedisInsight
 	$(MAKE) compose-start NAME=redisinsight
 
 redisinsight-stop: ## Остановить контейнер RedisInsight
@@ -617,12 +636,12 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: npm-status npm-up npm-pull npm-start npm-stop npm-down npm-clean npm-logs npm-shell
 .PHONY: mariadb-status mariadb-shell mariadb-import mariadb-export mariadb-dump-list mariadb-db-list mariadb-db-create mariadb-db-drop mariadb-dump-upload
 .PHONY: mariadb-instance-add mariadb-instance-list mariadb-instance-resolve mariadb-instance-status mariadb-instance-generate mariadb-instance-up mariadb-instance-start mariadb-instance-stop mariadb-instance-down mariadb-instance-clean mariadb-instance-logs mariadb-instance-shell
-.PHONY: phpmyadmin-status phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs phpmyadmin-shell phpmyadmin-config-generate phpmyadmin-reload
+.PHONY: phpmyadmin-status phpmyadmin-require-running phpmyadmin-up phpmyadmin-pull phpmyadmin-start phpmyadmin-stop phpmyadmin-down phpmyadmin-clean phpmyadmin-logs phpmyadmin-shell phpmyadmin-config-generate phpmyadmin-reload
 .PHONY: postgres-status postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-dump-list postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload
 .PHONY: postgres-instance-add postgres-instance-list postgres-instance-resolve postgres-instance-status postgres-instance-up postgres-instance-start postgres-instance-stop postgres-instance-down postgres-instance-clean postgres-instance-logs postgres-instance-shell
-.PHONY: pgadmin-status pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell
+.PHONY: pgadmin-status pgadmin-require-running pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell
 .PHONY: redis-status redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs redis-shell
-.PHONY: redisinsight-status redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs redisinsight-shell
+.PHONY: redisinsight-status redis-require-running redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs redisinsight-shell
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell registry-require-running
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
