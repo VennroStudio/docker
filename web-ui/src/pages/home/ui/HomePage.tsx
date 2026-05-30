@@ -13,7 +13,7 @@ type HomePageProps = {
 export function HomePage({ onOpenView, statuses, text }: HomePageProps) {
   return (
     <div className="space-y-4">
-      <HomeHero text={text} onOpenProxy={() => onOpenView("proxy")} />
+      <HomeHero text={text} />
       <ServiceGrid statuses={statuses} text={text} onOpenService={onOpenView} />
       <WorkflowPanel text={text} />
     </div>

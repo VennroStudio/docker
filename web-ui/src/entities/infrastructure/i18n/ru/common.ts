@@ -5,6 +5,7 @@ export const ruCommon = {
   clear: "Очистить",
   hide: "Скрыть",
   link: "Ссылка",
+  panel: "панель",
   panels: "панелей",
   statusLabels: {
     missing: "нет",

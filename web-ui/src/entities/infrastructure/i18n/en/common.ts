@@ -5,6 +5,7 @@ export const enCommon = {
   clear: "Clear",
   hide: "Hide",
   link: "Link",
+  panel: "panel",
   panels: "panels",
   statusLabels: {
     missing: "missing",

@@ -9,6 +9,7 @@ export type AppText = {
     clear: string;
     hide: string;
     link: string;
+    panel: string;
     panels: string;
     statusLabels: Record<ServiceRuntimeState, string>;
     stop: string;
@@ -46,9 +47,12 @@ export type AppText = {
   };
   home: {
     hero: {
-      action: string;
       eyebrow: string;
       lead: string;
+      title: string;
+    };
+    modules: {
+      eyebrow: string;
       title: string;
     };
     services: {

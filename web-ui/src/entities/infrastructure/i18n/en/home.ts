@@ -2,20 +2,19 @@ import type { AppText } from "../types";
 
 export const enHome = {
   hero: {
-    action: "Configure domain",
-    eyebrow: "Local Infrastructure",
-    lead: "Manage local domains, Nginx Proxy Manager, databases, storage and logs from one dark, focused workspace.",
-    title: "Open-server control panel for Docker services.",
+    eyebrow: "Infrastructure",
+    lead: "Manage local domains, databases, storage, cache, registry and SSH from one control panel.",
+    title: "Control panel",
   },
   serviceCards: {
-    mariadb: {
-      description: "MariaDB, PostgreSQL, phpMyAdmin and pgAdmin in one workspace.",
-      meta: "SQL stack",
-      title: "Databases",
-    },
+  mariadb: {
+    description: "MariaDB, Postgres and UI database management.",
+    meta: "Data module",
+    title: "Databases",
+  },
     minio: {
       description: "S3-compatible storage with console access.",
-      meta: "Storage",
+      meta: "Storage module",
       title: "MinIO",
     },
     nginx: {
@@ -29,29 +28,33 @@ export const enHome = {
       title: "Postgres",
     },
     proxy: {
-      description: "Domains, proxy hosts and the NPM container.",
+      description: "Domain, SSL and NPM container management.",
       meta: "NPM module",
       title: "Nginx Proxy Manager",
     },
     redis: {
-      description: "Cache service, RedisInsight and live logs.",
-      meta: "Cache",
-      title: "Redis",
+      description: "Redis and UI cache management.",
+      meta: "Cache module",
+      title: "Cache",
     },
     registry: {
-      description: "Private Docker Registry, UI and image logs.",
-      meta: "Images",
-      title: "Registry",
+      description: "Registry and UI image management.",
+      meta: "Images module",
+      title: "Private Docker Registry",
     },
     ssh: {
-      description: "Servers, passwords, RSA keys and SSH terminal.",
-      meta: "Servers",
-      title: "SSH",
+      description: "Store SSH servers, connect through the terminal and manage RSA keys.",
+      meta: "SSH service",
+      title: "SSH Control Panel",
     },
   },
+  modules: {
+    eyebrow: "Module panel",
+    title: "Module management",
+  },
   services: {
-    eyebrow: "Service panels",
-    title: "Run every service separately",
+    eyebrow: "Service panel",
+    title: "Service management",
   },
   workflow: {
     eyebrow: "Local flow",

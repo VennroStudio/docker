@@ -4,10 +4,12 @@ export type HomeService = {
   id: ServiceViewId;
 };
 
-export const homeServices: HomeService[] = [
+export const homeModules: HomeService[] = [
   { id: "proxy" },
   { id: "mariadb" },
   { id: "redis" },
   { id: "minio" },
   { id: "registry" },
 ];
+
+export const homeServices: HomeService[] = [{ id: "ssh" }];

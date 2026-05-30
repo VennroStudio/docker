@@ -2,20 +2,19 @@ import type { AppText } from "../types";
 
 export const ruHome = {
   hero: {
-    action: "Настроить домен",
-    eyebrow: "Локальная инфраструктура",
-    lead: "Управляй локальными доменами, Nginx Proxy Manager, базами, хранилищем и логами из одного темного рабочего пространства.",
-    title: "Open-server панель управления Docker сервисами.",
+    eyebrow: "Инфраструктура",
+    lead: "Управляй локальными доменами, базами данных, хранилищем, кешем, registry и SSH из одной панели.",
+    title: "Панель управления",
   },
   serviceCards: {
-    mariadb: {
-      description: "MariaDB, PostgreSQL, phpMyAdmin и pgAdmin на одной странице.",
-      meta: "SQL stack",
-      title: "Базы данных",
-    },
+  mariadb: {
+    description: "Mariadb, Postgres и UI управление базами данных",
+    meta: "Data module",
+    title: "Базы данных",
+  },
     minio: {
       description: "S3-совместимое хранилище с доступом к консоли.",
-      meta: "Storage",
+      meta: "Storage module",
       title: "MinIO",
     },
     nginx: {
@@ -28,30 +27,34 @@ export const ruHome = {
       meta: "DB tools",
       title: "Postgres",
     },
-    proxy: {
-      description: "Домены, proxy hosts и контейнер NPM.",
+  proxy: {
+    description: "Управление доменами, SSL и контейнером NPM",
       meta: "NPM module",
       title: "Nginx Proxy Manager",
     },
-    redis: {
-      description: "Cache service, RedisInsight и поток логов.",
-      meta: "Cache",
-      title: "Redis",
+  redis: {
+    description: "Redis и UI управление кэшем",
+      meta: "Cache module",
+      title: "Кэширование",
     },
-    registry: {
-      description: "Private Docker Registry, UI и логи образов.",
-      meta: "Images",
-      title: "Registry",
+  registry: {
+    description: "Registry и UI управление образами",
+      meta: "Images module",
+      title: "Private Docker Registry",
     },
-    ssh: {
-      description: "Серверы, пароли, RSA ключи и SSH терминал.",
-      meta: "Servers",
-      title: "SSH",
+  ssh: {
+    description: "Хранение SSH серверов, подключение через терминал и управление RSA ключами",
+      meta: "SSH service",
+      title: "SSH Control Panel",
     },
   },
+  modules: {
+    eyebrow: "Панель модулей",
+    title: "Управление модулями",
+  },
   services: {
-    eyebrow: "Панели сервисов",
-    title: "Запускай каждый сервис отдельно",
+    eyebrow: "Панель сервисов",
+    title: "Управление сервисами",
   },
   workflow: {
     eyebrow: "Локальный flow",
