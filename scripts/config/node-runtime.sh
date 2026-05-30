@@ -31,6 +31,13 @@ node_path() {
   esac
 }
 
+npm_path() {
+  case "$(platform)" in
+    win-*) printf "%s/npm.cmd\n" "$RUNTIME_DIR" ;;
+    *) printf "%s/bin/npm\n" "$RUNTIME_DIR" ;;
+  esac
+}
+
 ensure() {
   node_bin="$(node_path)"
   if [ -x "$node_bin" ]; then
@@ -83,8 +90,14 @@ case "$ACTION" in
     ensure
     exec "$(node_path)" "$@"
     ;;
+  npm)
+    shift
+    ensure
+    node_dir="$(cd "$(dirname "$(node_path)")" && pwd)"
+    PATH="$node_dir:$PATH" exec "$(npm_path)" "$@"
+    ;;
   *)
-    echo "Usage: $0 ensure|path|run [node args...]" >&2
+    echo "Usage: $0 ensure|path|run|npm [args...]" >&2
     exit 1
     ;;
 esac

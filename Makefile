@@ -5,10 +5,9 @@ COMPOSE_DIR := docker/compose
 COMPOSE_ENV := $(if $(wildcard .env),--env-file .env,)
 ROOT_DIR := $(CURDIR)
 NODE_RUN := ./scripts/config/node-runtime.sh run
-WEB_UI_IMAGE := infrastructure-ui
+NPM_RUN := ./scripts/config/node-runtime.sh npm
 WEB_UI_RUNTIME_DIR := build/web-ui
 WEB_UI_STATIC_DIR := $(WEB_UI_RUNTIME_DIR)/dist
-WEB_UI_RUNTIME_NODE_PTY := $(WEB_UI_RUNTIME_DIR)/node_modules/node-pty/package.json
 ARCHIVE_DIR := archives
 
 compose-file = $(COMPOSE_DIR)/docker-compose-$(NAME).yml
@@ -22,10 +21,21 @@ help: ## Показать список команд
 		$(MAKEFILE_LIST)
 	@echo ""
 
+##@ Runtime
+node-runtime: ## Скачать локальный Node.js runtime в .runtime/node
+	@./scripts/config/node-runtime.sh ensure
+
+shell: node-runtime ## Открыть shell с локальным runtime в PATH
+	@node_bin="$(ROOT_DIR)/$$(./scripts/config/node-runtime.sh path)"; \
+		node_dir="$$(dirname "$$node_bin")"; \
+		printf 'Local Node.js: %s\n' "$$node_bin"; \
+		printf 'Runtime shell started. Run exit to leave.\n'; \
+		export PATH="$$node_dir:$$PATH"; \
+		exec "$${SHELL:-/bin/sh}" -i
+
 ##@ Project
 init: ## Создать локальные config файлы
 	@$(NODE_RUN) ./scripts/config/settings.mjs init
-	@mkdir -p docker/mariadb docker/phpmyadmin docker/postgres dumps/mariadb dumps/postgres
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
@@ -42,35 +52,31 @@ settings-env: ## Сгенерировать .env из config/settings.json
 	@$(NODE_RUN) ./scripts/config/settings.mjs env
 
 ##@ Web UI
-node-runtime: ## Скачать локальный Node.js runtime в .runtime/node
-	@./scripts/config/node-runtime.sh ensure
+ui-restart: ui-stop web-ui-build ui ## Пересобрать и перезапустить Web UI
 
-ui: node-runtime web-ui-dist proxy-network-ensure ## Запустить Web UI на хосте
+ui: node-runtime proxy-network-ensure ## Запустить Web UI на хосте
 	@$(NODE_RUN) "$(WEB_UI_RUNTIME_DIR)/server.mjs"
 
-web-ui-build: node-runtime ## Собрать frontend dist через Docker
-	docker build -t $(WEB_UI_IMAGE) -f web-ui/Dockerfile .
-	@container="$$(docker create $(WEB_UI_IMAGE))"; \
-		rm -rf "$(WEB_UI_RUNTIME_DIR)"; \
-		mkdir -p "$(WEB_UI_RUNTIME_DIR)"; \
-		docker cp "$$container:/opt/web-ui/dist" "$(WEB_UI_STATIC_DIR)"; \
-		docker rm "$$container" >/dev/null; \
-		cp web-ui/server.mjs "$(WEB_UI_RUNTIME_DIR)/server.mjs"; \
-		cp web-ui/commands.manifest.json "$(WEB_UI_RUNTIME_DIR)/commands.manifest.json"; \
-		cp -R web-ui/server "$(WEB_UI_RUNTIME_DIR)/server"
-	@printf '%s\n' '{"type":"module","dependencies":{"node-pty":"^1.0.0","ws":"^8.21.0"}}' > "$(WEB_UI_RUNTIME_DIR)/package.json"
-	@node_bin="$$(./scripts/config/node-runtime.sh path)"; \
-		case "$$node_bin" in \
-			*.exe) npm_bin="$$(dirname "$$node_bin")/npm.cmd" ;; \
-			*) npm_bin="$$(dirname "$$node_bin")/npm" ;; \
-		esac; \
-		"$$npm_bin" install --prefix "$(WEB_UI_RUNTIME_DIR)" --omit=dev --no-audit --no-fund
-	@find "$(WEB_UI_RUNTIME_DIR)/node_modules/node-pty/prebuilds" -name spawn-helper -type f -exec chmod +x {} \; 2>/dev/null || true
+ui-stop: ## Остановить Web UI на порту 8088
+	@pids="$$(lsof -ti tcp:8088)"; \
+		if [ -n "$$pids" ]; then \
+			kill $$pids; \
+		else \
+			printf 'Web UI is not running on port 8088\n'; \
+		fi
 
-web-ui-dist: ## Создать build/web-ui, если его нет
-	@if [ ! -f "$(WEB_UI_STATIC_DIR)/index.html" ] || [ ! -f "$(WEB_UI_RUNTIME_DIR)/server.mjs" ] || [ ! -f "$(WEB_UI_RUNTIME_NODE_PTY)" ]; then \
-		$(MAKE) web-ui-build; \
-	fi
+web-ui-build: node-runtime ## Собрать Web UI через локальный Node.js runtime
+	@$(NPM_RUN) --prefix web-ui ci
+	@$(NPM_RUN) --prefix web-ui run build
+	@rm -rf "$(WEB_UI_RUNTIME_DIR)"
+	@mkdir -p "$(WEB_UI_RUNTIME_DIR)"
+	@cp -R web-ui/dist "$(WEB_UI_STATIC_DIR)"
+	@cp web-ui/server.mjs "$(WEB_UI_RUNTIME_DIR)/server.mjs"
+	@cp web-ui/commands.manifest.json "$(WEB_UI_RUNTIME_DIR)/commands.manifest.json"
+	@cp -R web-ui/server "$(WEB_UI_RUNTIME_DIR)/server"
+	@printf '%s\n' '{"type":"module","dependencies":{"node-pty":"^1.0.0","ws":"^8.21.0"}}' > "$(WEB_UI_RUNTIME_DIR)/package.json"
+	@$(NPM_RUN) install --prefix "$(WEB_UI_RUNTIME_DIR)" --omit=dev --no-audit --no-fund
+	@find "$(WEB_UI_RUNTIME_DIR)/node_modules/node-pty/prebuilds" -name spawn-helper -type f -exec chmod +x {} \; 2>/dev/null || true
 
 web-ui-clean: ## Удалить собранный frontend dist
 	rm -rf "$(WEB_UI_RUNTIME_DIR)"
@@ -78,9 +84,6 @@ web-ui-clean: ## Удалить собранный frontend dist
 ##@ Docker network
 proxy-network-ensure: ## Создать общую сеть proxy, если ее еще нет
 	@docker network inspect proxy >/dev/null 2>&1 || docker network create proxy
-
-add-proxy: ## Создать общую сеть proxy
-	docker network create proxy
 
 delete-proxy: ## Удалить общую сеть proxy
 	docker network rm proxy
@@ -628,8 +631,9 @@ archive-delete: ## Удалить архив из папки archives, пере�
 	@$(NODE_RUN) ./scripts/utilities/archive.mjs delete --name "$(NAME)"
 
 .PHONY: help init settings-show settings-set settings-env
-.PHONY: node-runtime ui web-ui-build web-ui-dist web-ui-clean
-.PHONY: proxy-network-ensure add-proxy delete-proxy
+.PHONY: node-runtime shell
+.PHONY: ui ui-stop web-ui-build web-ui-clean
+.PHONY: proxy-network-ensure delete-proxy
 .PHONY: compose-up compose-pull compose-start compose-stop compose-restart compose-down compose-logs compose-shell
 .PHONY: host-add host-remove
 .PHONY: app-proxy app-proxy-remove

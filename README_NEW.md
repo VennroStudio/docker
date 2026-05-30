@@ -561,12 +561,6 @@ make settings-env
 make proxy-network-ensure
 ```
 
-Создать общую Docker network `proxy`:
-
-```sh
-make add-proxy
-```
-
 Удалить общую Docker network `proxy`:
 
 ```sh
