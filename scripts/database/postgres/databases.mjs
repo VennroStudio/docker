@@ -13,7 +13,6 @@ import {
 } from "./common.mjs";
 
 const systemDatabases = new Set(["postgres", "template0", "template1"]);
-const maintenanceDatabase = "postgres";
 
 const [command, ...argv] = process.argv.slice(2);
 const args = parseArgs(argv);
@@ -82,7 +81,7 @@ async function executeSql(target, sql) {
     "-U",
     target.user,
     "-d",
-    maintenanceDatabase,
+    target.database,
     "-At",
     "-c",
     sql,
