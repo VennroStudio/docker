@@ -36,6 +36,7 @@ shell: node-runtime ## Открыть shell с локальным runtime в PAT
 ##@ Project
 init: ## Создать локальные config файлы
 	@$(NODE_RUN) ./scripts/config/settings.mjs init
+	@$(NODE_RUN) ./scripts/projects/projects.mjs init
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
@@ -573,6 +574,96 @@ registry-ui-logs: ## Логи Registry UI
 registry-ui-shell: ## Shell внутри контейнера Registry UI
 	$(MAKE) compose-shell NAME=registry-ui
 
+##@ Projects
+project-init: ## Создать config/projects.json
+	@$(NODE_RUN) ./scripts/projects/projects.mjs init
+
+project-catalog: ## Показать доступные runtime для проектов
+	@$(NODE_RUN) ./scripts/projects/projects.mjs catalog
+
+project-list: ## Показать список проектов
+	@$(NODE_RUN) ./scripts/projects/projects.mjs list
+
+project-show: ## Показать проект, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs show --name "$(NAME)"
+
+project-create: proxy-network-ensure ## Создать сайт, передать NAME=project-a WEB_STACK=nginx-fpm PHP_VERSION=8.4 PHP_PRESET=laravel
+	@$(NODE_RUN) ./scripts/projects/projects.mjs create \
+		--name "$(NAME)" \
+		$(if $(RUNTIMES),--runtimes "$(RUNTIMES)",) \
+		$(if $(WEB_STACK),--web-stack "$(WEB_STACK)",) \
+		$(if $(DOCUMENT_ROOT),--document-root "$(DOCUMENT_ROOT)",) \
+		$(if $(WEB_PORT),--web-port "$(WEB_PORT)",) \
+		$(if $(WEB_COMMAND),--web-command "$(WEB_COMMAND)",) \
+		$(if $(PHP_VERSION),--php-version "$(PHP_VERSION)",) \
+		$(if $(PHP_PRESET),--php-preset "$(PHP_PRESET)",) \
+		$(if $(PHP_EXTENSIONS),--php-extensions "$(PHP_EXTENSIONS)",) \
+		$(if $(PHP_PACKAGE_MANAGERS),--php-package-managers "$(PHP_PACKAGE_MANAGERS)",) \
+		$(if $(NODE_VERSION),--node-version "$(NODE_VERSION)",) \
+		$(if $(NODE_PACKAGE_MANAGER),--node-package-manager "$(NODE_PACKAGE_MANAGER)",) \
+		$(if $(PYTHON_VERSION),--python-version "$(PYTHON_VERSION)",) \
+		$(if $(PYTHON_PACKAGE_MANAGER),--python-package-manager "$(PYTHON_PACKAGE_MANAGER)",) \
+		$(if $(GO_VERSION),--go-version "$(GO_VERSION)",) \
+		$(if $(JAVA_VERSION),--java-version "$(JAVA_VERSION)",) \
+		$(if $(JAVA_PACKAGE_MANAGER),--java-package-manager "$(JAVA_PACKAGE_MANAGER)",) \
+		$(if $(DOTNET_VERSION),--dotnet-version "$(DOTNET_VERSION)",) \
+		$(if $(RUBY_VERSION),--ruby-version "$(RUBY_VERSION)",) \
+		$(if $(RUBY_PACKAGE_MANAGER),--ruby-package-manager "$(RUBY_PACKAGE_MANAGER)",)
+
+project-update: ## Изменить сайт, передать NAME=project-a WEB_STACK=apache PHP_VERSION=8.3
+	@$(NODE_RUN) ./scripts/projects/projects.mjs update \
+		--name "$(NAME)" \
+		$(if $(RUNTIMES),--runtimes "$(RUNTIMES)",) \
+		$(if $(REMOVE_RUNTIMES),--remove-runtimes "$(REMOVE_RUNTIMES)",) \
+		$(if $(WEB_STACK),--web-stack "$(WEB_STACK)",) \
+		$(if $(DOCUMENT_ROOT),--document-root "$(DOCUMENT_ROOT)",) \
+		$(if $(WEB_PORT),--web-port "$(WEB_PORT)",) \
+		$(if $(WEB_COMMAND),--web-command "$(WEB_COMMAND)",) \
+		$(if $(PHP_VERSION),--php-version "$(PHP_VERSION)",) \
+		$(if $(PHP_PRESET),--php-preset "$(PHP_PRESET)",) \
+		$(if $(PHP_EXTENSIONS),--php-extensions "$(PHP_EXTENSIONS)",) \
+		$(if $(PHP_PACKAGE_MANAGERS),--php-package-managers "$(PHP_PACKAGE_MANAGERS)",) \
+		$(if $(NODE_VERSION),--node-version "$(NODE_VERSION)",) \
+		$(if $(NODE_PACKAGE_MANAGER),--node-package-manager "$(NODE_PACKAGE_MANAGER)",) \
+		$(if $(PYTHON_VERSION),--python-version "$(PYTHON_VERSION)",) \
+		$(if $(PYTHON_PACKAGE_MANAGER),--python-package-manager "$(PYTHON_PACKAGE_MANAGER)",) \
+		$(if $(GO_VERSION),--go-version "$(GO_VERSION)",) \
+		$(if $(JAVA_VERSION),--java-version "$(JAVA_VERSION)",) \
+		$(if $(JAVA_PACKAGE_MANAGER),--java-package-manager "$(JAVA_PACKAGE_MANAGER)",) \
+		$(if $(DOTNET_VERSION),--dotnet-version "$(DOTNET_VERSION)",) \
+		$(if $(RUBY_VERSION),--ruby-version "$(RUBY_VERSION)",) \
+		$(if $(RUBY_PACKAGE_MANAGER),--ruby-package-manager "$(RUBY_PACKAGE_MANAGER)",)
+
+project-remove: ## Удалить проект, передать NAME=project-a FORCE=1
+	@$(NODE_RUN) ./scripts/projects/projects.mjs remove --name "$(NAME)" $(if $(FORCE),--force "$(FORCE)",)
+
+project-generate: ## Перегенерировать файлы проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs generate --name "$(NAME)"
+
+project-shell: proxy-network-ensure ## Открыть shell проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs shell --name "$(NAME)"
+
+project-up: proxy-network-ensure ## Запустить контейнер проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs up --name "$(NAME)"
+
+project-down: ## Остановить контейнер проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs down --name "$(NAME)"
+
+project-build: ## Собрать Docker image проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs build --name "$(NAME)"
+
+project-logs: ## Показать логи проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs logs --name "$(NAME)"
+
+project-logs-follow: ## Смотреть живые логи проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs logs-follow --name "$(NAME)"
+
+project-clean: ## Остановить проект и удалить его контейнеры/image, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs clean --name "$(NAME)"
+
+project-status: ## Показать docker status проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs status --name "$(NAME)"
+
 ##@ SSH
 ssh-init: ## Создать config/ssh-servers.json и config/ssh-commands.json
 	@$(NODE_RUN) ./scripts/ssh/servers.mjs init
@@ -649,5 +740,6 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell registry-require-running
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
+.PHONY: project-init project-catalog project-list project-show project-create project-update project-remove project-generate project-shell project-up project-down project-build project-logs project-logs-follow project-clean project-status
 .PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-connect ssh-key-generate ssh-key-push ssh-key-remove ssh-key-show ssh-command-list ssh-command-add ssh-command-update ssh-command-remove
 .PHONY: archive archive-list unarchive archive-delete

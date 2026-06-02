@@ -12,6 +12,7 @@
 
 # Generated local state
 /config/settings.json
+/config/projects.json
 /config/ssh-servers.json
 /config/ssh-commands.json
 /docker/mariadb/instances.json
@@ -29,3 +30,4 @@ docker/ansible/.env.server
 
 /dumps/mariadb
 /dumps/postgres
+/projects

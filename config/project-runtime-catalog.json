@@ -1,0 +1,41 @@
+{
+  "php": {
+    "defaultVersion": "8.4",
+    "versions": ["8.2", "8.3", "8.4"],
+    "packageManagers": ["composer"],
+    "presets": {
+      "minimal": ["bcmath", "curl", "mbstring", "pdo_mysql", "zip"],
+      "laravel": ["bcmath", "curl", "dom", "fileinfo", "intl", "mbstring", "openssl", "pdo_mysql", "tokenizer", "xml", "zip"],
+      "symfony": ["ctype", "curl", "dom", "iconv", "intl", "mbstring", "openssl", "pdo_mysql", "tokenizer", "xml", "zip"],
+      "wordpress": ["curl", "dom", "exif", "fileinfo", "gd", "mbstring", "mysqli", "openssl", "pdo_mysql", "zip"]
+    }
+  },
+  "node": {
+    "defaultVersion": "24",
+    "versions": ["20", "22", "24"],
+    "packageManagers": ["npm", "yarn", "pnpm"]
+  },
+  "python": {
+    "defaultVersion": "3.13",
+    "versions": ["3.11", "3.12", "3.13"],
+    "packageManagers": ["pip", "poetry", "uv"]
+  },
+  "go": {
+    "defaultVersion": "1.24",
+    "versions": ["1.22", "1.23", "1.24"]
+  },
+  "java": {
+    "defaultVersion": "21",
+    "versions": ["17", "21", "25"],
+    "packageManagers": ["maven", "gradle"]
+  },
+  "dotnet": {
+    "defaultVersion": "9.0",
+    "versions": ["8.0", "9.0", "10.0"]
+  },
+  "ruby": {
+    "defaultVersion": "3.4",
+    "versions": ["3.2", "3.3", "3.4"],
+    "packageManagers": ["bundler"]
+  }
+}
