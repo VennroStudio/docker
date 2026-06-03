@@ -649,6 +649,12 @@ project-up: proxy-network-ensure ## Запустить контейнер про
 project-down: ## Остановить контейнер проекта, передать NAME=project-a
 	@$(NODE_RUN) ./scripts/projects/projects.mjs down --name "$(NAME)"
 
+project-start: ## Запустить существующие контейнеры проекта, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs start --name "$(NAME)"
+
+project-stop: ## Остановить контейнеры проекта без удаления, передать NAME=project-a
+	@$(NODE_RUN) ./scripts/projects/projects.mjs stop --name "$(NAME)"
+
 project-build: ## Собрать Docker image проекта, передать NAME=project-a
 	@$(NODE_RUN) ./scripts/projects/projects.mjs build --name "$(NAME)"
 
@@ -740,6 +746,6 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell registry-require-running
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
-.PHONY: project-init project-catalog project-list project-show project-create project-update project-remove project-generate project-shell project-up project-down project-build project-logs project-logs-follow project-clean project-status
+.PHONY: project-init project-catalog project-list project-show project-create project-update project-remove project-generate project-shell project-up project-down project-start project-stop project-build project-logs project-logs-follow project-clean project-status
 .PHONY: ssh-init ssh-list ssh-add ssh-update ssh-remove ssh-connect ssh-key-generate ssh-key-push ssh-key-remove ssh-key-show ssh-command-list ssh-command-add ssh-command-update ssh-command-remove
 .PHONY: archive archive-list unarchive archive-delete

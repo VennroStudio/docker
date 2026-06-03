@@ -52,7 +52,13 @@ const phpBuiltInExtensions = new Set([
 const phpPeclExtensions = new Set(["imagick", "redis"]);
 
 const phpApkPackagesByExtension = {
-  gd: ["libpng-dev", "libjpeg-turbo-dev", "freetype-dev", "libwebp-dev", "libavif-dev"],
+  gd: [
+    "libpng-dev",
+    "libjpeg-turbo-dev",
+    "freetype-dev",
+    "libwebp-dev",
+    "libavif-dev",
+  ],
   imagick: ["imagemagick-dev"],
   intl: ["icu-dev"],
   mysqli: ["mysql-dev"],
@@ -68,7 +74,11 @@ export async function generateProjectFiles(project) {
   await mkdir(project.path, { recursive: true });
   await rm(path.join(project.path, "Dockerfile"), { force: true });
   await removeInactiveGeneratedFiles(project);
-  await writeFile(projectConfigFile(project), `${JSON.stringify(project, null, 2)}\n`, "utf8");
+  await writeFile(
+    projectConfigFile(project),
+    `${JSON.stringify(project, null, 2)}\n`,
+    "utf8",
+  );
   await writeFile(projectComposeFile(project), composeFile(project), "utf8");
   await writeFile(projectMakefile(project), makefile(project), "utf8");
 
@@ -90,7 +100,10 @@ async function removeInactiveGeneratedFiles(project) {
   }
 
   if (project.web.stack === "node") {
-    await rm(path.join(project.path, "docker/common/php"), { force: true, recursive: true });
+    await rm(path.join(project.path, "docker/common/php"), {
+      force: true,
+      recursive: true,
+    });
   }
 }
 
@@ -129,7 +142,10 @@ export function normalizeRuntimes(payload, catalog) {
 
 export function mergeRuntimes(current, payload, catalog) {
   const next = { ...current };
-  const requested = unique([...runtimeListFromPayload(payload.runtimes), ...runtimeFromWeb(payload)]);
+  const requested = unique([
+    ...runtimeListFromPayload(payload.runtimes),
+    ...runtimeFromWeb(payload),
+  ]);
   validateList("RUNTIMES", requested, supportedRuntimes);
 
   for (const runtime of requested) {
@@ -138,7 +154,12 @@ export function mergeRuntimes(current, payload, catalog) {
 
   for (const runtime of supportedRuntimes) {
     if (hasRuntimeInput(payload, runtime)) {
-      next[runtime] = normalizeRuntime(runtime, payload, catalog, next[runtime]);
+      next[runtime] = normalizeRuntime(
+        runtime,
+        payload,
+        catalog,
+        next[runtime],
+      );
     }
   }
 
@@ -158,7 +179,11 @@ export function projectConfigChanged(left = {}, right = {}) {
 
 function normalizeRuntime(runtime, payload, catalog, current = {}) {
   const defaults = catalog[runtime] || {};
-  const version = runtimeVersion(payload, runtime, current.version || defaults.defaultVersion || "latest");
+  const version = runtimeVersion(
+    payload,
+    runtime,
+    current.version || defaults.defaultVersion || "latest",
+  );
   const result = {
     enabled: true,
     version,
@@ -170,33 +195,56 @@ function normalizeRuntime(runtime, payload, catalog, current = {}) {
     assert(defaults.presets?.[preset], `Unknown PHP_PRESET: ${preset}`);
     const extraExtensions = splitList(payload.phpExtensions);
     result.preset = preset;
-    result.extensions = unique([...presetExtensions, ...extraExtensions]).sort();
-    result.packageManagers = packageManagerList(payload.phpPackageManagers || current.packageManagers?.join(",") || "composer");
+    result.extensions = unique([
+      ...presetExtensions,
+      ...extraExtensions,
+    ]).sort();
+    result.packageManagers = packageManagerList(
+      payload.phpPackageManagers ||
+        current.packageManagers?.join(",") ||
+        "composer",
+    );
     validateList("PHP_PACKAGE_MANAGERS", result.packageManagers, ["composer"]);
     validatePhpExtensions(result.extensions);
     return result;
   }
 
   if (runtime === "node") {
-    result.packageManager = payload.nodePackageManager || current.packageManager || "npm";
-    validateEnum("NODE_PACKAGE_MANAGER", result.packageManager, ["npm", "yarn", "pnpm"]);
+    result.packageManager =
+      payload.nodePackageManager || current.packageManager || "npm";
+    validateEnum("NODE_PACKAGE_MANAGER", result.packageManager, [
+      "npm",
+      "yarn",
+      "pnpm",
+    ]);
     return result;
   }
 
   if (runtime === "python") {
-    result.packageManager = payload.pythonPackageManager || current.packageManager || "pip";
-    validateEnum("PYTHON_PACKAGE_MANAGER", result.packageManager, ["pip", "poetry", "uv"]);
+    result.packageManager =
+      payload.pythonPackageManager || current.packageManager || "pip";
+    validateEnum("PYTHON_PACKAGE_MANAGER", result.packageManager, [
+      "pip",
+      "poetry",
+      "uv",
+    ]);
     return result;
   }
 
   if (runtime === "java") {
-    result.packageManager = payload.javaPackageManager || current.packageManager || "";
-    if (result.packageManager) validateEnum("JAVA_PACKAGE_MANAGER", result.packageManager, ["maven", "gradle"]);
+    result.packageManager =
+      payload.javaPackageManager || current.packageManager || "";
+    if (result.packageManager)
+      validateEnum("JAVA_PACKAGE_MANAGER", result.packageManager, [
+        "maven",
+        "gradle",
+      ]);
     return result;
   }
 
   if (runtime === "ruby") {
-    result.packageManager = payload.rubyPackageManager || current.packageManager || "bundler";
+    result.packageManager =
+      payload.rubyPackageManager || current.packageManager || "bundler";
     validateEnum("RUBY_PACKAGE_MANAGER", result.packageManager, ["bundler"]);
     return result;
   }
@@ -208,16 +256,28 @@ function normalizeWeb(payload, runtimes, current = {}) {
   const stack = payload.webStack || current.stack || defaultWebStack(runtimes);
   validateEnum("WEB_STACK", stack, webStacks);
 
-  const documentRoot = normalizeDocumentRoot(payload.documentRoot || current.documentRoot || defaultDocumentRoot(stack, runtimes));
+  const documentRoot = normalizeDocumentRoot(
+    payload.documentRoot ||
+      current.documentRoot ||
+      defaultDocumentRoot(stack, runtimes),
+  );
+  const target = proxyTarget(stack, payload.name, current);
   const web = {
     stack,
     documentRoot,
-    proxyTarget: proxyTarget(stack, payload.name, current.proxyTarget),
-    proxyPort: Number(payload.webPort || current.proxyPort || defaultWebPort(stack)),
+    proxyTarget: target,
+    proxyPort: Number(
+      payload.webPort || current.proxyPort || defaultWebPort(stack),
+    ),
   };
 
+  if (current.url && current.proxyTarget === target) web.url = current.url;
+
   if (stack === "node") {
-    web.command = payload.webCommand || current.command || defaultNodeCommand(runtimes.node);
+    web.command =
+      payload.webCommand ||
+      current.command ||
+      defaultNodeCommand(runtimes.node);
   }
 
   return web;
@@ -260,15 +320,19 @@ function defaultNodeCommand(runtime) {
   return "npm run dev -- --host 0.0.0.0";
 }
 
-function proxyTarget(stack, projectName, current) {
-  if (current) return current;
+function proxyTarget(stack, projectName, current = {}) {
+  if (current.proxyTarget && current.stack === stack)
+    return current.proxyTarget;
   if (stack === "nginx-fpm") return `${projectName}-nginx`;
   return `${projectName}-container`;
 }
 
 function hasRuntimeInput(payload, runtime) {
   if (payload[`${runtime}Version`]) return true;
-  if (runtime === "php") return Boolean(payload.phpPreset || payload.phpExtensions || payload.phpPackageManagers);
+  if (runtime === "php")
+    return Boolean(
+      payload.phpPreset || payload.phpExtensions || payload.phpPackageManagers,
+    );
   if (runtime === "node") return Boolean(payload.nodePackageManager);
   if (runtime === "python") return Boolean(payload.pythonPackageManager);
   if (runtime === "java") return Boolean(payload.javaPackageManager);
@@ -285,7 +349,11 @@ function runtimeListFromPayload(value) {
 
 function runtimeFromVersion(payload, runtime, key) {
   if (payload[key] || payload[`${runtime}Version`]) return [runtime];
-  if (runtime === "php" && (payload.phpPreset || payload.phpExtensions || payload.phpPackageManagers)) return [runtime];
+  if (
+    runtime === "php" &&
+    (payload.phpPreset || payload.phpExtensions || payload.phpPackageManagers)
+  )
+    return [runtime];
   if (runtime === "node" && payload.nodePackageManager) return [runtime];
   if (runtime === "python" && payload.pythonPackageManager) return [runtime];
   if (runtime === "java" && payload.javaPackageManager) return [runtime];
@@ -294,38 +362,85 @@ function runtimeFromVersion(payload, runtime, key) {
 }
 
 function runtimeFromWeb(payload) {
-  if (payload.webStack === "apache" || payload.webStack === "nginx-fpm") return ["php"];
+  if (payload.webStack === "apache" || payload.webStack === "nginx-fpm")
+    return ["php"];
   if (payload.webStack === "node") return ["node"];
   return [];
 }
 
 function runtimeVersion(payload, runtime, fallback) {
-  return payload[`${runtime}Version`] || payload[runtime.toUpperCase() + "_VERSION"] || fallback;
+  return (
+    payload[`${runtime}Version`] ||
+    payload[runtime.toUpperCase() + "_VERSION"] ||
+    fallback
+  );
 }
 
 async function generateNginxFpmProject(project) {
   await writeIfMissing(path.join(project.path, ".env"), "");
-  await writeIfMissing(path.join(project.path, project.web.documentRoot, "index.php"), defaultPhpIndex(project));
-  await writeGenerated(path.join(project.path, "docker/common/php/conf.d/limit.ini"), phpLimitIni());
-  await writeGenerated(path.join(project.path, "docker/common/php/conf.d/security.ini"), phpSecurityIni());
-  await writeGenerated(path.join(project.path, "docker/development/nginx/Dockerfile"), nginxDockerfile());
-  await writeGenerated(path.join(project.path, "docker/development/nginx/conf.d/default.conf"), nginxConfig(project));
-  await writeGenerated(path.join(project.path, "docker/development/php-fpm/Dockerfile"), phpFpmDockerfile(project));
-  await writeGenerated(path.join(project.path, "docker/development/php-cli/Dockerfile"), phpCliDockerfile(project));
+  await writeIfMissing(
+    path.join(project.path, project.web.documentRoot, "index.php"),
+    defaultPhpIndex(project),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/common/php/conf.d/limit.ini"),
+    phpLimitIni(),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/common/php/conf.d/security.ini"),
+    phpSecurityIni(),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/development/nginx/Dockerfile"),
+    nginxDockerfile(),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/development/nginx/conf.d/default.conf"),
+    nginxConfig(project),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/development/php-fpm/Dockerfile"),
+    phpFpmDockerfile(project),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/development/php-cli/Dockerfile"),
+    phpCliDockerfile(project),
+  );
 }
 
 async function generateApacheProject(project) {
   await writeIfMissing(path.join(project.path, ".env"), "");
-  await writeIfMissing(path.join(project.path, project.web.documentRoot, "index.php"), defaultPhpIndex(project));
-  await writeGenerated(path.join(project.path, "docker/common/php/conf.d/limit.ini"), phpLimitIni());
-  await writeGenerated(path.join(project.path, "docker/common/php/conf.d/security.ini"), phpSecurityIni());
-  await writeGenerated(path.join(project.path, "docker/development/apache/Dockerfile"), apacheDockerfile(project));
+  await writeIfMissing(
+    path.join(project.path, project.web.documentRoot, "index.php"),
+    defaultPhpIndex(project),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/common/php/conf.d/limit.ini"),
+    phpLimitIni(),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/common/php/conf.d/security.ini"),
+    phpSecurityIni(),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/development/apache/Dockerfile"),
+    apacheDockerfile(project),
+  );
 }
 
 async function generateNodeProject(project) {
-  await writeIfMissing(path.join(project.path, "package.json"), defaultPackageJson(project));
-  await writeIfMissing(path.join(project.path, "index.html"), defaultHtml(project));
-  await writeGenerated(path.join(project.path, "docker/development/node/Dockerfile"), nodeDockerfile(project.runtimes.node));
+  await writeIfMissing(
+    path.join(project.path, "package.json"),
+    defaultPackageJson(project),
+  );
+  await writeIfMissing(
+    path.join(project.path, "index.html"),
+    defaultHtml(project),
+  );
+  await writeGenerated(
+    path.join(project.path, "docker/development/node/Dockerfile"),
+    nodeDockerfile(project.runtimes.node),
+  );
 }
 
 async function writeGenerated(file, content) {
@@ -432,7 +547,10 @@ networks:
 }
 
 function makefile(project) {
-  const shellService = project.web.stack === "nginx-fpm" ? `${project.name}-php-cli` : project.name;
+  const shellService =
+    project.web.stack === "nginx-fpm"
+      ? `${project.name}-php-cli`
+      : project.name;
   const buildServices = projectBuildServices(project).join(" ");
   const upServices = projectUpServices(project).join(" ");
   const imageNames = projectImageNames(project).join(" ");
@@ -443,7 +561,7 @@ BUILD_SERVICES = ${buildServices}
 UP_SERVICES = ${upServices}
 IMAGE_NAMES = ${imageNames}
 
-.PHONY: help proxy-network-ensure shell up down build logs logs-follow clean status
+.PHONY: help proxy-network-ensure shell up down start stop build logs logs-follow clean status
 
 help: ## Показать список команд
 \t@echo ""
@@ -457,7 +575,7 @@ help: ## Показать список команд
 proxy-network-ensure: ## Создать общую сеть proxy, если ее еще нет
 \t@docker network inspect proxy >/dev/null 2>&1 || docker network create proxy
 
-shell: proxy-network-ensure build ## Открыть shell внутри web-проекта
+shell: proxy-network-ensure ## Открыть shell внутри web-проекта
 \t$(COMPOSE) run --rm $(SHELL_SERVICE) sh
 
 up: proxy-network-ensure build ## Запустить сайт
@@ -466,6 +584,12 @@ up: proxy-network-ensure build ## Запустить сайт
 down: ## Остановить сайт
 \t$(COMPOSE) stop $(BUILD_SERVICES)
 \t$(COMPOSE) rm -f $(BUILD_SERVICES)
+
+start: ## Запустить существующие контейнеры сайта
+\t$(COMPOSE) start $(UP_SERVICES)
+
+stop: ## Остановить сайт без удаления контейнеров
+\t$(COMPOSE) stop $(UP_SERVICES)
 
 build: ## Собрать Docker image сайта
 \t$(COMPOSE) build $(BUILD_SERVICES)
@@ -488,7 +612,11 @@ status: ## Показать статус сайта
 
 function projectBuildServices(project) {
   if (project.web.stack === "nginx-fpm") {
-    return [`${project.name}-nginx`, `${project.name}-php-fpm`, `${project.name}-php-cli`];
+    return [
+      `${project.name}-nginx`,
+      `${project.name}-php-fpm`,
+      `${project.name}-php-cli`,
+    ];
   }
 
   return [project.name];
@@ -503,7 +631,9 @@ function projectUpServices(project) {
 }
 
 function projectImageNames(project) {
-  return projectBuildServices(project).map((service) => `vennro-${service}:latest`);
+  return projectBuildServices(project).map(
+    (service) => `vennro-${service}:latest`,
+  );
 }
 
 function nginxDockerfile() {
@@ -541,31 +671,52 @@ function phpFpmDockerfile(project) {
 }
 
 function phpCliDockerfile(project) {
-  return phpDockerfile(project, "cli", { composer: true, node: Boolean(project.runtimes.node) });
+  return phpDockerfile(project, "cli", {
+    composer: true,
+    node: Boolean(project.runtimes.node),
+  });
 }
 
 function apacheDockerfile(project) {
   const runtime = project.runtimes.php;
-  const lines = [`FROM php:${runtime.version}-apache-bookworm`, ""];
-  const aptPackages = phpAptPackages(runtime.extensions, { node: Boolean(project.runtimes.node), apache: true });
-  const installable = runtime.extensions.filter((extension) => phpInstallableExtensions.has(extension));
-  const pecl = runtime.extensions.filter((extension) => phpPeclExtensions.has(extension));
+  const lines = [`FROM ${phpImage(runtime.version, "apache")}`, ""];
+  const aptPackages = phpAptPackages(runtime.extensions, {
+    node: Boolean(project.runtimes.node),
+    apache: true,
+    phpVersion: runtime.version,
+  });
+  const installable = runtime.extensions.filter((extension) =>
+    phpInstallableExtensions.has(extension),
+  );
+  const pecl = runtime.extensions.filter((extension) =>
+    phpPeclExtensions.has(extension),
+  );
 
   lines.push("RUN apt-get update \\");
-  lines.push(`  && apt-get install -y --no-install-recommends ${aptPackages.join(" ")} \\`);
+  lines.push(
+    `  && apt-get install -y --no-install-recommends ${aptPackages.join(" ")} \\`,
+  );
   if (pecl.length) lines.push(`  && pecl install ${pecl.join(" ")} \\`);
   if (installable.includes("gd")) {
-    lines.push("  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-avif \\");
+    lines.push(`  && ${gdConfigureCommand(runtime.version)} \\`);
   }
-  if (installable.length) lines.push(`  && docker-php-ext-install ${installable.join(" ")} \\`);
-  if (pecl.length) lines.push(`  && docker-php-ext-enable ${pecl.join(" ")} \\`);
+  if (installable.length)
+    lines.push(`  && docker-php-ext-install ${installable.join(" ")} \\`);
+  if (pecl.length)
+    lines.push(`  && docker-php-ext-enable ${pecl.join(" ")} \\`);
   lines.push("  && rm -rf /var/lib/apt/lists/*", "");
-  lines.push("RUN mv $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini", "");
+  lines.push(
+    "RUN mv $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini",
+    "",
+  );
   lines.push("COPY ./common/php/conf.d /usr/local/etc/php/conf.d", "");
 
   if (runtime.packageManagers?.includes("composer")) {
     lines.push("ENV COMPOSER_ALLOW_SUPERUSER=1", "");
-    lines.push("RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin --filename=composer --version=2.10.0 --quiet", "");
+    lines.push(
+      `RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin --filename=composer --version=${composerVersion(runtime.version)} --quiet`,
+      "",
+    );
   }
 
   if (project.runtimes.node) {
@@ -573,34 +724,57 @@ function apacheDockerfile(project) {
     lines.push(...nodePackageManager(project.runtimes.node), "");
   }
 
-  lines.push(`ENV APACHE_DOCUMENT_ROOT=${apacheDocumentRoot(project.web.documentRoot)}`, "");
-  lines.push("RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf", "");
+  lines.push(
+    `ENV APACHE_DOCUMENT_ROOT=${apacheDocumentRoot(project.web.documentRoot)}`,
+    "",
+  );
+  lines.push(
+    "RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf",
+    "",
+  );
   lines.push("WORKDIR /var/www/html", "");
   return compactBlankLines(lines).join("\n");
 }
 
 function phpDockerfile(project, sapi, options = {}) {
   const runtime = project.runtimes.php;
-  const lines = [`FROM php:${runtime.version}-${sapi}-bookworm`, ""];
-  const aptPackages = phpAptPackages(runtime.extensions, options);
-  const installable = runtime.extensions.filter((extension) => phpInstallableExtensions.has(extension));
-  const pecl = runtime.extensions.filter((extension) => phpPeclExtensions.has(extension));
+  const lines = [`FROM ${phpImage(runtime.version, sapi)}`, ""];
+  const aptPackages = phpAptPackages(runtime.extensions, {
+    ...options,
+    phpVersion: runtime.version,
+  });
+  const installable = runtime.extensions.filter((extension) =>
+    phpInstallableExtensions.has(extension),
+  );
+  const pecl = runtime.extensions.filter((extension) =>
+    phpPeclExtensions.has(extension),
+  );
 
   lines.push("RUN apt-get update \\");
-  lines.push(`  && apt-get install -y --no-install-recommends ${aptPackages.join(" ")} \\`);
+  lines.push(
+    `  && apt-get install -y --no-install-recommends ${aptPackages.join(" ")} \\`,
+  );
   if (pecl.length) lines.push(`  && pecl install ${pecl.join(" ")} \\`);
   if (installable.includes("gd")) {
-    lines.push("  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-avif \\");
+    lines.push(`  && ${gdConfigureCommand(runtime.version)} \\`);
   }
-  if (installable.length) lines.push(`  && docker-php-ext-install ${installable.join(" ")} \\`);
-  if (pecl.length) lines.push(`  && docker-php-ext-enable ${pecl.join(" ")} \\`);
+  if (installable.length)
+    lines.push(`  && docker-php-ext-install ${installable.join(" ")} \\`);
+  if (pecl.length)
+    lines.push(`  && docker-php-ext-enable ${pecl.join(" ")} \\`);
   lines.push("  && rm -rf /var/lib/apt/lists/*", "");
-  lines.push("RUN mv $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini", "");
+  lines.push(
+    "RUN mv $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini",
+    "",
+  );
   lines.push("COPY ./common/php/conf.d /usr/local/etc/php/conf.d", "");
 
   if (options.composer && runtime.packageManagers?.includes("composer")) {
     lines.push("ENV COMPOSER_ALLOW_SUPERUSER=1", "");
-    lines.push("RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin --filename=composer --version=2.10.0 --quiet", "");
+    lines.push(
+      `RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin --filename=composer --version=${composerVersion(runtime.version)} --quiet`,
+      "",
+    );
   }
 
   if (options.node) {
@@ -619,7 +793,9 @@ function phpApkPackages(extensions, options = {}) {
     "git",
     "linux-headers",
     "unzip",
-    ...extensions.flatMap((extension) => phpApkPackagesByExtension[extension] || []),
+    ...extensions.flatMap(
+      (extension) => phpApkPackagesByExtension[extension] || [],
+    ),
   ]);
   if (options.node) packages.push("libstdc++");
   return unique(packages).sort();
@@ -642,15 +818,49 @@ function nodeRuntimeAlpine(runtime) {
 
 function nodeRuntimeDebian(runtime) {
   return [
-    `COPY --from=node:${runtime.version}-bookworm /usr/local/bin/node /usr/local/bin/node`,
-    `COPY --from=node:${runtime.version}-bookworm /usr/local/lib/node_modules /usr/local/lib/node_modules`,
+    `COPY --from=${nodeDebianImage(runtime.version)} /usr/local/bin/node /usr/local/bin/node`,
+    `COPY --from=${nodeDebianImage(runtime.version)} /usr/local/lib/node_modules /usr/local/lib/node_modules`,
     "RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \\",
     "    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx",
   ];
 }
 
+function phpImage(version, sapi) {
+  if (isModernPhp(version)) return `php:${version}-${sapi}-bookworm`;
+  return `php:${version}-${sapi}`;
+}
+
+function isModernPhp(version) {
+  return (
+    Number(String(version).split(".")[0]) >= 8 &&
+    Number(String(version).split(".")[1] || 0) >= 2
+  );
+}
+
+function nodeDebianImage(version) {
+  if (Number(version) >= 20) return `node:${version}-bookworm`;
+  return `node:${version}`;
+}
+
+function composerVersion(phpVersion) {
+  if (phpVersion === "5.6") return "2.2.24";
+  return "2.10.0";
+}
+
+function gdConfigureCommand(phpVersion) {
+  if (phpVersion === "5.6") {
+    return "docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/";
+  }
+
+  if (!isModernPhp(phpVersion))
+    return "docker-php-ext-configure gd --with-freetype --with-jpeg";
+  return "docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-avif";
+}
+
 function apacheDocumentRoot(documentRoot) {
-  return documentRoot === "." ? "/var/www/html" : `/var/www/html/${documentRoot}`;
+  return documentRoot === "."
+    ? "/var/www/html"
+    : `/var/www/html/${documentRoot}`;
 }
 
 function nodePackageManager(runtime) {
@@ -722,7 +932,10 @@ error_log = /var/log/php_errors.log
 function normalizeDocumentRoot(value) {
   const root = String(value || "").trim() || ".";
   assert(!path.isAbsolute(root), "DOCUMENT_ROOT must be relative");
-  assert(!root.split(/[\\/]+/).includes(".."), "DOCUMENT_ROOT must not contain ..");
+  assert(
+    !root.split(/[\\/]+/).includes(".."),
+    "DOCUMENT_ROOT must not contain ..",
+  );
   return root.replace(/^\.\/+/, "") || ".";
 }
 
@@ -752,16 +965,29 @@ function phpAptPackages(extensions, options = {}) {
     "curl",
     "git",
     "unzip",
-    ...extensions.flatMap((extension) => phpAptPackagesByExtension(extension)),
+    ...extensions.flatMap((extension) =>
+      phpAptPackagesByExtension(extension, options),
+    ),
   ]);
-  if (extensions.some((extension) => phpPeclExtensions.has(extension))) packages.push("$PHPIZE_DEPS");
+  if (extensions.some((extension) => phpPeclExtensions.has(extension)))
+    packages.push("$PHPIZE_DEPS");
   if (options.node) packages.push("libstdc++6");
   return unique(packages).sort();
 }
 
-function phpAptPackagesByExtension(extension) {
+function phpAptPackagesByExtension(extension, options = {}) {
+  if (extension === "gd" && !isModernPhp(options.phpVersion)) {
+    return ["libpng-dev", "libjpeg-dev", "libfreetype6-dev"];
+  }
+
   const packages = {
-    gd: ["libpng-dev", "libjpeg-dev", "libfreetype6-dev", "libwebp-dev", "libavif-dev"],
+    gd: [
+      "libpng-dev",
+      "libjpeg-dev",
+      "libfreetype6-dev",
+      "libwebp-dev",
+      "libavif-dev",
+    ],
     imagick: ["libmagickwand-dev"],
     intl: ["libicu-dev"],
     mysqli: ["default-libmysqlclient-dev"],

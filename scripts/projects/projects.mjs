@@ -18,7 +18,11 @@ import {
   validateProjectName,
   writeProjectsStore,
 } from "./common.mjs";
-import { generateProjectFiles, normalizeProjectConfig, projectConfigChanged } from "./generate.mjs";
+import {
+  generateProjectFiles,
+  normalizeProjectConfig,
+  projectConfigChanged,
+} from "./generate.mjs";
 
 const action = process.argv[2] || "";
 const options = parseArgs(process.argv.slice(3));
@@ -52,6 +56,8 @@ try {
     case "shell":
     case "up":
     case "down":
+    case "start":
+    case "stop":
     case "build":
     case "logs":
     case "logs-follow":
@@ -111,7 +117,10 @@ async function updateProject() {
   const name = validateProjectName(input(options, "NAME"));
   const project = requireProject(store, name);
   const config = normalizeProjectConfig(projectPayload(name), catalog, project);
-  const changed = projectConfigChanged({ runtimes: project.runtimes, web: project.web }, config);
+  const changed = projectConfigChanged(
+    { runtimes: project.runtimes, web: project.web },
+    config,
+  );
   const next = {
     ...project,
     ...config,
@@ -121,7 +130,9 @@ async function updateProject() {
   if (changed) await cleanupRuntimeArtifacts(next);
   await generateProjectFiles(next);
 
-  store.projects = store.projects.map((item) => (item.name === name ? next : item));
+  store.projects = store.projects.map((item) =>
+    item.name === name ? next : item,
+  );
   await writeProjectsStore(store);
   if (changed) await runProjectMake("up", next);
   printProject(next);
@@ -148,7 +159,11 @@ async function generateProject() {
   printProject(project);
 }
 
-async function runProjectMake(command, project = null, { optional = false } = {}) {
+async function runProjectMake(
+  command,
+  project = null,
+  { optional = false } = {},
+) {
   const store = await readProjectsStore();
   const target = project || requireProject(store, input(options, "NAME"));
   const args = ["-C", target.path, command];
@@ -196,12 +211,18 @@ function usage() {
   console.log("  make project-catalog");
   console.log("  make project-list");
   console.log("  make project-show NAME=project-a");
-  console.log("  make project-create NAME=project-a WEB_STACK=nginx-fpm PHP_VERSION=8.4 PHP_PRESET=laravel");
-  console.log("  make project-update NAME=project-a WEB_STACK=apache PHP_PRESET=wordpress");
+  console.log(
+    "  make project-create NAME=project-a WEB_STACK=nginx-fpm PHP_VERSION=8.4 PHP_PRESET=laravel",
+  );
+  console.log(
+    "  make project-update NAME=project-a WEB_STACK=apache PHP_PRESET=wordpress",
+  );
   console.log("  make project-remove NAME=project-a FORCE=1");
   console.log("  make project-shell NAME=project-a");
   console.log("  make project-up NAME=project-a");
   console.log("  make project-down NAME=project-a");
+  console.log("  make project-start NAME=project-a");
+  console.log("  make project-stop NAME=project-a");
   console.log("  make project-build NAME=project-a");
   console.log("  make project-logs NAME=project-a");
   console.log("  make project-logs-follow NAME=project-a");

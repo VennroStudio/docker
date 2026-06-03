@@ -12,6 +12,8 @@ import type {
   PostgresImportForm,
   PostgresInstanceAction,
   PostgresInstanceForm,
+  ProjectAction,
+  ProjectForm,
   ProxyFormState,
   SshKeyForm,
   SshServerForm,
@@ -49,6 +51,30 @@ export function openProxyDeleteTerminal(domain: string, handlers: TerminalHandle
 
 export function openShellTerminal(container: string, handlers: TerminalHandlers): TerminalSession {
   return openTerminal({ container, type: "shell" }, handlers);
+}
+
+export function openProjectCreateTerminal(form: ProjectForm, handlers: TerminalHandlers): TerminalSession {
+  return openTerminal(projectPayload(form, "project-create"), handlers);
+}
+
+export function openProjectUpdateTerminal(form: ProjectForm, handlers: TerminalHandlers): TerminalSession {
+  return openTerminal(projectPayload(form, "project-update"), handlers);
+}
+
+export function openProjectRemoveTerminal(name: string, handlers: TerminalHandlers): TerminalSession {
+  return openTerminal({ name, type: "project-remove" }, handlers);
+}
+
+export function openProjectActionTerminal(
+  name: string,
+  action: ProjectAction,
+  handlers: TerminalHandlers,
+): TerminalSession {
+  return openTerminal({ action, name, type: "project-action" }, handlers);
+}
+
+export function openProjectShellTerminal(name: string, handlers: TerminalHandlers): TerminalSession {
+  return openTerminal({ name, type: "project-shell" }, handlers);
 }
 
 export function openArchiveCreateTerminal(form: ArchiveCreateForm, handlers: TerminalHandlers): TerminalSession {
@@ -230,4 +256,22 @@ export function openPostgresDatabaseTerminal(
     },
     handlers,
   );
+}
+
+function projectPayload(form: ProjectForm, type: "project-create" | "project-update") {
+  return {
+    documentRoot: form.documentRoot,
+    enableNode: form.enableNode,
+    name: form.name,
+    nodePackageManager: form.enableNode ? form.nodePackageManager : "",
+    nodeVersion: form.enableNode ? form.nodeVersion : "",
+    phpExtensions: form.phpExtensions,
+    phpPreset: form.phpPreset,
+    phpVersion: form.phpVersion,
+    type,
+    removeNode: form.webStack === "node" || form.enableNode ? "" : "1",
+    webCommand: form.webStack === "node" ? form.webCommand : "",
+    webPort: form.webPort,
+    webStack: form.webStack,
+  };
 }

@@ -10,6 +10,7 @@ import {
   useNginxStatus,
   useRedisStatus,
   useRegistryStatus,
+  useProjects,
   useServiceStatuses,
   useSshServers,
   type CommandAction,
@@ -31,6 +32,7 @@ import { useCommandOperations } from "./useCommandOperations";
 import { useDatabaseOperations } from "./useDatabaseOperations";
 import { useLanguage } from "./useLanguage";
 import { useProxyOperations } from "./useProxyOperations";
+import { useProjectOperations } from "./useProjectOperations";
 import { useSshOperations } from "./useSshOperations";
 import { useTerminalOperations } from "./useTerminalOperations";
 
@@ -64,12 +66,14 @@ export function useInfrastructureController() {
   const redisView = activeView === "redis";
   const minioView = activeView === "minio";
   const registryView = activeView === "registry";
+  const projectsView = activeView === "projects";
   const utilitiesView = activeView === "utilities";
   const sshView = activeView === "ssh";
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const redisStatus = useRedisStatus(redisView);
   const minioStatus = useMinioStatus(minioView);
   const registryStatus = useRegistryStatus(registryView);
+  const projects = useProjects(projectsView);
   const sshServers = useSshServers(sshView);
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const statusRefresh = redisView
@@ -78,9 +82,11 @@ export function useInfrastructureController() {
       ? minioStatus.refresh
       : registryView
         ? registryStatus.refresh
-        : sshView
-          ? sshServers.refresh
-          : nginxStatus.refresh;
+        : projectsView
+          ? projects.refresh
+          : sshView
+            ? sshServers.refresh
+            : nginxStatus.refresh;
   const settings = useSettings();
   const archives = useArchives(utilitiesView, archivesRefreshSignal);
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
@@ -123,6 +129,12 @@ export function useInfrastructureController() {
   const archiveOperations = useArchiveOperations({
     confirmDialog,
     refreshArchives,
+    runWithTerminal,
+    text,
+  });
+  const projectOperations = useProjectOperations({
+    confirmDialog,
+    refreshProjects: projects.refresh,
     runWithTerminal,
     text,
   });
@@ -210,6 +222,7 @@ export function useInfrastructureController() {
     operationBlockTitle,
     operationRunning,
     postgresInstances,
+    projects,
     proxyForm,
     redisStatus,
     registryStatus,
@@ -219,6 +232,7 @@ export function useInfrastructureController() {
     ...commandOperations,
     ...databaseOperations,
     ...proxyOperations,
+    ...projectOperations,
     ...sshOperations,
     runShell,
     selectView,

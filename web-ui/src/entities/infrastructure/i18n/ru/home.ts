@@ -7,11 +7,11 @@ export const ruHome = {
     title: "Панель управления",
   },
   serviceCards: {
-  mariadb: {
-    description: "Mariadb, Postgres и UI управление базами данных",
-    meta: "Data module",
-    title: "Базы данных",
-  },
+    mariadb: {
+      description: "Mariadb, Postgres и UI управление базами данных",
+      meta: "Data module",
+      title: "Базы данных",
+    },
     minio: {
       description: "S3-совместимое хранилище с доступом к консоли.",
       meta: "Storage module",
@@ -27,23 +27,28 @@ export const ruHome = {
       meta: "DB tools",
       title: "Postgres",
     },
-  proxy: {
-    description: "Управление доменами, SSL и контейнером NPM",
+    proxy: {
+      description: "Управление доменами, SSL и контейнером NPM",
       meta: "NPM module",
       title: "Nginx Proxy Manager",
     },
-  redis: {
-    description: "Redis и UI управление кэшем",
+    projects: {
+      description: "Локальные сайты на Docker с Apache, nginx + PHP-FPM или Node.",
+      meta: "Web module",
+      title: "Проекты",
+    },
+    redis: {
+      description: "Redis и UI управление кэшем",
       meta: "Cache module",
       title: "Кэширование",
     },
-  registry: {
-    description: "Registry и UI управление образами",
+    registry: {
+      description: "Registry и UI управление образами",
       meta: "Images module",
       title: "Private Docker Registry",
     },
-  ssh: {
-    description: "Хранение SSH серверов, подключение через терминал и управление RSA ключами",
+    ssh: {
+      description: "Хранение SSH серверов, подключение через терминал и управление RSA ключами",
       meta: "SSH service",
       title: "SSH Control Panel",
     },

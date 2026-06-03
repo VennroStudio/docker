@@ -242,6 +242,66 @@ export type AppText = {
     title: string;
     titleEyebrow: string;
   };
+  projects: {
+    actions: Record<
+      | "build"
+      | "clean"
+      | "create"
+      | "down"
+      | "edit"
+      | "logs"
+      | "logsFollow"
+      | "refresh"
+      | "remove"
+      | "shell"
+      | "start"
+      | "status"
+      | "stop"
+      | "up",
+      string
+    >;
+    containers: string;
+    description: string;
+    empty: string;
+    eyebrow: string;
+    fields: {
+      documentRoot: string;
+      enableNode: string;
+      link: string;
+      name: string;
+      nodePackageManager: string;
+      nodeVersion: string;
+      phpExtensions: string;
+      phpPreset: string;
+      phpVersion: string;
+      webCommand: string;
+      webPort: string;
+      webStack: string;
+    };
+    loading: string;
+    modal: {
+      create: string;
+      edit: string;
+    };
+    options: {
+      apache: string;
+      node: string;
+      nginxFpm: string;
+    };
+    runtime: string;
+    sections: {
+      create: string;
+      details: string;
+      runtime: string;
+      web: string;
+    };
+    title: string;
+    validation: {
+      name: string;
+      nodeVersion: string;
+      phpVersion: string;
+    };
+  };
   panels: {
     npm: {
       configEyebrow: string;

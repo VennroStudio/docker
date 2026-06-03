@@ -7,6 +7,7 @@ import { ruConfirm } from "./ru/confirm";
 import { ruHome } from "./ru/home";
 import { ruMariadbInstances } from "./ru/mariadbInstances";
 import { ruPostgresInstances } from "./ru/postgresInstances";
+import { ruProjects } from "./ru/projects";
 import { ruPanels } from "./ru/panels";
 import { ruUtilities } from "./ru/utilities";
 import { ruSsh } from "./ru/ssh";
@@ -23,6 +24,7 @@ export const ru: AppText = {
   home: ruHome,
   mariadbInstances: ruMariadbInstances,
   postgresInstances: ruPostgresInstances,
+  projects: ruProjects,
   panels: ruPanels,
   utilities: ruUtilities,
   ssh: ruSsh,

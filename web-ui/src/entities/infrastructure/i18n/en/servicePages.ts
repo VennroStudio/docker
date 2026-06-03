@@ -31,6 +31,12 @@ export const enServicePages = {
     panelEyebrow: "Proxy host",
     panelTitle: "Routing and NPM",
   },
+  projects: {
+    description: "Create local Docker websites and manage their web stack.",
+    eyebrow: "Web projects",
+    panelEyebrow: "Projects",
+    panelTitle: "Projects",
+  },
   redis: {
     description: "Manage Redis and RedisInsight containers.",
     eyebrow: "Cache",

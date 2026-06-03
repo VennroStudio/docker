@@ -7,11 +7,11 @@ export const enHome = {
     title: "Control panel",
   },
   serviceCards: {
-  mariadb: {
-    description: "MariaDB, Postgres and UI database management.",
-    meta: "Data module",
-    title: "Databases",
-  },
+    mariadb: {
+      description: "MariaDB, Postgres and UI database management.",
+      meta: "Data module",
+      title: "Databases",
+    },
     minio: {
       description: "S3-compatible storage with console access.",
       meta: "Storage module",
@@ -31,6 +31,11 @@ export const enHome = {
       description: "Domain, SSL and NPM container management.",
       meta: "NPM module",
       title: "Nginx Proxy Manager",
+    },
+    projects: {
+      description: "Local Docker websites with Apache, nginx + PHP-FPM, or Node.",
+      meta: "Web module",
+      title: "Projects",
     },
     redis: {
       description: "Redis and UI cache management.",

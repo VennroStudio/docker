@@ -60,6 +60,16 @@ export async function resolveTerminalRequest(request) {
       return resolvePostgresInstanceCommand(request);
     case "postgres-instance-add":
       return postgresInstanceCreateCommand(validatePostgresCreateForm(param(request)));
+    case "project-action":
+      return projectActionCommand(request);
+    case "project-create":
+      return projectCreateCommand(request);
+    case "project-remove":
+      return ["make", ["project-remove", `NAME=${validateProjectName(request.name)}`, "FORCE=1"]];
+    case "project-shell":
+      return ["make", ["project-shell", `NAME=${validateProjectName(request.name)}`]];
+    case "project-update":
+      return projectUpdateCommand(request);
     case "proxy":
       return resolveProxyCommand(request);
     case "proxy-delete":
@@ -151,6 +161,60 @@ function resolvePostgresInstanceCommand(request) {
   return postgresInstanceActionCommand(request.name, request.action);
 }
 
+function projectActionCommand(request) {
+  const action = validateEnum(
+    request.action,
+    ["build", "clean", "down", "logs", "logs-follow", "start", "status", "stop", "up"],
+    "Invalid project action",
+  );
+  return ["make", [`project-${action}`, `NAME=${validateProjectName(request.name)}`]];
+}
+
+function projectCreateCommand(request) {
+  return ["make", ["project-create", ...projectArgs(request)]];
+}
+
+function projectUpdateCommand(request) {
+  return ["make", ["project-update", ...projectArgs(request)]];
+}
+
+function projectArgs(payload) {
+  const args = [
+    valueArg("NAME", validateProjectName(payload.name)),
+    valueArg(
+      "WEB_STACK",
+      validateEnum(payload.webStack || "nginx-fpm", ["apache", "nginx-fpm", "node"], "Invalid WEB_STACK"),
+    ),
+  ];
+
+  if (payload.documentRoot)
+    args.push(valueArg("DOCUMENT_ROOT", validateProjectPath(payload.documentRoot, "Invalid DOCUMENT_ROOT")));
+  if (payload.webPort) args.push(valueArg("WEB_PORT", validateProjectPort(payload.webPort)));
+  if (payload.webStack === "node" && payload.webCommand)
+    args.push(valueArg("WEB_COMMAND", validateCommandText(payload.webCommand)));
+  if (payload.phpVersion)
+    args.push(valueArg("PHP_VERSION", validateVersion(payload.phpVersion, "Invalid PHP_VERSION")));
+  if (payload.phpPreset) args.push(valueArg("PHP_PRESET", validateSlug(payload.phpPreset, "Invalid PHP_PRESET")));
+  if (payload.phpExtensions)
+    args.push(valueArg("PHP_EXTENSIONS", validateCsv(payload.phpExtensions, "Invalid PHP_EXTENSIONS")));
+  if (payload.enableNode || payload.webStack === "node") {
+    if (payload.nodeVersion)
+      args.push(valueArg("NODE_VERSION", validateVersion(payload.nodeVersion, "Invalid NODE_VERSION")));
+    if (payload.nodePackageManager) {
+      args.push(
+        valueArg(
+          "NODE_PACKAGE_MANAGER",
+          validateEnum(payload.nodePackageManager, ["npm", "pnpm", "yarn"], "Invalid NODE_PACKAGE_MANAGER"),
+        ),
+      );
+    }
+  } else if (payload.removeNode) {
+    args.push("REMOVE_RUNTIMES=node");
+  }
+
+  return args;
+}
+
 function serverArgs(payload) {
   return [
     valueArg("NAME", validateText(payload.name, "NAME is required")),
@@ -229,6 +293,37 @@ function validateCommandText(value) {
   const command = validateText(value, "COMMAND is required");
   assert(!command.includes("\0"), "Invalid COMMAND");
   return command;
+}
+
+function validateProjectName(value) {
+  assert(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(value || ""), "Invalid project NAME");
+  return value;
+}
+
+function validateProjectPath(value, message) {
+  const path = validateText(value, message);
+  assert(!path.includes("..") && !path.startsWith("/") && !path.includes("\0"), message);
+  return path;
+}
+
+function validateProjectPort(value) {
+  validatePort(value);
+  return String(value);
+}
+
+function validateVersion(value, message) {
+  assert(/^[A-Za-z0-9_.-]+$/.test(value || ""), message);
+  return value;
+}
+
+function validateSlug(value, message) {
+  assert(/^[A-Za-z0-9_-]+$/.test(value || ""), message);
+  return value;
+}
+
+function validateCsv(value, message) {
+  assert(/^[A-Za-z0-9_,-]+$/.test(value || ""), message);
+  return value;
 }
 
 function validateEnum(value, allowed, message) {

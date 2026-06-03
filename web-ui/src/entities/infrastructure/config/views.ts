@@ -1,4 +1,16 @@
-import { Box, Database, HardDrive, House, KeyRound, Package, Server, Settings, Shield, Wrench } from "lucide-react";
+import {
+  Box,
+  Database,
+  Folder,
+  HardDrive,
+  House,
+  KeyRound,
+  Package,
+  Server,
+  Settings,
+  Shield,
+  Wrench,
+} from "lucide-react";
 import type { ViewConfig } from "../model/types";
 
 const routeViews: ViewConfig[] = [
@@ -33,6 +45,14 @@ const routeViews: ViewConfig[] = [
     shortLabel: "DB",
     subtitle: "SQL stack",
     icon: Database,
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    path: "/projects",
+    shortLabel: "PR",
+    subtitle: "Web stack",
+    icon: Folder,
   },
   {
     id: "postgres",

@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, ListTree, Play, Square, TerminalSquare, Trash2 } from "lucide-react";
 import { cn } from "@/shared/lib";
 import { IconButton } from "@/shared/ui";
-import type { ContainerRuntimeState, MariaDbInstanceAction } from "../model/types";
+import type { ContainerLifecycleAction, ContainerRuntimeState, MariaDbInstanceAction } from "../model/types";
 
 const actionIcon = {
   clean: <Trash2 size={16} strokeWidth={2.5} />,
@@ -23,21 +23,23 @@ const actionTone = {
   up: "success",
 } as const;
 
-export function DatabaseAction({
+type ContainerActionButtonProps = {
+  action: ContainerLifecycleAction;
+  disabled?: boolean;
+  label: string;
+  loading?: boolean;
+  onClick: () => void;
+  title?: string;
+};
+
+export function ContainerActionButton({
   action,
   disabled,
   label,
   loading,
   onClick,
   title,
-}: {
-  action: MariaDbInstanceAction;
-  disabled?: boolean;
-  label: string;
-  loading?: boolean;
-  onClick: () => void;
-  title?: string;
-}) {
+}: ContainerActionButtonProps) {
   return (
     <IconButton
       disabled={disabled}
@@ -50,6 +52,10 @@ export function DatabaseAction({
       {actionIcon[action]}
     </IconButton>
   );
+}
+
+export function DatabaseAction(props: ContainerActionButtonProps & { action: MariaDbInstanceAction }) {
+  return <ContainerActionButton {...props} />;
 }
 
 export function ShellIconButton({

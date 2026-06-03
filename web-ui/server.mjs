@@ -6,6 +6,7 @@ import { meta } from "./server/meta-route.mjs";
 import { databases, dumps, mariadbInstances, postgresInstances } from "./server/modules/database/routes.mjs";
 import { homeStatus } from "./server/modules/home/routes.mjs";
 import { nginxStatus } from "./server/modules/nginx/routes.mjs";
+import { projectsOverview } from "./server/modules/projects/routes.mjs";
 import { redisStatus } from "./server/modules/redis/routes.mjs";
 import { minioStatus } from "./server/modules/minio/routes.mjs";
 import { registryStatus } from "./server/modules/registry/routes.mjs";
@@ -23,6 +24,7 @@ const server = createServer(async (req, res) => {
 
     if (req.method === "GET" && pathname === "/api/status") return await homeStatus(req, res);
     if (req.method === "GET" && pathname === "/api/nginx/status") return await nginxStatus(req, res);
+    if (req.method === "GET" && pathname === "/api/projects") return await projectsOverview(req, res);
     if (req.method === "GET" && pathname.startsWith("/api/databases")) return await databases(req, res);
     if (req.method === "GET" && pathname.startsWith("/api/dumps")) return await dumps(req, res);
     if (req.method === "GET" && pathname === "/api/redis/status") return await redisStatus(req, res);

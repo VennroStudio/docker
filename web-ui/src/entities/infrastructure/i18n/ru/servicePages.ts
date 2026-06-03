@@ -31,6 +31,12 @@ export const ruServicePages = {
     panelEyebrow: "Proxy host",
     panelTitle: "Маршрутизация и NPM",
   },
+  projects: {
+    description: "Создавай локальные Docker-сайты и управляй их web stack.",
+    eyebrow: "Web projects",
+    panelEyebrow: "Projects",
+    panelTitle: "Проекты",
+  },
   redis: {
     description: "Управляй контейнерами Redis и RedisInsight.",
     eyebrow: "Cache",

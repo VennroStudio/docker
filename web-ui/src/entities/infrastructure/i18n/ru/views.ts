@@ -7,6 +7,7 @@ export const ruViews = {
   nginx: "Nginx",
   postgres: "Postgres",
   proxy: "Nginx Proxy Manager",
+  projects: "Проекты",
   redis: "Redis",
   registry: "Registry",
   ssh: "SSH",

@@ -1,6 +1,7 @@
 import { nginxActions, proxyShells } from "@/entities/infrastructure";
 import { DatabasesPage } from "@/pages/databases";
 import { HomePage } from "@/pages/home";
+import { ProjectsPage } from "@/pages/projects";
 import { ProxyPage } from "@/pages/proxy";
 import { getServiceModulesPageModel, ServiceModulesPage } from "@/pages/service-modules";
 import { SettingsPage } from "@/pages/settings";
@@ -28,6 +29,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     proxyForm,
     redisStatus,
     registryStatus,
+    projects,
     runSshConnect,
     runSshCommandAdd,
     runSshCommandInsert,
@@ -58,6 +60,14 @@ export function AppRouter({ controller }: AppRouterProps) {
     runPostgresInstanceAction,
     runPostgresInstanceCreate,
     runPostgresInstanceShell,
+    runProjectAction,
+    runProjectCreate,
+    runProjectHost,
+    runProjectProxy,
+    runProjectProxyDelete,
+    runProjectRemove,
+    runProjectShell,
+    runProjectUpdate,
     runProxy,
     runProxyDelete,
     runShell,
@@ -135,6 +145,27 @@ export function AppRouter({ controller }: AppRouterProps) {
 
   if (activeView === "settings") {
     return <SettingsPage settingsState={settings} text={text} view={activeConfig} />;
+  }
+
+  if (activeView === "projects") {
+    return (
+      <ProjectsPage
+        activeOperationKey={activeOperationKey}
+        operationDisabled={operationRunning}
+        operationDisabledTitle={operationBlockTitle}
+        projectsState={projects}
+        text={text}
+        view={activeConfig}
+        onProjectAction={runProjectAction}
+        onProjectCreate={runProjectCreate}
+        onProjectHost={runProjectHost}
+        onProjectProxyCreate={runProjectProxy}
+        onProjectProxyDelete={runProjectProxyDelete}
+        onProjectRemove={runProjectRemove}
+        onProjectShell={runProjectShell}
+        onProjectUpdate={runProjectUpdate}
+      />
+    );
   }
 
   if (activeView === "utilities") {

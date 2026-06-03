@@ -4,7 +4,19 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { assert, bool, parseArgs } from "../common/cli.mjs";
-import { defaultSettingsFile, readJson, readSettings, settingsValue, writeSettings } from "../common/settings.mjs";
+import {
+  defaultSettingsFile,
+  readJson,
+  readSettings,
+  settingsValue,
+  writeSettings,
+} from "../common/settings.mjs";
+import {
+  projectConfigFile,
+  readProjectsStore,
+  writeJson as writeProjectJson,
+  writeProjectsStore,
+} from "../projects/common.mjs";
 
 process.on("uncaughtException", fail);
 process.on("unhandledRejection", fail);
@@ -85,7 +97,10 @@ async function main() {
 
   const host = await upsertProxyHost(certificateId);
   await updatePublicUrl();
-  console.log(`Proxy Host #${host.id}: ${config.domain} -> ${config.target}:${config.port}`);
+  await updateProjectPublicUrl();
+  console.log(
+    `Proxy Host #${host.id}: ${config.domain} -> ${config.target}:${config.port}`,
+  );
   console.log(`Open: ${config.ssl ? "https" : "http"}://${config.domain}`);
 }
 
@@ -94,12 +109,17 @@ function validate({ delete: deleting, domain, target, port }) {
   if (deleting) return;
 
   assert(/^[a-zA-Z0-9._-]+$/.test(target), `Invalid TARGET: ${target}`);
-  assert(Number.isInteger(port) && port > 0 && port <= 65535, `Invalid PORT: ${port}`);
+  assert(
+    Number.isInteger(port) && port > 0 && port <= 65535,
+    `Invalid PORT: ${port}`,
+  );
 }
 
 function need(value, name) {
   if (!value) {
-    throw new Error(`Missing ${name}. Example: make app-proxy DOMAIN=pma.local TARGET=phpmyadmin-container PORT=80`);
+    throw new Error(
+      `Missing ${name}. Example: make app-proxy DOMAIN=pma.local TARGET=phpmyadmin-container PORT=80`,
+    );
   }
 
   return value;
@@ -120,22 +140,42 @@ async function ensureCertificateFiles() {
   const certPath = path.join(config.certDir, `${config.domain}.crt`);
   const keyPath = path.join(config.certDir, `${config.domain}.key`);
 
-  if (!config.forceCert && await exists(certPath) && await exists(keyPath)) {
+  if (
+    !config.forceCert &&
+    (await exists(certPath)) &&
+    (await exists(keyPath))
+  ) {
     console.log(`Using existing certificate: ${certPath}`);
     return { certPath, keyPath };
   }
 
   if (hasCommand("mkcert")) {
-    console.log(`Generating trusted local certificate with mkcert for ${config.domain}`);
+    console.log(
+      `Generating trusted local certificate with mkcert for ${config.domain}`,
+    );
     run("mkcert", ["-install"]);
-    run("mkcert", ["-cert-file", certPath, "-key-file", keyPath, config.domain]);
+    run("mkcert", [
+      "-cert-file",
+      certPath,
+      "-key-file",
+      keyPath,
+      config.domain,
+    ]);
     return { certPath, keyPath };
   }
 
-  assert(hasCommand("openssl"), "Neither mkcert nor openssl was found. Install mkcert with: brew install mkcert");
+  assert(
+    hasCommand("openssl"),
+    "Neither mkcert nor openssl was found. Install mkcert with: brew install mkcert",
+  );
 
-  console.log(`Generating self-signed certificate with openssl for ${config.domain}`);
-  const opensslConfigPath = path.join(config.certDir, `${config.domain}.openssl.cnf`);
+  console.log(
+    `Generating self-signed certificate with openssl for ${config.domain}`,
+  );
+  const opensslConfigPath = path.join(
+    config.certDir,
+    `${config.domain}.openssl.cnf`,
+  );
 
   await writeFile(opensslConfigPath, opensslConfig(), "utf8");
   run("openssl", [
@@ -211,7 +251,10 @@ async function getToken() {
     },
   });
 
-  assert(!response.requires2fa, "NPM user has 2FA enabled. Use an admin without 2FA for automation.");
+  assert(
+    !response.requires2fa,
+    "NPM user has 2FA enabled. Use an admin without 2FA for automation.",
+  );
   token = response.token;
   return token;
 }
@@ -220,28 +263,45 @@ async function uploadCertificate(files) {
   const certificate = await findOrCreateCertificate();
   const form = new FormData();
 
-  form.append("certificate", new Blob([await readFile(files.certPath)]), path.basename(files.certPath));
-  form.append("certificate_key", new Blob([await readFile(files.keyPath)]), path.basename(files.keyPath));
+  form.append(
+    "certificate",
+    new Blob([await readFile(files.certPath)]),
+    path.basename(files.certPath),
+  );
+  form.append(
+    "certificate_key",
+    new Blob([await readFile(files.keyPath)]),
+    path.basename(files.keyPath),
+  );
 
-  await api(`/nginx/certificates/${certificate.id}/upload`, { method: "POST", form });
-  console.log(`Uploaded certificate files to NPM certificate #${certificate.id}`);
+  await api(`/nginx/certificates/${certificate.id}/upload`, {
+    method: "POST",
+    form,
+  });
+  console.log(
+    `Uploaded certificate files to NPM certificate #${certificate.id}`,
+  );
 
   return certificate.id;
 }
 
 async function findCertificate({ provider } = {}) {
   const certificates = await api("/nginx/certificates");
-  return certificates.find((item) => (
-    (!provider || item.provider === provider)
-    && (item.nice_name === config.domain || item.domain_names?.includes(config.domain))
-  ));
+  return certificates.find(
+    (item) =>
+      (!provider || item.provider === provider) &&
+      (item.nice_name === config.domain ||
+        item.domain_names?.includes(config.domain)),
+  );
 }
 
 async function findOrCreateCertificate() {
   const certificate = await findCertificate({ provider: "other" });
 
   if (certificate) {
-    console.log(`Using NPM certificate #${certificate.id} for ${config.domain}`);
+    console.log(
+      `Using NPM certificate #${certificate.id} for ${config.domain}`,
+    );
     return certificate;
   }
 
@@ -259,7 +319,9 @@ async function findOrCreateCertificate() {
 
 async function deleteProxyHostAndCertificate() {
   const proxyHosts = await api("/nginx/proxy-hosts");
-  const host = proxyHosts.find((item) => item.domain_names?.includes(config.domain));
+  const host = proxyHosts.find((item) =>
+    item.domain_names?.includes(config.domain),
+  );
   let certificateId = host?.certificate_id || 0;
 
   if (host) {
@@ -276,7 +338,9 @@ async function deleteProxyHostAndCertificate() {
 
   if (certificateId) {
     await api(`/nginx/certificates/${certificateId}`, { method: "DELETE" });
-    console.log(`Deleted NPM certificate #${certificateId} for ${config.domain}`);
+    console.log(
+      `Deleted NPM certificate #${certificateId} for ${config.domain}`,
+    );
   } else {
     console.log(`NPM certificate for ${config.domain} was not found`);
   }
@@ -291,7 +355,9 @@ async function updatePublicUrl() {
     [binding.key]: `${config.ssl ? "https" : config.scheme}://${config.domain}`,
   };
   await writeSettings(settings);
-  console.log(`Updated settings ${binding.name}: ${settings[binding.group][binding.key]}`);
+  console.log(
+    `Updated settings ${binding.name}: ${settings[binding.group][binding.key]}`,
+  );
 }
 
 async function resetPublicUrlsForDomain() {
@@ -311,6 +377,7 @@ async function resetPublicUrlsForDomain() {
   }
 
   if (changed) await writeSettings(settings);
+  await resetProjectPublicUrlsForDomain();
 }
 
 function resetUrlForBinding(binding, defaultSettings) {
@@ -327,7 +394,78 @@ function resetUrlForBinding(binding, defaultSettings) {
 
 function shouldResetPublicUrl(binding) {
   try {
-    return new URL(settings[binding.group]?.[binding.key] || "").hostname === config.domain;
+    return (
+      new URL(settings[binding.group]?.[binding.key] || "").hostname ===
+      config.domain
+    );
+  } catch {
+    return false;
+  }
+}
+
+function publicUrl() {
+  return `${config.ssl ? "https" : config.scheme}://${config.domain}`;
+}
+
+async function updateProjectPublicUrl() {
+  const store = await readProjectsStore();
+  const project = store.projects.find(
+    (item) => item?.web?.proxyTarget === config.target,
+  );
+  if (!project) return;
+
+  const next = {
+    ...project,
+    updatedAt: new Date().toISOString(),
+    web: {
+      ...(project.web || {}),
+      url: publicUrl(),
+    },
+  };
+
+  await persistProjectLink(store, project.name, next);
+  console.log(`Updated project ${project.name} URL: ${next.web.url}`);
+}
+
+async function resetProjectPublicUrlsForDomain() {
+  const store = await readProjectsStore();
+  let changed = false;
+  const nextProjects = [];
+
+  for (const project of store.projects) {
+    if (!projectUrlMatchesDomain(project)) {
+      nextProjects.push(project);
+      continue;
+    }
+
+    const next = {
+      ...project,
+      updatedAt: new Date().toISOString(),
+      web: { ...(project.web || {}) },
+    };
+    delete next.web.url;
+    nextProjects.push(next);
+    await writeProjectJson(projectConfigFile(next), next);
+    changed = true;
+    console.log(`Reset project ${project.name} URL`);
+  }
+
+  if (changed) await writeProjectsStore({ projects: nextProjects });
+}
+
+async function persistProjectLink(store, name, project) {
+  const nextStore = {
+    projects: store.projects.map((item) =>
+      item.name === name ? project : item,
+    ),
+  };
+  await writeProjectsStore(nextStore);
+  await writeProjectJson(projectConfigFile(project), project);
+}
+
+function projectUrlMatchesDomain(project) {
+  try {
+    return new URL(project?.web?.url || "").hostname === config.domain;
   } catch {
     return false;
   }
@@ -335,16 +473,24 @@ function shouldResetPublicUrl(binding) {
 
 async function upsertProxyHost(certificateId) {
   const proxyHosts = await api("/nginx/proxy-hosts");
-  const existing = proxyHosts.find((item) => item.domain_names?.includes(config.domain));
+  const existing = proxyHosts.find((item) =>
+    item.domain_names?.includes(config.domain),
+  );
   const payload = proxyPayload(certificateId);
 
   if (existing) {
-    const updated = await api(`/nginx/proxy-hosts/${existing.id}`, { method: "PUT", data: payload });
+    const updated = await api(`/nginx/proxy-hosts/${existing.id}`, {
+      method: "PUT",
+      data: payload,
+    });
     console.log(`Updated NPM Proxy Host #${updated.id}`);
     return updated;
   }
 
-  const created = await api("/nginx/proxy-hosts", { method: "POST", data: payload });
+  const created = await api("/nginx/proxy-hosts", {
+    method: "POST",
+    data: payload,
+  });
   console.log(`Created NPM Proxy Host #${created.id}`);
   return created;
 }
@@ -388,8 +534,14 @@ async function api(apiPath, { auth = true, method = "GET", data, form } = {}) {
   const payload = text ? parseJson(text) : null;
 
   if (!response.ok) {
-    const message = payload?.error?.message || payload?.message || text || response.statusText;
-    throw new Error(`NPM API ${method} ${apiPath} failed: ${response.status} ${message}`);
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      text ||
+      response.statusText;
+    throw new Error(
+      `NPM API ${method} ${apiPath} failed: ${response.status} ${message}`,
+    );
   }
 
   return payload;

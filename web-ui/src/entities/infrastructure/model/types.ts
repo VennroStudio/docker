@@ -9,6 +9,7 @@ export type ViewId =
   | "redis"
   | "minio"
   | "registry"
+  | "projects"
   | "ssh"
   | "utilities"
   | "settings";
@@ -52,7 +53,8 @@ export type ProxyFormState = {
 };
 
 export type MariaDbAuthMode = "config" | "cookie";
-export type MariaDbInstanceAction = "clean" | "down" | "logs" | "start" | "stop" | "up";
+export type ContainerLifecycleAction = "clean" | "down" | "logs" | "start" | "stop" | "up";
+export type MariaDbInstanceAction = ContainerLifecycleAction;
 export type PostgresInstanceAction = MariaDbInstanceAction;
 export type ContainerRuntimeState =
   | "created"
@@ -70,6 +72,64 @@ export type ContainerStateInfo = {
   error?: string;
   state: ContainerRuntimeState;
   status?: string;
+};
+
+export type ProjectWebStack = "apache" | "nginx-fpm" | "node";
+export type ProjectAction = ContainerLifecycleAction;
+
+export type ProjectRuntimeCatalog = {
+  php?: {
+    defaultVersion: string;
+    packageManagers: string[];
+    presets: Record<string, string[]>;
+    versions: string[];
+  };
+  node?: {
+    defaultVersion: string;
+    packageManagers: string[];
+    versions: string[];
+  };
+};
+
+export type ProjectForm = {
+  documentRoot: string;
+  enableNode: boolean;
+  name: string;
+  nodePackageManager: string;
+  nodeVersion: string;
+  phpExtensions: string;
+  phpPreset: string;
+  phpVersion: string;
+  webCommand: string;
+  webPort: string;
+  webStack: ProjectWebStack;
+};
+
+export type ProjectRuntime = {
+  enabled: boolean;
+  extensions?: string[];
+  packageManager?: string;
+  packageManagers?: string[];
+  preset?: string;
+  version: string;
+};
+
+export type Project = {
+  containers: Array<ContainerStateInfo & { container: string }>;
+  createdAt: string;
+  name: string;
+  path: string;
+  runtimes: Partial<Record<"dotnet" | "go" | "java" | "node" | "php" | "python" | "ruby", ProjectRuntime>>;
+  state: ServiceRuntimeState;
+  updatedAt: string;
+  web: {
+    command?: string;
+    documentRoot: string;
+    proxyPort: number;
+    proxyTarget: string;
+    stack: ProjectWebStack;
+    url?: string;
+  };
 };
 
 export type ServiceLink = {

@@ -7,6 +7,7 @@ export type HomeService = {
 export const homeModules: HomeService[] = [
   { id: "proxy" },
   { id: "mariadb" },
+  { id: "projects" },
   { id: "redis" },
   { id: "minio" },
   { id: "registry" },

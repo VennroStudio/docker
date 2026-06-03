@@ -7,6 +7,7 @@ export const enViews = {
   nginx: "Nginx",
   postgres: "Postgres",
   proxy: "Nginx Proxy Manager",
+  projects: "Projects",
   redis: "Redis",
   registry: "Registry",
   ssh: "SSH",
