@@ -22,19 +22,18 @@ export function ProjectModalFields({
   onFieldChange,
   onStackChange,
 }: ProjectModalFieldsProps) {
-  const phpPresets = Object.keys(catalog.php?.presets || { laravel: [] });
   const phpVersions = catalog.php?.versions || [form.phpVersion].filter(Boolean);
   const nodeVersions = catalog.node?.versions || [form.nodeVersion].filter(Boolean);
   const nodeManagers = catalog.node?.packageManagers || ["npm"];
-  const phpStack = form.webStack === "apache" || form.webStack === "nginx-fpm";
+  const phpStack = form.webStack === "apache" || form.webStack === "nginx";
   const nodeControls = form.webStack === "node" || form.enableNode;
   const stackOptions = useMemo(
     () => [
-      { label: copy.options.nginxFpm, value: "nginx-fpm" },
+      { label: copy.options.nginx, value: "nginx" },
       { label: copy.options.apache, value: "apache" },
       { label: copy.options.node, value: "node" },
     ],
-    [copy.options.apache, copy.options.nginxFpm, copy.options.node],
+    [copy.options.apache, copy.options.nginx, copy.options.node],
   );
 
   return (
@@ -81,13 +80,7 @@ export function ProjectModalFields({
       </section>
 
       {phpStack ? (
-        <ProjectPhpFields
-          copy={copy}
-          form={form}
-          phpPresets={phpPresets}
-          phpVersions={phpVersions}
-          onFieldChange={onFieldChange}
-        />
+        <ProjectPhpFields copy={copy} form={form} phpVersions={phpVersions} onFieldChange={onFieldChange} />
       ) : null}
 
       <section className="grid gap-3">

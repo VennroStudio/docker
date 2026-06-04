@@ -33,7 +33,7 @@ export const ruHome = {
       title: "Nginx Proxy Manager",
     },
     projects: {
-      description: "Локальные сайты на Docker с Apache, nginx + PHP-FPM или Node.",
+      description: "Локальные сайты на Docker с Apache, nginx + PHP или Node.",
       meta: "Web module",
       title: "Проекты",
     },

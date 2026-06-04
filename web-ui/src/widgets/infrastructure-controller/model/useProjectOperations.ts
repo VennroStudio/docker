@@ -186,8 +186,6 @@ function projectPreview(command: "project-create" | "project-update", form: Proj
     form.documentRoot ? `DOCUMENT_ROOT=${form.documentRoot}` : "",
     form.webPort ? `WEB_PORT=${form.webPort}` : "",
     form.phpVersion ? `PHP_VERSION=${form.phpVersion}` : "",
-    form.phpPreset ? `PHP_PRESET=${form.phpPreset}` : "",
-    form.phpExtensions ? `PHP_EXTENSIONS=${form.phpExtensions}` : "",
     form.enableNode ? `NODE_VERSION=${form.nodeVersion}` : "",
     form.enableNode ? `NODE_PACKAGE_MANAGER=${form.nodePackageManager}` : "",
     !form.enableNode && form.webStack !== "node" ? "REMOVE_RUNTIMES=node" : "",

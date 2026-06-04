@@ -74,14 +74,12 @@ export type ContainerStateInfo = {
   status?: string;
 };
 
-export type ProjectWebStack = "apache" | "nginx-fpm" | "node";
+export type ProjectWebStack = "apache" | "nginx" | "node";
 export type ProjectAction = ContainerLifecycleAction;
 
 export type ProjectRuntimeCatalog = {
   php?: {
     defaultVersion: string;
-    packageManagers: string[];
-    presets: Record<string, string[]>;
     versions: string[];
   };
   node?: {
@@ -97,8 +95,6 @@ export type ProjectForm = {
   name: string;
   nodePackageManager: string;
   nodeVersion: string;
-  phpExtensions: string;
-  phpPreset: string;
   phpVersion: string;
   webCommand: string;
   webPort: string;
@@ -107,10 +103,7 @@ export type ProjectForm = {
 
 export type ProjectRuntime = {
   enabled: boolean;
-  extensions?: string[];
   packageManager?: string;
-  packageManagers?: string[];
-  preset?: string;
   version: string;
 };
 
@@ -119,7 +112,7 @@ export type Project = {
   createdAt: string;
   name: string;
   path: string;
-  runtimes: Partial<Record<"dotnet" | "go" | "java" | "node" | "php" | "python" | "ruby", ProjectRuntime>>;
+  runtimes: Partial<Record<"node" | "php", ProjectRuntime>>;
   state: ServiceRuntimeState;
   updatedAt: string;
   web: {

@@ -587,7 +587,7 @@ project-list: ## Показать список проектов
 project-show: ## Показать проект, передать NAME=project-a
 	@$(NODE_RUN) ./scripts/projects/projects.mjs show --name "$(NAME)"
 
-project-create: proxy-network-ensure ## Создать сайт, передать NAME=project-a WEB_STACK=nginx-fpm PHP_VERSION=8.4 PHP_PRESET=laravel
+project-create: proxy-network-ensure ## Создать сайт, передать NAME=project-a WEB_STACK=nginx PHP_VERSION=8.4
 	@$(NODE_RUN) ./scripts/projects/projects.mjs create \
 		--name "$(NAME)" \
 		$(if $(RUNTIMES),--runtimes "$(RUNTIMES)",) \
@@ -596,19 +596,8 @@ project-create: proxy-network-ensure ## Создать сайт, передат�
 		$(if $(WEB_PORT),--web-port "$(WEB_PORT)",) \
 		$(if $(WEB_COMMAND),--web-command "$(WEB_COMMAND)",) \
 		$(if $(PHP_VERSION),--php-version "$(PHP_VERSION)",) \
-		$(if $(PHP_PRESET),--php-preset "$(PHP_PRESET)",) \
-		$(if $(PHP_EXTENSIONS),--php-extensions "$(PHP_EXTENSIONS)",) \
-		$(if $(PHP_PACKAGE_MANAGERS),--php-package-managers "$(PHP_PACKAGE_MANAGERS)",) \
 		$(if $(NODE_VERSION),--node-version "$(NODE_VERSION)",) \
-		$(if $(NODE_PACKAGE_MANAGER),--node-package-manager "$(NODE_PACKAGE_MANAGER)",) \
-		$(if $(PYTHON_VERSION),--python-version "$(PYTHON_VERSION)",) \
-		$(if $(PYTHON_PACKAGE_MANAGER),--python-package-manager "$(PYTHON_PACKAGE_MANAGER)",) \
-		$(if $(GO_VERSION),--go-version "$(GO_VERSION)",) \
-		$(if $(JAVA_VERSION),--java-version "$(JAVA_VERSION)",) \
-		$(if $(JAVA_PACKAGE_MANAGER),--java-package-manager "$(JAVA_PACKAGE_MANAGER)",) \
-		$(if $(DOTNET_VERSION),--dotnet-version "$(DOTNET_VERSION)",) \
-		$(if $(RUBY_VERSION),--ruby-version "$(RUBY_VERSION)",) \
-		$(if $(RUBY_PACKAGE_MANAGER),--ruby-package-manager "$(RUBY_PACKAGE_MANAGER)",)
+		$(if $(NODE_PACKAGE_MANAGER),--node-package-manager "$(NODE_PACKAGE_MANAGER)",)
 
 project-update: ## Изменить сайт, передать NAME=project-a WEB_STACK=apache PHP_VERSION=8.3
 	@$(NODE_RUN) ./scripts/projects/projects.mjs update \
@@ -620,19 +609,8 @@ project-update: ## Изменить сайт, передать NAME=project-a WE
 		$(if $(WEB_PORT),--web-port "$(WEB_PORT)",) \
 		$(if $(WEB_COMMAND),--web-command "$(WEB_COMMAND)",) \
 		$(if $(PHP_VERSION),--php-version "$(PHP_VERSION)",) \
-		$(if $(PHP_PRESET),--php-preset "$(PHP_PRESET)",) \
-		$(if $(PHP_EXTENSIONS),--php-extensions "$(PHP_EXTENSIONS)",) \
-		$(if $(PHP_PACKAGE_MANAGERS),--php-package-managers "$(PHP_PACKAGE_MANAGERS)",) \
 		$(if $(NODE_VERSION),--node-version "$(NODE_VERSION)",) \
-		$(if $(NODE_PACKAGE_MANAGER),--node-package-manager "$(NODE_PACKAGE_MANAGER)",) \
-		$(if $(PYTHON_VERSION),--python-version "$(PYTHON_VERSION)",) \
-		$(if $(PYTHON_PACKAGE_MANAGER),--python-package-manager "$(PYTHON_PACKAGE_MANAGER)",) \
-		$(if $(GO_VERSION),--go-version "$(GO_VERSION)",) \
-		$(if $(JAVA_VERSION),--java-version "$(JAVA_VERSION)",) \
-		$(if $(JAVA_PACKAGE_MANAGER),--java-package-manager "$(JAVA_PACKAGE_MANAGER)",) \
-		$(if $(DOTNET_VERSION),--dotnet-version "$(DOTNET_VERSION)",) \
-		$(if $(RUBY_VERSION),--ruby-version "$(RUBY_VERSION)",) \
-		$(if $(RUBY_PACKAGE_MANAGER),--ruby-package-manager "$(RUBY_PACKAGE_MANAGER)",)
+		$(if $(NODE_PACKAGE_MANAGER),--node-package-manager "$(NODE_PACKAGE_MANAGER)",)
 
 project-remove: ## Удалить проект, передать NAME=project-a FORCE=1
 	@$(NODE_RUN) ./scripts/projects/projects.mjs remove --name "$(NAME)" $(if $(FORCE),--force "$(FORCE)",)

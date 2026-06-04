@@ -271,8 +271,6 @@ export type AppText = {
       name: string;
       nodePackageManager: string;
       nodeVersion: string;
-      phpExtensions: string;
-      phpPreset: string;
       phpVersion: string;
       webCommand: string;
       webPort: string;
@@ -286,7 +284,7 @@ export type AppText = {
     options: {
       apache: string;
       node: string;
-      nginxFpm: string;
+      nginx: string;
     };
     runtime: string;
     sections: {

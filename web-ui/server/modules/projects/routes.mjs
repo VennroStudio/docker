@@ -28,10 +28,6 @@ async function enrichProject(project) {
 }
 
 function projectContainerNames(project) {
-  if (project?.web?.stack === "nginx-fpm") {
-    return [`${project.name}-nginx`, `${project.name}-php-fpm`, `${project.name}-php-cli`];
-  }
-
   return [`${project.name}-container`];
 }
 
@@ -59,12 +55,11 @@ async function inspectContainer(container) {
 }
 
 function projectState(running, containers) {
-  const webContainers = containers.filter((container) => !container.container.endsWith("-php-cli"));
-  const webRunning = webContainers.filter((container) => container.state === "running").length;
-  const existing = webContainers.filter((container) => container.state !== "missing").length;
+  const webRunning = containers.filter((container) => container.state === "running").length;
+  const existing = containers.filter((container) => container.state !== "missing").length;
 
-  if (webContainers.length === 0 || existing === 0) return "missing";
-  if (webRunning === webContainers.length) return "running";
+  if (containers.length === 0 || existing === 0) return "missing";
+  if (webRunning === containers.length) return "running";
   if (running > 0) return "partial";
   return "stopped";
 }

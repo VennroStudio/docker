@@ -265,8 +265,6 @@ function projectPayload(form: ProjectForm, type: "project-create" | "project-upd
     name: form.name,
     nodePackageManager: form.enableNode ? form.nodePackageManager : "",
     nodeVersion: form.enableNode ? form.nodeVersion : "",
-    phpExtensions: form.phpExtensions,
-    phpPreset: form.phpPreset,
     phpVersion: form.phpVersion,
     type,
     removeNode: form.webStack === "node" || form.enableNode ? "" : "1",

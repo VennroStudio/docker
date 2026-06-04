@@ -8,19 +8,7 @@ export const runtimeCatalogFile = process.env.INFRA_PROJECT_RUNTIME_CATALOG_FILE
 export const projectsRoot = process.env.INFRA_PROJECTS_DIR || "projects";
 export const projectNamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 
-export const supportedRuntimes = ["php", "node", "python", "go", "java", "dotnet", "ruby"];
-export const supportedPackageManagers = [
-  "composer",
-  "npm",
-  "yarn",
-  "pnpm",
-  "pip",
-  "poetry",
-  "uv",
-  "maven",
-  "gradle",
-  "bundler",
-];
+export const supportedRuntimes = ["php", "node"];
 
 export async function initProjectsStore() {
   if (existsSync(projectsFile)) return;
@@ -113,14 +101,6 @@ export function requireProject(store, name) {
 
 export async function removeProjectDirectory(project) {
   await rm(project.path, { force: true, recursive: true });
-}
-
-export function runtimeList(value) {
-  return splitList(value);
-}
-
-export function packageManagerList(value) {
-  return splitList(value);
 }
 
 export function splitList(value) {

@@ -38,9 +38,7 @@ export function ProjectDetails({
             <ProjectInfoRow
               key={name}
               label={name}
-              value={[runtime.version, runtime.preset, runtime.packageManager, runtime.packageManagers?.join(", ")]
-                .filter(Boolean)
-                .join(" / ")}
+              value={[runtime.version, runtime.packageManager].filter(Boolean).join(" / ")}
             />
           ))}
         </ProjectInfoBlock>

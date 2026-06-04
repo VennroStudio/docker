@@ -176,7 +176,7 @@ async function runProjectMake(
 }
 
 async function cleanupRuntimeArtifacts(project) {
-  await runProjectMake("down", project, { optional: true });
+  await runProjectMake("clean", project, { optional: true });
 }
 
 function projectPayload(name = input(options, "NAME")) {
@@ -189,19 +189,8 @@ function projectPayload(name = input(options, "NAME")) {
     webPort: input(options, "WEB_PORT"),
     webCommand: input(options, "WEB_COMMAND"),
     phpVersion: input(options, "PHP_VERSION"),
-    phpPreset: input(options, "PHP_PRESET"),
-    phpExtensions: input(options, "PHP_EXTENSIONS"),
-    phpPackageManagers: input(options, "PHP_PACKAGE_MANAGERS"),
     nodeVersion: input(options, "NODE_VERSION"),
     nodePackageManager: input(options, "NODE_PACKAGE_MANAGER"),
-    pythonVersion: input(options, "PYTHON_VERSION"),
-    pythonPackageManager: input(options, "PYTHON_PACKAGE_MANAGER"),
-    goVersion: input(options, "GO_VERSION"),
-    javaVersion: input(options, "JAVA_VERSION"),
-    javaPackageManager: input(options, "JAVA_PACKAGE_MANAGER"),
-    dotnetVersion: input(options, "DOTNET_VERSION"),
-    rubyVersion: input(options, "RUBY_VERSION"),
-    rubyPackageManager: input(options, "RUBY_PACKAGE_MANAGER"),
   };
 }
 
@@ -212,10 +201,10 @@ function usage() {
   console.log("  make project-list");
   console.log("  make project-show NAME=project-a");
   console.log(
-    "  make project-create NAME=project-a WEB_STACK=nginx-fpm PHP_VERSION=8.4 PHP_PRESET=laravel",
+    "  make project-create NAME=project-a WEB_STACK=nginx PHP_VERSION=8.4",
   );
   console.log(
-    "  make project-update NAME=project-a WEB_STACK=apache PHP_PRESET=wordpress",
+    "  make project-update NAME=project-a WEB_STACK=apache PHP_VERSION=8.4",
   );
   console.log("  make project-remove NAME=project-a FORCE=1");
   console.log("  make project-shell NAME=project-a");

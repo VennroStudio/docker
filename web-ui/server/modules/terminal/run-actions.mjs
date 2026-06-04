@@ -183,7 +183,7 @@ function projectArgs(payload) {
     valueArg("NAME", validateProjectName(payload.name)),
     valueArg(
       "WEB_STACK",
-      validateEnum(payload.webStack || "nginx-fpm", ["apache", "nginx-fpm", "node"], "Invalid WEB_STACK"),
+      validateEnum(payload.webStack || "nginx", ["apache", "nginx", "node"], "Invalid WEB_STACK"),
     ),
   ];
 
@@ -194,9 +194,6 @@ function projectArgs(payload) {
     args.push(valueArg("WEB_COMMAND", validateCommandText(payload.webCommand)));
   if (payload.phpVersion)
     args.push(valueArg("PHP_VERSION", validateVersion(payload.phpVersion, "Invalid PHP_VERSION")));
-  if (payload.phpPreset) args.push(valueArg("PHP_PRESET", validateSlug(payload.phpPreset, "Invalid PHP_PRESET")));
-  if (payload.phpExtensions)
-    args.push(valueArg("PHP_EXTENSIONS", validateCsv(payload.phpExtensions, "Invalid PHP_EXTENSIONS")));
   if (payload.enableNode || payload.webStack === "node") {
     if (payload.nodeVersion)
       args.push(valueArg("NODE_VERSION", validateVersion(payload.nodeVersion, "Invalid NODE_VERSION")));
@@ -313,16 +310,6 @@ function validateProjectPort(value) {
 
 function validateVersion(value, message) {
   assert(/^[A-Za-z0-9_.-]+$/.test(value || ""), message);
-  return value;
-}
-
-function validateSlug(value, message) {
-  assert(/^[A-Za-z0-9_-]+$/.test(value || ""), message);
-  return value;
-}
-
-function validateCsv(value, message) {
-  assert(/^[A-Za-z0-9_,-]+$/.test(value || ""), message);
   return value;
 }
 

@@ -1,5 +1,5 @@
 import type { AppText, ProjectForm } from "@/entities/infrastructure";
-import { Field, SelectField } from "@/shared/ui";
+import { SelectField } from "@/shared/ui";
 
 type ProjectFieldChange = <Key extends keyof ProjectForm>(key: Key, value: ProjectForm[Key]) => void;
 
@@ -7,12 +7,10 @@ export function ProjectPhpFields({
   copy,
   form,
   onFieldChange,
-  phpPresets,
   phpVersions,
 }: {
   copy: AppText["projects"];
   form: ProjectForm;
-  phpPresets: string[];
   phpVersions: string[];
   onFieldChange: ProjectFieldChange;
 }) {
@@ -26,19 +24,7 @@ export function ProjectPhpFields({
           value={form.phpVersion}
           onChange={(event) => onFieldChange("phpVersion", event.target.value)}
         />
-        <SelectField
-          label={copy.fields.phpPreset}
-          options={phpPresets.map((preset) => ({ label: preset, value: preset }))}
-          value={form.phpPreset}
-          onChange={(event) => onFieldChange("phpPreset", event.target.value)}
-        />
       </div>
-      <Field
-        label={copy.fields.phpExtensions}
-        placeholder="redis,pdo_pgsql"
-        value={form.phpExtensions}
-        onChange={(event) => onFieldChange("phpExtensions", event.target.value)}
-      />
     </section>
   );
 }
