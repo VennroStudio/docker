@@ -196,7 +196,7 @@ function projectPayload(name = input(options, "NAME")) {
 
 function usage() {
   console.log("Usage:");
-  console.log("  make project-init");
+  console.log("  make init");
   console.log("  make project-catalog");
   console.log("  make project-list");
   console.log("  make project-show NAME=project-a");

@@ -19,14 +19,14 @@ export function initStore() {
     return;
   }
 
-  writeStore({ servers: [] });
+  writeStore({ servers: [] }, { allowCreate: true });
   console.log(
     `Created SSH servers file: ${path.relative(rootDir, serversFile)}`,
   );
 }
 
 export function readStore() {
-  if (!existsSync(serversFile)) return { servers: [] };
+  requireInitializedStore();
 
   const payload = JSON.parse(readFileSync(serversFile, "utf8"));
   if (Array.isArray(payload))
@@ -39,7 +39,8 @@ export function readStore() {
   };
 }
 
-export function writeStore(store) {
+export function writeStore(store, { allowCreate = false } = {}) {
+  if (!allowCreate) requireInitializedStore();
   mkdirSync(path.dirname(serversFile), { recursive: true });
   writeFileSync(
     serversFile,
@@ -198,4 +199,16 @@ function requiredString(value, message) {
 
 function assertNoWhitespace(value, message) {
   if (/\s/.test(value)) throw new Error(message);
+}
+
+function requireInitializedStore() {
+  if (existsSync(serversFile)) return;
+  throw new Error(
+    `SSH servers file is missing: ${displayPath(serversFile)}. Run make init.`,
+  );
+}
+
+function displayPath(file) {
+  const relative = path.relative(rootDir, file);
+  return relative.startsWith("..") ? file : relative;
 }

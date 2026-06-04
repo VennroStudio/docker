@@ -171,29 +171,24 @@ function findTargetInstance(options) {
 }
 
 function readInstances() {
-  ensureInstancesFile();
+  requireInitializedInstancesFile();
   const instances = JSON.parse(readFileSync(instancesPath, "utf8"));
-  const normalized = instances.map((instance) => ({
+  return instances.map((instance) => ({
     ...instance,
     composeFile: composeFileFor(instance.name),
   }));
-  if (
-    JSON.stringify(instances.map((instance) => instance.composeFile)) !==
-    JSON.stringify(normalized.map((instance) => instance.composeFile))
-  ) {
-    writeInstances(normalized);
-  }
-  return normalized;
 }
 
 function writeInstances(instances) {
-  ensureInstancesFile();
+  requireInitializedInstancesFile();
   writeFileSync(instancesPath, `${JSON.stringify(instances, null, 2)}\n`);
 }
 
-function ensureInstancesFile() {
-  mkdirSync(path.dirname(instancesPath), { recursive: true });
-  if (!existsSync(instancesPath)) writeFileSync(instancesPath, "[]\n");
+function requireInitializedInstancesFile() {
+  assert(
+    existsSync(instancesPath),
+    `Postgres instances file is missing: ${path.relative(cwd, instancesPath)}. Run make init.`,
+  );
 }
 
 function composeFor(instance) {

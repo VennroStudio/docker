@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { assert } from "../../common/cli.mjs";
 import { containerStatus, parseArgs, printJson, settingsUrl } from "../../common/status.mjs";
@@ -91,7 +91,7 @@ function findTargetInstance(options) {
 }
 
 function readInstances() {
-  ensureInstancesFile();
+  requireInitializedInstancesFile();
   const instances = JSON.parse(readFileSync(instancesPath, "utf8"));
   const normalized = instances.map((instance) => ({
     ...instance,
@@ -101,7 +101,9 @@ function readInstances() {
   return normalized;
 }
 
-function ensureInstancesFile() {
-  mkdirSync(path.dirname(instancesPath), { recursive: true });
-  if (!existsSync(instancesPath)) writeFileSync(instancesPath, "[]\n");
+function requireInitializedInstancesFile() {
+  assert(
+    existsSync(instancesPath),
+    `MariaDB instances file is missing: ${path.relative(cwd, instancesPath)}. Run make init.`,
+  );
 }

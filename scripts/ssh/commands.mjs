@@ -46,7 +46,7 @@ function initStore() {
     return;
   }
 
-  writeStore({ commands: [] });
+  writeStore({ commands: [] }, { allowCreate: true });
   console.log(
     `Created SSH commands file: ${path.relative(rootDir, commandsFile)}`,
   );
@@ -106,7 +106,7 @@ function removeCommand() {
 }
 
 function readStore() {
-  if (!existsSync(commandsFile)) return { commands: [] };
+  requireInitializedStore();
 
   const payload = JSON.parse(readFileSync(commandsFile, "utf8"));
   if (Array.isArray(payload))
@@ -119,7 +119,8 @@ function readStore() {
   };
 }
 
-function writeStore(store) {
+function writeStore(store, { allowCreate = false } = {}) {
+  if (!allowCreate) requireInitializedStore();
   mkdirSync(path.dirname(commandsFile), { recursive: true });
   writeFileSync(
     commandsFile,
@@ -158,6 +159,18 @@ function nextCommandId(commands) {
       0,
     ) + 1
   );
+}
+
+function requireInitializedStore() {
+  if (existsSync(commandsFile)) return;
+  throw new Error(
+    `SSH commands file is missing: ${displayPath(commandsFile)}. Run make init.`,
+  );
+}
+
+function displayPath(file) {
+  const relative = path.relative(rootDir, file);
+  return relative.startsWith("..") ? file : relative;
 }
 
 function usage() {

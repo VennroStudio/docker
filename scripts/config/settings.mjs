@@ -81,6 +81,10 @@ function setByPath(target, key, value) {
 }
 
 async function readJson(file) {
+  if (path.resolve(file) === path.resolve(settingsFile) && !existsSync(settingsFile)) {
+    throw new Error(`Settings file is missing: ${settingsFile}. Run make init.`);
+  }
+
   const payload = JSON.parse(await readFile(file, "utf8"));
   if (path.resolve(file) === path.resolve(defaultsFile) || !existsSync(defaultsFile)) {
     return normalizeSettings(payload);

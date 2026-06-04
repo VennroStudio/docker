@@ -17,13 +17,14 @@ export async function initProjectsStore() {
 }
 
 export async function readProjectsStore() {
-  const payload = await readJson(projectsFile, { projects: [] });
+  const payload = await readRequiredJson(projectsFile, "Projects store");
   return {
     projects: Array.isArray(payload.projects) ? payload.projects : [],
   };
 }
 
 export async function writeProjectsStore(store) {
+  requireInitializedFile(projectsFile, "Projects store");
   await writeJson(projectsFile, {
     projects: [...store.projects].sort((left, right) => left.name.localeCompare(right.name)),
   });
@@ -44,6 +45,15 @@ export async function readJson(file, fallback) {
 export async function writeJson(file, payload) {
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+async function readRequiredJson(file, label) {
+  requireInitializedFile(file, label);
+  return JSON.parse(await readFile(file, "utf8"));
+}
+
+function requireInitializedFile(file, label) {
+  assert(existsSync(file), `${label} is missing: ${file}. Run make init.`);
 }
 
 export function input(options, name, fallback = "") {

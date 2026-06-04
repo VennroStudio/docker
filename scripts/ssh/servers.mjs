@@ -116,7 +116,7 @@ function runSsh(remoteCommand = []) {
 
 function usage() {
   console.log("Usage:");
-  console.log("  make ssh-init");
+  console.log("  make init");
   console.log("  make ssh-list");
   console.log(
     "  make ssh-add NAME=prod HOST=example.com USER=root PASSWORD=secret",

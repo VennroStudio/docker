@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { assert, parseArgs } from "../../common/cli.mjs";
 import { getRuntimeEnv } from "../../common/env.mjs";
@@ -89,9 +89,16 @@ export function assertValidContainerName(container) {
 }
 
 async function readMariaDbInstances() {
+  await requireInitializedInstancesFile();
+  return JSON.parse(await readFile(instancesPath, "utf8"));
+}
+
+async function requireInitializedInstancesFile() {
   try {
-    return JSON.parse(await readFile(instancesPath, "utf8"));
+    await access(instancesPath);
   } catch {
-    return [];
+    throw new Error(
+      `MariaDB instances file is missing: ${path.relative(process.cwd(), instancesPath)}. Run make init.`,
+    );
   }
 }
