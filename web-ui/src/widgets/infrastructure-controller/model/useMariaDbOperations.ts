@@ -15,7 +15,7 @@ import {
   openMariaDbInstanceCreateTerminal,
   openShellTerminal,
 } from "@/features/command-terminal";
-import type { ConfirmDialogApi, RunWithTerminal } from "./operationTypes";
+import { requiresContainerActionConfirm, type ConfirmDialogApi, type RunWithTerminal } from "./operationTypes";
 
 type UseMariaDbOperationsConfig = {
   confirmDialog: ConfirmDialogApi;
@@ -92,12 +92,12 @@ export function useMariaDbOperations({
   };
 
   const runMariaDbInstanceAction = async (instance: MariaDbInstance, action: MariaDbInstanceAction) => {
-    if (action === "clean" || action === "down" || action === "stop") {
+    if (requiresContainerActionConfirm(action)) {
       const confirmed = await confirmDialog.confirm({
         body: text.confirm.runCommand.body(`mariadb instance ${action}: ${instance.name}`),
         cancelLabel: text.common.cancel,
         confirmLabel: text.confirm.runCommand.confirmLabel,
-        title: text.mariadbInstances.actions[action].label,
+        title: text.common.containerActions[action].label,
         tone: "danger",
       });
       if (!confirmed) return;
@@ -105,7 +105,7 @@ export function useMariaDbOperations({
 
     runWithTerminal({
       key: `mariadb:${instance.name}:${action}`,
-      label: text.mariadbInstances.actions[action].label,
+      label: text.common.containerActions[action].label,
       onSettled: refreshMariaDbInstances,
       open: (handlers) => openMariaDbInstanceActionTerminal(instance.name, action, handlers),
       preview: `make mariadb-instance-${action} NAME=${instance.name}`,
@@ -115,7 +115,7 @@ export function useMariaDbOperations({
   const runMariaDbInstanceShell = (instance: MariaDbInstance) => {
     runWithTerminal({
       key: `shell:${instance.container}`,
-      label: text.mariadbInstances.actions.shell.label,
+      label: text.common.containerActions.shell.label,
       open: (handlers) => openShellTerminal(instance.container, handlers),
       preview: `make mariadb-instance-shell NAME=${instance.name}`,
     });

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
 import { getPostgresOverview } from "../api/postgres";
-import type { PgAdminOverview, PostgresInstance } from "@/entities/infrastructure";
+import { useDatabaseOverview, type PgAdminOverview, type PostgresInstance } from "@/entities/infrastructure";
+import type { PostgresOverview } from "../api/postgres";
 
 const fallbackPgAdmin: PgAdminOverview = {
   container: "pgadmin-container",
@@ -8,35 +8,22 @@ const fallbackPgAdmin: PgAdminOverview = {
 };
 
 export function usePostgresInstances(enabled: boolean) {
-  const [error, setError] = useState<string | null>(null);
-  const [instances, setInstances] = useState<PostgresInstance[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pgadmin, setPgAdmin] = useState<PgAdminOverview>(fallbackPgAdmin);
+  const overview = useDatabaseOverview({
+    enabled,
+    fallbackAdmin: fallbackPgAdmin,
+    fetchOverview: getPostgresOverview,
+    selectAdmin: selectPgAdmin,
+    selectInstances,
+  });
 
-  const refresh = useCallback(async () => {
-    if (!enabled) return;
+  const { admin, ...state } = overview;
+  return { ...state, pgadmin: admin };
+}
 
-    setLoading(true);
-    setError(null);
+function selectInstances(overview: PostgresOverview): PostgresInstance[] {
+  return overview.instances;
+}
 
-    try {
-      const overview = await getPostgresOverview();
-      setInstances(overview.instances);
-      setPgAdmin(overview.pgadmin);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
-    } finally {
-      setLoading(false);
-    }
-  }, [enabled]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void refresh();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [refresh]);
-
-  return { error, instances, loading, pgadmin, refresh };
+function selectPgAdmin(overview: PostgresOverview): PgAdminOverview {
+  return overview.pgadmin;
 }

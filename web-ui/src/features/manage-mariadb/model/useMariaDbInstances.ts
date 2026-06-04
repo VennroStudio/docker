@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
 import { getMariaDbOverview } from "../api/mariadb";
-import type { MariaDbInstance, PhpMyAdminOverview } from "@/entities/infrastructure";
+import { useDatabaseOverview, type MariaDbInstance, type PhpMyAdminOverview } from "@/entities/infrastructure";
+import type { MariaDbOverview } from "../api/mariadb";
 
 const fallbackPhpMyAdmin: PhpMyAdminOverview = {
   container: "phpmyadmin-container",
@@ -8,35 +8,22 @@ const fallbackPhpMyAdmin: PhpMyAdminOverview = {
 };
 
 export function useMariaDbInstances(enabled: boolean) {
-  const [error, setError] = useState<string | null>(null);
-  const [instances, setInstances] = useState<MariaDbInstance[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [phpmyadmin, setPhpMyAdmin] = useState<PhpMyAdminOverview>(fallbackPhpMyAdmin);
+  const overview = useDatabaseOverview({
+    enabled,
+    fallbackAdmin: fallbackPhpMyAdmin,
+    fetchOverview: getMariaDbOverview,
+    selectAdmin: selectPhpMyAdmin,
+    selectInstances,
+  });
 
-  const refresh = useCallback(async () => {
-    if (!enabled) return;
+  const { admin, ...state } = overview;
+  return { ...state, phpmyadmin: admin };
+}
 
-    setLoading(true);
-    setError(null);
+function selectInstances(overview: MariaDbOverview): MariaDbInstance[] {
+  return overview.instances;
+}
 
-    try {
-      const overview = await getMariaDbOverview();
-      setInstances(overview.instances);
-      setPhpMyAdmin(overview.phpmyadmin);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
-    } finally {
-      setLoading(false);
-    }
-  }, [enabled]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void refresh();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [refresh]);
-
-  return { error, instances, loading, phpmyadmin, refresh };
+function selectPhpMyAdmin(overview: MariaDbOverview): PhpMyAdminOverview {
+  return overview.phpmyadmin;
 }

@@ -181,10 +181,7 @@ function projectUpdateCommand(request) {
 function projectArgs(payload) {
   const args = [
     valueArg("NAME", validateProjectName(payload.name)),
-    valueArg(
-      "WEB_STACK",
-      validateEnum(payload.webStack || "nginx", ["apache", "nginx", "node"], "Invalid WEB_STACK"),
-    ),
+    valueArg("WEB_STACK", validateEnum(payload.webStack || "nginx", ["apache", "nginx", "node"], "Invalid WEB_STACK")),
   ];
 
   if (payload.documentRoot)

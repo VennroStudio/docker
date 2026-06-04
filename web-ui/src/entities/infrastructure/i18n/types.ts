@@ -7,6 +7,13 @@ export type AppText = {
   common: {
     cancel: string;
     clear: string;
+    containerActions: Record<
+      "clean" | "down" | "logs" | "shell" | "start" | "stop" | "up",
+      {
+        detail: string;
+        label: string;
+      }
+    >;
     hide: string;
     link: string;
     panel: string;
@@ -67,13 +74,6 @@ export type AppText = {
     };
   };
   mariadbInstances: {
-    actions: Record<
-      "clean" | "down" | "logs" | "shell" | "start" | "stop" | "up",
-      {
-        detail: string;
-        label: string;
-      }
-    >;
     authModes: {
       config: string;
       cookie: string;

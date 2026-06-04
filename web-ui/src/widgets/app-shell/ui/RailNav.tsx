@@ -1,7 +1,7 @@
 import { Languages } from "lucide-react";
 import type { AppText, Language } from "@/entities/infrastructure";
 import type { ViewConfig, ViewId } from "@/entities/infrastructure";
-import logoUrl from "../../../../logo.png";
+import logoUrl from "../../../../logo-nav.png";
 
 type RailNavProps = {
   activeView: ViewId;

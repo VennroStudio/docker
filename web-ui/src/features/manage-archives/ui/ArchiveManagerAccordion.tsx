@@ -49,10 +49,14 @@ export function ArchiveManagerAccordion({
   );
 
   useEffect(() => {
-    setExtractForm((current) => {
-      if (current.name && archivesState.archives.some((archive) => archive.name === current.name)) return current;
-      return { ...current, name: archivesState.archives[0]?.name ?? "" };
-    });
+    const timer = window.setTimeout(() => {
+      setExtractForm((current) => {
+        if (current.name && archivesState.archives.some((archive) => archive.name === current.name)) return current;
+        return { ...current, name: archivesState.archives[0]?.name ?? "" };
+      });
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [archivesState.archives]);
 
   return (

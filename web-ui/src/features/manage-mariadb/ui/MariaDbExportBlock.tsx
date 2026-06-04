@@ -1,5 +1,6 @@
 import {
   DatabaseDumpExportForm,
+  mariaDbDatabaseEngine,
   type AppText,
   type MariaDbExportForm,
   type MariaDbInstance,
@@ -23,22 +24,10 @@ export function MariaDbExportBlock(props: MariaDbExportBlockProps) {
     <DatabaseDumpExportForm<MariaDbInstance, MariaDbExportForm>
       {...props}
       fetchDatabases={fetchMariaDbDatabases}
-      getSuggestedFilePath={(database) => `dumps/mariadb/${database}.sql.gz`}
-      instanceLabel={instanceLabel}
-      isValidDatabaseName={isValidDatabaseName}
-      isValidDumpPath={isSupportedDumpPath}
+      getSuggestedFilePath={mariaDbDatabaseEngine.getSuggestedFilePath}
+      instanceLabel={mariaDbDatabaseEngine.instanceLabel}
+      isValidDatabaseName={mariaDbDatabaseEngine.isValidDatabaseName}
+      isValidDumpPath={mariaDbDatabaseEngine.isValidDumpPath}
     />
   );
-}
-
-function isSupportedDumpPath(filePath: string) {
-  return filePath.endsWith(".sql") || filePath.endsWith(".sql.gz");
-}
-
-function isValidDatabaseName(database: string) {
-  return /^[A-Za-z0-9_$.-]+$/.test(database);
-}
-
-function instanceLabel(instance: MariaDbInstance) {
-  return `MariaDB ${instance.version} / ${instance.container} / :${instance.hostPort}`;
 }

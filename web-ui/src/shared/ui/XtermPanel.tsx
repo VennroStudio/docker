@@ -34,19 +34,7 @@ type XtermPanelProps = {
 };
 
 export const XtermPanel = forwardRef<XtermPanelHandle, XtermPanelProps>(function XtermPanel(
-  {
-    actionLabels,
-    cwd,
-    inputEnabled = false,
-    onClear,
-    onInput,
-    onResize,
-    onStop,
-    output,
-    state,
-    stateLabels,
-    title,
-  },
+  { actionLabels, cwd, inputEnabled = false, onClear, onInput, onResize, onStop, output, state, stateLabels, title },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,7 +78,7 @@ export const XtermPanel = forwardRef<XtermPanelHandle, XtermPanelProps>(function
 
     const terminal = new XTerm({
       convertEol: true,
-      cursorBlink: state === "running",
+      cursorBlink: false,
       cursorStyle: "block",
       disableStdin: false,
       fontFamily: "Menlo, Monaco, Consolas, 'Liberation Mono', monospace",
@@ -124,13 +112,12 @@ export const XtermPanel = forwardRef<XtermPanelHandle, XtermPanelProps>(function
 
     terminal.loadAddon(fit);
     terminal.open(containerRef.current);
-    terminal.write(output || "");
     fit.fit();
     onResizeRef.current?.(terminal.cols, terminal.rows);
 
     terminalRef.current = terminal;
     fitRef.current = fit;
-    lastOutputRef.current = output || "";
+    lastOutputRef.current = "";
 
     const inputDisposable = terminal.onData((data) => {
       if (!inputEnabledRef.current) return;

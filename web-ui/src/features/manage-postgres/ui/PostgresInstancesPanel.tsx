@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DatabaseInstancesSection } from "@/entities/infrastructure";
+import { containerActionLabels, DatabaseInstancesSection } from "@/entities/infrastructure";
 import type {
   AppText,
   PostgresDatabaseForm,
@@ -58,21 +58,12 @@ export function PostgresInstancesPanel({
   const [createOpen, setCreateOpen] = useState(false);
   const [postgresOpen, setPostgresOpen] = useState(false);
   const copy = text.postgresInstances;
-  const actionLabels = text.mariadbInstances.actions;
   const runningInstances = instances.filter((instance) => instance.state === "running");
 
   return (
     <>
       <DatabaseInstancesSection
-        actionLabels={{
-          clean: actionLabels.clean.label,
-          down: actionLabels.down.label,
-          logs: actionLabels.logs.label,
-          shell: actionLabels.shell.label,
-          start: actionLabels.start.label,
-          stop: actionLabels.stop.label,
-          up: actionLabels.up.label,
-        }}
+        actionLabels={containerActionLabels(text.common.containerActions)}
         activeOperationKey={activeOperationKey}
         containerRequiredTitle={text.panels.serviceControl.containerRequired}
         copy={copy}

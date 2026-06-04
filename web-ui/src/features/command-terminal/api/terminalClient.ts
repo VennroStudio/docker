@@ -80,7 +80,11 @@ function terminalUrl() {
   return new URL("/api/terminal/run", `${protocol}//${window.location.host}`);
 }
 
-function send(socket: WebSocket, pendingMessages: Array<Record<string, number | string>>, payload: Record<string, number | string>) {
+function send(
+  socket: WebSocket,
+  pendingMessages: Array<Record<string, number | string>>,
+  payload: Record<string, number | string>,
+) {
   if (socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify(payload));
     return;

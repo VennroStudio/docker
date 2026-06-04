@@ -1,4 +1,6 @@
-import type { CommandAction, ContainerRuntimeState } from "./types";
+import type { CommandAction, ContainerLifecycleAction, ContainerRuntimeState } from "./types";
+
+type ContainerActionCopy = Record<ContainerLifecycleAction | "shell", { label: string }>;
 
 type ContainerActionOptions = {
   disabledTitle?: string;
@@ -37,6 +39,18 @@ export function applyContainerActionRules(
 
     return nextAction;
   });
+}
+
+export function containerActionLabels(actions: ContainerActionCopy) {
+  return {
+    clean: actions.clean.label,
+    down: actions.down.label,
+    logs: actions.logs.label,
+    shell: actions.shell.label,
+    start: actions.start.label,
+    stop: actions.stop.label,
+    up: actions.up.label,
+  };
 }
 
 export function shellDisabledForContainerState(state?: ContainerRuntimeState | null) {

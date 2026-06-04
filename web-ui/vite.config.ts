@@ -20,5 +20,14 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          icons: ["lucide-react"],
+          react: ["react", "react-dom", "react-router-dom"],
+          terminal: ["@xterm/addon-fit", "@xterm/xterm"],
+        },
+      },
+    },
   },
 });

@@ -7,48 +7,42 @@ export function useDumpFiles<File extends DatabaseDumpFile>(fetchDumpFiles: Fetc
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      if (signal?.aborted) return [];
 
-    try {
-      const nextFiles = await fetchDumpFiles();
-      setFiles(nextFiles);
-      return nextFiles;
-    } catch (requestError) {
-      setFiles([]);
-      setError(toErrorMessage(requestError));
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchDumpFiles]);
+      setLoading(true);
+      setError(null);
+
+      try {
+        const nextFiles = await fetchDumpFiles();
+        if (signal?.aborted) return [];
+
+        setFiles(nextFiles);
+        return nextFiles;
+      } catch (requestError) {
+        if (signal?.aborted) return [];
+
+        setFiles([]);
+        setError(toErrorMessage(requestError));
+        return [];
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [fetchDumpFiles],
+  );
+
+  const refresh = useCallback(() => load(), [load]);
 
   useEffect(() => {
-    let mounted = true;
-
-    void Promise.resolve()
-      .then(() => {
-        if (mounted) {
-          setLoading(true);
-          setError(null);
-        }
-        return fetchDumpFiles();
-      })
-      .then((nextFiles) => {
-        if (mounted) setFiles(nextFiles);
-      })
-      .catch((requestError: unknown) => {
-        if (mounted) setError(toErrorMessage(requestError));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+    const controller = new AbortController();
+    void Promise.resolve().then(() => load(controller.signal));
 
     return () => {
-      mounted = false;
+      controller.abort();
     };
-  }, [fetchDumpFiles]);
+  }, [load]);
 
-  return { error, files, loading, refresh: load };
+  return { error, files, loading, refresh };
 }

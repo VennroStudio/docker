@@ -1,5 +1,5 @@
 import { KeyRound, Send, TerminalSquare, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AppText, SshQuickCommand, SshServer, SshServerForm } from "@/entities/infrastructure";
 import { AccordionPanel, IconButton } from "@/shared/ui";
 import { validateSshServerForm } from "../model/validation";
@@ -37,23 +37,23 @@ export function SshServerAccordion({
   onTerminalOpen,
   server,
 }: SshServerAccordionProps) {
+  const { authType, host, keyPath, name, password, passwordMode, port, user } = server;
+  const serverDefaults = useMemo(
+    () => ({ authType, host, keyPath, name, password, passwordMode, port, user }),
+    [authType, host, keyPath, name, password, passwordMode, port, user],
+  );
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<SshServerForm>(serverForm(server));
+  const [form, setForm] = useState<SshServerForm>(serverDefaults);
   const [error, setError] = useState("");
   const keyActionsDisabled = form.authType !== "key" || !server.keyPath;
 
   useEffect(() => {
-    setForm(serverForm(server));
-  }, [
-    server.authType,
-    server.host,
-    server.keyPath,
-    server.name,
-    server.password,
-    server.passwordMode,
-    server.port,
-    server.user,
-  ]);
+    const timer = window.setTimeout(() => {
+      setForm(serverDefaults);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [serverDefaults]);
 
   const save = () => {
     const nextError = validateSshServerForm(form, copy);
@@ -73,7 +73,12 @@ export function SshServerAccordion({
           <IconButton label={copy.actions.terminal} tone="primary" onClick={() => onTerminalOpen(server)}>
             <TerminalSquare size={16} strokeWidth={2.5} />
           </IconButton>
-          <IconButton disabled={keyActionsDisabled} label={copy.actions.keyPush} tone="primary" onClick={() => onKeyPush(server)}>
+          <IconButton
+            disabled={keyActionsDisabled}
+            label={copy.actions.keyPush}
+            tone="primary"
+            onClick={() => onKeyPush(server)}
+          >
             <Send size={16} strokeWidth={2.5} />
           </IconButton>
           <IconButton
@@ -126,19 +131,6 @@ function AuthBadge({ authType, copy }: { authType: SshServer["authType"]; copy: 
       {authType === "key" ? copy.options.key : copy.options.password}
     </span>
   );
-}
-
-function serverForm(server: SshServer): SshServerForm {
-  return {
-    authType: server.authType,
-    host: server.host,
-    keyPath: server.keyPath,
-    name: server.name,
-    password: server.password,
-    passwordMode: server.passwordMode,
-    port: server.port,
-    user: server.user,
-  };
 }
 
 function BlockHeader({ eyebrow, title }: { eyebrow: string; title: string }) {

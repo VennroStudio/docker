@@ -1,15 +1,6 @@
 import type { AppText } from "../types";
 
 export const ruMariadbInstances = {
-  actions: {
-    clean: { label: "Clean", detail: "удалить образ" },
-    down: { label: "Down", detail: "удалить контейнер" },
-    logs: { label: "Logs", detail: "поток логов" },
-    shell: { label: "Shell", detail: "make shell" },
-    start: { label: "Start", detail: "запустить контейнер" },
-    stop: { label: "Stop", detail: "остановить сервис" },
-    up: { label: "Up", detail: "docker compose up" },
-  },
   authModes: {
     config: "Автологин",
     cookie: "Логин и пароль",

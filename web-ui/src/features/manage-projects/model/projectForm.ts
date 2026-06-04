@@ -45,8 +45,7 @@ export function validateProjectForm(
   messages: { name: string; nodeVersion: string; phpVersion: string },
 ) {
   if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(form.name.trim())) return messages.name;
-  if ((form.webStack === "apache" || form.webStack === "nginx") && !form.phpVersion.trim())
-    return messages.phpVersion;
+  if ((form.webStack === "apache" || form.webStack === "nginx") && !form.phpVersion.trim()) return messages.phpVersion;
   if ((form.webStack === "node" || form.enableNode) && !form.nodeVersion.trim()) return messages.nodeVersion;
   return "";
 }

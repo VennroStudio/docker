@@ -1,5 +1,6 @@
 import {
   DatabaseCatalogBlock,
+  postgresDatabaseEngine,
   type AppText,
   type PostgresDatabaseForm,
   type PostgresInstance,
@@ -24,16 +25,8 @@ export function PostgresDatabaseBlock(props: PostgresDatabaseBlockProps) {
       {...props}
       fetchDatabases={fetchPostgresDatabases}
       idPrefix="postgres"
-      instanceLabel={instanceLabel}
-      isValidDatabaseName={isValidDatabaseName}
+      instanceLabel={postgresDatabaseEngine.instanceLabel}
+      isValidDatabaseName={postgresDatabaseEngine.isValidDatabaseName}
     />
   );
-}
-
-function isValidDatabaseName(database: string) {
-  return /^[A-Za-z0-9_]+$/.test(database);
-}
-
-function instanceLabel(instance: PostgresInstance) {
-  return `Postgres ${instance.version} / ${instance.container} / :${instance.hostPort}`;
 }

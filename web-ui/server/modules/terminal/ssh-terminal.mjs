@@ -84,7 +84,6 @@ function validateId(value) {
 
 function validateAction(value) {
   if (!value) return "connect";
-  if (value === "connect" || value === "key-push" || value === "key-remove")
-    return value;
+  if (value === "connect" || value === "key-push" || value === "key-remove") return value;
   throw new Error("Invalid SSH terminal action");
 }

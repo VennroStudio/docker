@@ -1,5 +1,6 @@
 import {
   DatabaseDumpImportForm,
+  postgresDatabaseEngine,
   type AppText,
   type PostgresImportForm,
   type PostgresInstance,
@@ -25,21 +26,9 @@ export function PostgresImportBlock(props: PostgresImportBlockProps) {
       {...props}
       fetchDatabases={fetchPostgresDatabases}
       fetchDumpFiles={fetchPostgresDumps}
-      instanceLabel={instanceLabel}
-      isValidDatabaseName={isValidDatabaseName}
-      isValidDumpPath={isSupportedDumpPath}
+      instanceLabel={postgresDatabaseEngine.instanceLabel}
+      isValidDatabaseName={postgresDatabaseEngine.isValidDatabaseName}
+      isValidDumpPath={postgresDatabaseEngine.isValidDumpPath}
     />
   );
-}
-
-function isSupportedDumpPath(filePath: string) {
-  return filePath.endsWith(".sql") || filePath.endsWith(".sql.gz") || filePath.endsWith(".dump");
-}
-
-function isValidDatabaseName(database: string) {
-  return /^[A-Za-z0-9_]+$/.test(database);
-}
-
-function instanceLabel(instance: PostgresInstance) {
-  return `Postgres ${instance.version} / ${instance.container} / :${instance.hostPort}`;
 }

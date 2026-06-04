@@ -53,7 +53,7 @@ export function PgAdminPanel({
 }: PgAdminPanelProps) {
   const [open, setOpen] = useState(false);
   const copy = text.postgresInstances;
-  const actionLabels = text.mariadbInstances.actions;
+  const actionLabels = text.common.containerActions;
 
   return (
     <DatabaseAdminSection

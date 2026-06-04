@@ -1,21 +1,7 @@
-import { fetchJson } from "@/shared/api";
+import { fetchDatabaseDumps, type DatabaseDumpFileInfo } from "@/entities/infrastructure";
 
-export type MariaDbDumpFile = {
-  modifiedAt: string;
-  name: string;
-  path: string;
-  size: number;
-};
-
-type DumpFilesResponse = {
-  dumps: MariaDbDumpFile[];
-};
+export type MariaDbDumpFile = DatabaseDumpFileInfo;
 
 export async function fetchMariaDbDumps(): Promise<MariaDbDumpFile[]> {
-  const payload = await fetchJson<DumpFilesResponse>(
-    "/api/dumps?engine=mariadb",
-    undefined,
-    "MariaDB dumps request failed",
-  );
-  return payload.dumps;
+  return fetchDatabaseDumps("mariadb");
 }

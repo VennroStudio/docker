@@ -1,21 +1,7 @@
-import { fetchJson } from "@/shared/api";
+import { fetchDatabaseDumps, type DatabaseDumpFileInfo } from "@/entities/infrastructure";
 
-export type PostgresDumpFile = {
-  modifiedAt: string;
-  name: string;
-  path: string;
-  size: number;
-};
-
-type DumpFilesResponse = {
-  dumps: PostgresDumpFile[];
-};
+export type PostgresDumpFile = DatabaseDumpFileInfo;
 
 export async function fetchPostgresDumps(): Promise<PostgresDumpFile[]> {
-  const payload = await fetchJson<DumpFilesResponse>(
-    "/api/dumps?engine=postgres",
-    undefined,
-    "Postgres dumps request failed",
-  );
-  return payload.dumps;
+  return fetchDatabaseDumps("postgres");
 }

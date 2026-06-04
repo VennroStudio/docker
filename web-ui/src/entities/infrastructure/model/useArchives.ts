@@ -26,15 +26,24 @@ export function useArchives(enabled: boolean, refreshSignal = 0) {
 
   useEffect(() => {
     if (!enabled) {
-      setArchives([]);
-      setError("");
-      setLoading(false);
-      return undefined;
+      const timer = window.setTimeout(() => {
+        setArchives([]);
+        setError("");
+        setLoading(false);
+      }, 0);
+
+      return () => window.clearTimeout(timer);
     }
 
     const controller = new AbortController();
-    void refresh(controller.signal);
-    return () => controller.abort();
+    const timer = window.setTimeout(() => {
+      void refresh(controller.signal);
+    }, 0);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
   }, [enabled, refresh, refreshSignal]);
 
   return useMemo(() => ({ archives, error, loading, refresh }), [archives, error, loading, refresh]);

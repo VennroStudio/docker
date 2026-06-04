@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DatabaseInstancesSection } from "@/entities/infrastructure";
+import { containerActionLabels, DatabaseInstancesSection } from "@/entities/infrastructure";
 import type {
   AppText,
   MariaDbDatabaseForm,
@@ -59,15 +59,7 @@ export function MariaDbInstancesPanel({
   return (
     <>
       <DatabaseInstancesSection
-        actionLabels={{
-          clean: copy.actions.clean.label,
-          down: copy.actions.down.label,
-          logs: copy.actions.logs.label,
-          shell: copy.actions.shell.label,
-          start: copy.actions.start.label,
-          stop: copy.actions.stop.label,
-          up: copy.actions.up.label,
-        }}
+        actionLabels={containerActionLabels(text.common.containerActions)}
         activeOperationKey={activeOperationKey}
         containerRequiredTitle={text.panels.serviceControl.containerRequired}
         copy={copy}

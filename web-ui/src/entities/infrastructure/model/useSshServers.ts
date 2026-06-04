@@ -25,7 +25,12 @@ export function useSshServers(enabled: boolean) {
 
   useEffect(() => {
     if (!enabled) return;
-    void refresh();
+
+    const timer = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [enabled, refresh]);
 
   return { commands, error, loading, refresh, servers };

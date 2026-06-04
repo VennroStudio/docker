@@ -47,7 +47,7 @@ export function PhpMyAdminPanel({
       copy={{
         containerLabel: copy.containerLabel,
         linkLabel: text.common.link,
-        shellLabel: copy.actions.shell.label,
+        shellLabel: text.common.containerActions.shell.label,
         statusLabel: copy.statusLabel,
       }}
       link={link}

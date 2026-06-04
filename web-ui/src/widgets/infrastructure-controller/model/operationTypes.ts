@@ -1,4 +1,4 @@
-import type { AppText } from "@/entities/infrastructure";
+import type { AppText, ContainerLifecycleAction } from "@/entities/infrastructure";
 import type { useConfirmDialog, useToast } from "@/shared/lib/hooks";
 import type { RunWithTerminalConfig } from "./useTerminalOperations";
 
@@ -9,3 +9,9 @@ export type ToastApi = Pick<ReturnType<typeof useToast>, "show">;
 export type OperationTextConfig = {
   text: AppText;
 };
+
+const destructiveContainerActions = new Set<ContainerLifecycleAction>(["clean", "down", "stop"]);
+
+export function requiresContainerActionConfirm(action: ContainerLifecycleAction) {
+  return destructiveContainerActions.has(action);
+}

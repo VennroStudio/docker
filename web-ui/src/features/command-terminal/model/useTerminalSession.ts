@@ -76,7 +76,7 @@ export function useTerminalSession() {
 
   return {
     clear,
-    inputEnabled: Boolean(terminalSession.current && terminalState === "running"),
+    inputEnabled: terminalState === "running",
     output,
     prompt: "$",
     resize,

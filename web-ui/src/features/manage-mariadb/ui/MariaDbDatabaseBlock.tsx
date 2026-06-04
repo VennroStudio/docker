@@ -1,5 +1,6 @@
 import {
   DatabaseCatalogBlock,
+  mariaDbDatabaseEngine,
   type AppText,
   type MariaDbDatabaseForm,
   type MariaDbInstance,
@@ -24,16 +25,8 @@ export function MariaDbDatabaseBlock(props: MariaDbDatabaseBlockProps) {
       {...props}
       fetchDatabases={fetchMariaDbDatabases}
       idPrefix="mariadb"
-      instanceLabel={instanceLabel}
-      isValidDatabaseName={isValidDatabaseName}
+      instanceLabel={mariaDbDatabaseEngine.instanceLabel}
+      isValidDatabaseName={mariaDbDatabaseEngine.isValidDatabaseName}
     />
   );
-}
-
-function isValidDatabaseName(database: string) {
-  return /^[A-Za-z0-9_$.-]+$/.test(database);
-}
-
-function instanceLabel(instance: MariaDbInstance) {
-  return `MariaDB ${instance.version} / ${instance.container} / :${instance.hostPort}`;
 }
