@@ -5,6 +5,7 @@ import {
   getViewById,
   getViewByPath,
   useAppMeta,
+  useAnsible,
   useArchives,
   useMinioStatus,
   useNginxStatus,
@@ -19,7 +20,12 @@ import {
   type SshServer,
   type ViewId,
 } from "@/entities/infrastructure";
-import { openShellTerminal } from "@/features/command-terminal";
+import {
+  openAnsibleBuildTerminal,
+  openAnsibleCleanTerminal,
+  openAnsibleSetupTerminal,
+  openShellTerminal,
+} from "@/features/command-terminal";
 import type { SshTerminalAction } from "@/features/ssh-terminal";
 import { useMariaDbInstances } from "@/features/manage-mariadb";
 import { usePostgresInstances } from "@/features/manage-postgres";
@@ -63,6 +69,7 @@ export function useInfrastructureController() {
   const navigate = useNavigate();
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
+  const ansibleView = activeView === "ansible";
   const redisView = activeView === "redis";
   const minioView = activeView === "minio";
   const registryView = activeView === "registry";
@@ -74,7 +81,8 @@ export function useInfrastructureController() {
   const minioStatus = useMinioStatus(minioView);
   const registryStatus = useRegistryStatus(registryView);
   const projects = useProjects(projectsView);
-  const sshServers = useSshServers(sshView);
+  const ansible = useAnsible(ansibleView);
+  const sshServers = useSshServers(sshView || ansibleView);
   const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
   const statusRefresh = redisView
     ? redisStatus.refresh
@@ -84,9 +92,11 @@ export function useInfrastructureController() {
         ? registryStatus.refresh
         : projectsView
           ? projects.refresh
-          : sshView
-            ? sshServers.refresh
-            : nginxStatus.refresh;
+          : ansibleView
+            ? ansible.refresh
+            : sshView
+              ? sshServers.refresh
+              : nginxStatus.refresh;
   const settings = useSettings();
   const archives = useArchives(utilitiesView, archivesRefreshSignal);
   const mariaDbInstances = useMariaDbInstances(activeView === "mariadb");
@@ -207,11 +217,42 @@ export function useInfrastructureController() {
     });
   };
 
+  const runAnsibleBuild = () => {
+    runWithTerminal({
+      key: "ansible:build",
+      label: text.ansible.actions.build,
+      onSettled: ansible.refresh,
+      open: openAnsibleBuildTerminal,
+      preview: "make ansible-build",
+    });
+  };
+
+  const runAnsibleClean = () => {
+    runWithTerminal({
+      key: "ansible:clean",
+      label: text.ansible.actions.clean,
+      onSettled: ansible.refresh,
+      open: openAnsibleCleanTerminal,
+      preview: "make ansible-clean",
+    });
+  };
+
+  const runAnsibleSetup = (serverId: string) => {
+    runWithTerminal({
+      key: `ansible:setup:${serverId}`,
+      label: text.ansible.actions.setup,
+      onSettled: ansible.refresh,
+      open: (handlers) => openAnsibleSetupTerminal(serverId, handlers),
+      preview: `make ansible-setup ID=${serverId}`,
+    });
+  };
+
   return {
     activeConfig,
     activeOperationKey,
     activeView,
     appMeta,
+    ansible,
     archives,
     confirmDialog,
     databaseRefreshSignal,
@@ -234,6 +275,9 @@ export function useInfrastructureController() {
     ...proxyOperations,
     ...projectOperations,
     ...sshOperations,
+    runAnsibleBuild,
+    runAnsibleClean,
+    runAnsibleSetup,
     runShell,
     selectView,
     serviceStatuses,

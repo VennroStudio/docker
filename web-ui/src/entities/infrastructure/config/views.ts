@@ -6,6 +6,7 @@ import {
   House,
   KeyRound,
   Package,
+  ScrollText,
   Server,
   Settings,
   Shield,
@@ -93,6 +94,14 @@ const routeViews: ViewConfig[] = [
     shortLabel: "SH",
     subtitle: "Servers",
     icon: KeyRound,
+  },
+  {
+    id: "ansible",
+    label: "Ansible",
+    path: "/ansible",
+    shortLabel: "AN",
+    subtitle: "Provisioning",
+    icon: ScrollText,
   },
   {
     id: "utilities",

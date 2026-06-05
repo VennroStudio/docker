@@ -1,4 +1,5 @@
 import type { AppText } from "./types";
+import { ruAnsible } from "./ru/ansible";
 import { ruActions } from "./ru/actions";
 import { ruCommon } from "./ru/common";
 import { ruOperationToast } from "./ru/operationToast";
@@ -16,6 +17,7 @@ import { ruSettings } from "./ru/settings";
 import { ruViews } from "./ru/views";
 
 export const ru: AppText = {
+  ansible: ruAnsible,
   actions: ruActions,
   common: ruCommon,
   operationToast: ruOperationToast,

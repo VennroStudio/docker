@@ -3,6 +3,45 @@ import type { CommandId, ServiceRuntimeState, ServiceViewId, TerminalState, View
 export type Language = "en" | "ru";
 
 export type AppText = {
+  ansible: {
+    actions: {
+      addRow: string;
+      addVariable: string;
+      build: string;
+      clean: string;
+      deleteRow: string;
+      savePlaybook: string;
+      saveVariables: string;
+      setup: string;
+    };
+    configEyebrow: string;
+    configTitle: string;
+    deployEyebrow: string;
+    deployTitle: string;
+    description: string;
+    emptyServers: string;
+    fields: {
+      parameter: string;
+      server: string;
+      value: string;
+    };
+    loading: string;
+    messages: {
+      configSaved: string;
+      playbookSaved: string;
+    };
+    runEyebrow: string;
+    runTitle: string;
+    title: string;
+    validation: {
+      duplicateVariable: (name: string) => string;
+      parameter: string;
+      server: string;
+    };
+    variablesEmpty: string;
+    variablesMissing: string;
+    variablesModalTitle: string;
+  };
   actions: Record<CommandId, { detail: string; label: string }>;
   common: {
     cancel: string;

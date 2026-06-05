@@ -1,6 +1,12 @@
 import type { AppText } from "../types";
 
 export const ruServicePages = {
+  ansible: {
+    description: "Редактируй Ansible переменные и запускай deploy.yml на SSH серверах.",
+    eyebrow: "Provisioning",
+    panelEyebrow: "Ansible",
+    panelTitle: "Ansible",
+  },
   mariadb: {
     description: "Управляй MariaDB, PostgreSQL, phpMyAdmin и pgAdmin на одной странице.",
     eyebrow: "SQL stack",

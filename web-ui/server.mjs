@@ -2,6 +2,7 @@
 import { createServer } from "node:http";
 import { host, port, publicHost } from "./server/config.mjs";
 import { getErrorMessage, sendJson } from "./server/http.mjs";
+import { ansible, ansibleConfig, ansiblePlaybook } from "./server/modules/ansible/routes.mjs";
 import { meta } from "./server/meta-route.mjs";
 import { databases, dumps, mariadbInstances, postgresInstances } from "./server/modules/database/routes.mjs";
 import { homeStatus } from "./server/modules/home/routes.mjs";
@@ -31,6 +32,9 @@ const server = createServer(async (req, res) => {
     if (req.method === "GET" && pathname === "/api/minio/status") return await minioStatus(req, res);
     if (req.method === "GET" && pathname === "/api/registry/status") return await registryStatus(req, res);
     if (req.method === "GET" && pathname === "/api/ssh/servers") return await sshServers(req, res);
+    if (req.method === "GET" && pathname === "/api/ansible") return await ansible(req, res);
+    if (req.method === "PUT" && pathname === "/api/ansible/config") return await ansibleConfig(req, res);
+    if (req.method === "PUT" && pathname === "/api/ansible/playbook") return await ansiblePlaybook(req, res);
     if (req.method === "GET" && pathname === "/api/archives") return await archives(req, res);
     if (req.method === "GET" && pathname === "/api/meta") return await meta(req, res);
     if (req.method === "GET" && pathname === "/api/mariadb/instances") return await mariadbInstances(req, res);

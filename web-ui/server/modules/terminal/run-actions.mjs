@@ -30,6 +30,12 @@ export async function resolveTerminalRequest(request) {
   assert(request && typeof request === "object", "Invalid terminal request");
 
   switch (request.type) {
+    case "ansible-build":
+      return ["make", ["ansible-build"]];
+    case "ansible-clean":
+      return ["make", ["ansible-clean"]];
+    case "ansible-setup":
+      return ["make", ["ansible-setup", `ID=${validateId(request.id)}`]];
     case "archive-create":
       return ["make", ["archive", `NAME=${validateArchiveBaseName(request.name)}`, pathArg("FOLDER", request.folder)]];
     case "archive-delete":

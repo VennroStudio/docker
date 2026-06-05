@@ -1,4 +1,5 @@
 import type { AppText } from "./types";
+import { enAnsible } from "./en/ansible";
 import { enActions } from "./en/actions";
 import { enCommon } from "./en/common";
 import { enOperationToast } from "./en/operationToast";
@@ -16,6 +17,7 @@ import { enSettings } from "./en/settings";
 import { enViews } from "./en/views";
 
 export const en: AppText = {
+  ansible: enAnsible,
   actions: enActions,
   common: enCommon,
   operationToast: enOperationToast,

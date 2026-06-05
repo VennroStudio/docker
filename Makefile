@@ -12,6 +12,7 @@ ARCHIVE_DIR := archives
 
 compose-file = $(COMPOSE_DIR)/docker-compose-$(NAME).yml
 compose = docker compose $(COMPOSE_ENV) -f $(call compose-file)
+ansible-compose = docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-ansible.yml --profile deploy
 
 help: ## Показать список команд
 	@echo ""
@@ -37,6 +38,7 @@ shell: node-runtime ## Открыть shell с локальным runtime в PAT
 init: ## Создать локальные config файлы
 	@$(NODE_RUN) ./scripts/config/settings.mjs init
 	@$(NODE_RUN) ./scripts/projects/projects.mjs init
+	@$(NODE_RUN) ./scripts/ansible/ansible.mjs init
 	@[ -f docker/mariadb/instances.json ] || printf "[]\n" > docker/mariadb/instances.json
 	@[ -f docker/postgres/instances.json ] || printf "[]\n" > docker/postgres/instances.json
 	@$(NODE_RUN) ./scripts/database/mariadb/instances.mjs generate
@@ -685,6 +687,20 @@ ssh-command-update: ## Изменить частую команду SSH, пер�
 ssh-command-remove: ## Удалить частую команду SSH, передать ID=1
 	@$(NODE_RUN) ./scripts/ssh/commands.mjs remove
 
+##@ Ansible
+ansible-build: ## Собрать Ansible контейнер
+	$(ansible-compose) build
+
+ansible-clean: ## Удалить Ansible контейнер и image
+	$(ansible-compose) down
+	docker rmi vennro-ansible 2>/dev/null || true
+
+ansible-config: ## Записать переменную в config/ansible.json, передать PARAM=... VALUE=...
+	@$(NODE_RUN) ./scripts/ansible/ansible.mjs config
+
+ansible-setup: ## Выполнить docker/ansible/deploy.yml на SSH сервере, передать ID=1
+	@$(NODE_RUN) ./scripts/ansible/ansible.mjs setup
+
 ##@ Utilities
 archive: ## Создать архив NAME-DD-MM-YYYY.tar.gz, передать NAME=archiveName FOLDER=folderName
 	@$(NODE_RUN) ./scripts/utilities/archive.mjs create --name "$(NAME)" --folder "$(FOLDER)"
@@ -719,4 +735,5 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
 .PHONY: project-catalog project-list project-show project-create project-update project-remove project-generate project-shell project-up project-down project-start project-stop project-build project-logs project-logs-follow project-clean project-status
 .PHONY: ssh-list ssh-add ssh-update ssh-remove ssh-connect ssh-key-generate ssh-key-push ssh-key-remove ssh-key-show ssh-command-list ssh-command-add ssh-command-update ssh-command-remove
+.PHONY: ansible-build ansible-clean ansible-config ansible-setup
 .PHONY: archive archive-list unarchive archive-delete

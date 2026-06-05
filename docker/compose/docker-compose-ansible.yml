@@ -3,18 +3,17 @@ name: vennro
 services:
   ansible:
     container_name: ansible-container
+    image: vennro-ansible
     build:
       context: ..
       dockerfile: ansible/Dockerfile
     volumes:
       - ../ansible:/ansible
+      - ../../config:/config:ro
+      - ../../.runtime/ansible:/runtime:ro
       - ~/.ssh:/root/.ssh:ro
     working_dir: /ansible
     environment:
       - ANSIBLE_HOST_KEY_CHECKING=False
-      - SERVER_HOST=${SERVER_HOST}
-      - SERVER_PORT=${SERVER_PORT}
-      - SERVER_USER=${SERVER_USER}
-      - SERVER_SSH_KEY=${SERVER_SSH_KEY}
     profiles:
       - deploy

@@ -1,6 +1,7 @@
 import type { AppText } from "../types";
 
 export const enViews = {
+  ansible: "Ansible",
   home: "Home",
   mariadb: "Databases",
   minio: "MinIO",

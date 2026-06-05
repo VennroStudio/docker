@@ -11,9 +11,10 @@ export type ViewId =
   | "registry"
   | "projects"
   | "ssh"
+  | "ansible"
   | "utilities"
   | "settings";
-export type ServiceViewId = Exclude<ViewId, "home" | "settings" | "utilities">;
+export type ServiceViewId = Exclude<ViewId, "ansible" | "home" | "settings" | "utilities">;
 export type CommandId = keyof typeof commandManifest.commands;
 export type CommandGroupId = keyof typeof commandManifest.groups;
 
@@ -269,6 +270,15 @@ export type SshKeyForm = {
   force: boolean;
   keyPath: string;
   serverId: string;
+};
+
+export type AnsibleState = {
+  config: Record<string, boolean | null | number | string>;
+  configError?: string;
+  configExists: boolean;
+  configPath: string;
+  playbook: string;
+  playbookPath: string;
 };
 
 export type TerminalState = "ready" | "running" | "done" | "error" | "stopped";

@@ -1,4 +1,5 @@
 import { nginxActions, proxyShells } from "@/entities/infrastructure";
+import { AnsiblePage } from "@/pages/ansible";
 import { DatabasesPage } from "@/pages/databases";
 import { HomePage } from "@/pages/home";
 import { ProjectsPage } from "@/pages/projects";
@@ -18,6 +19,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     activeConfig,
     activeOperationKey,
     activeView,
+    ansible,
     archives,
     databaseRefreshSignal,
     mariaDbInstances,
@@ -44,6 +46,9 @@ export function AppRouter({ controller }: AppRouterProps) {
     runArchiveCreate,
     runArchiveDelete,
     runArchiveExtract,
+    runAnsibleBuild,
+    runAnsibleClean,
+    runAnsibleSetup,
     runCommand,
     runHost,
     runMariaDbDatabaseCreate,
@@ -145,6 +150,23 @@ export function AppRouter({ controller }: AppRouterProps) {
 
   if (activeView === "settings") {
     return <SettingsPage settingsState={settings} text={text} view={activeConfig} />;
+  }
+
+  if (activeView === "ansible") {
+    return (
+      <AnsiblePage
+        activeOperationKey={activeOperationKey}
+        ansibleState={ansible}
+        operationDisabled={operationRunning}
+        operationDisabledTitle={operationBlockTitle}
+        sshServers={sshServers}
+        text={text}
+        view={activeConfig}
+        onBuild={runAnsibleBuild}
+        onClean={runAnsibleClean}
+        onSetup={runAnsibleSetup}
+      />
+    );
   }
 
   if (activeView === "projects") {

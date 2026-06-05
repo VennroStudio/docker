@@ -53,6 +53,18 @@ export function openShellTerminal(container: string, handlers: TerminalHandlers)
   return openTerminal({ container, type: "shell" }, handlers);
 }
 
+export function openAnsibleBuildTerminal(handlers: TerminalHandlers): TerminalSession {
+  return openTerminal({ type: "ansible-build" }, handlers);
+}
+
+export function openAnsibleCleanTerminal(handlers: TerminalHandlers): TerminalSession {
+  return openTerminal({ type: "ansible-clean" }, handlers);
+}
+
+export function openAnsibleSetupTerminal(serverId: string, handlers: TerminalHandlers): TerminalSession {
+  return openTerminal({ id: serverId, type: "ansible-setup" }, handlers);
+}
+
 export function openProjectCreateTerminal(form: ProjectForm, handlers: TerminalHandlers): TerminalSession {
   return openTerminal(projectPayload(form, "project-create"), handlers);
 }

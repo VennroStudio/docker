@@ -1,6 +1,12 @@
 import type { AppText } from "../types";
 
 export const enServicePages = {
+  ansible: {
+    description: "Edit Ansible variables and run deploy.yml on SSH servers.",
+    eyebrow: "Provisioning",
+    panelEyebrow: "Ansible",
+    panelTitle: "Ansible",
+  },
   mariadb: {
     description: "Manage MariaDB, PostgreSQL, phpMyAdmin and pgAdmin on one page.",
     eyebrow: "SQL stack",
