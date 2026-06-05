@@ -10,6 +10,7 @@ import { ProjectHeaderActions } from "./ProjectHeaderActions";
 type ProjectAccordionProps = {
   activeOperationKey?: null | string;
   copy: AppText["projects"];
+  initialOpen?: boolean;
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
   project: Project;
@@ -26,6 +27,7 @@ type ProjectAccordionProps = {
 export function ProjectAccordion({
   activeOperationKey = null,
   copy,
+  initialOpen = false,
   onAction,
   onEdit,
   onHost,
@@ -38,7 +40,7 @@ export function ProjectAccordion({
   project,
   proxyCopy,
 }: ProjectAccordionProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [domain, setDomain] = useState(() => domainFromUrl(project.web.url));
   const cleanDomain = domain.trim();
   const currentUrl = /^[a-zA-Z0-9.-]+$/.test(cleanDomain)

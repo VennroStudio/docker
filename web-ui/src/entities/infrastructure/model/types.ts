@@ -14,6 +14,7 @@ export type ViewId =
   | "ansible"
   | "utilities"
   | "settings";
+export type HomeCardViewId = Exclude<ViewId, "home" | "nginx" | "postgres" | "projects" | "settings">;
 export type ServiceViewId = Exclude<ViewId, "ansible" | "home" | "settings" | "utilities">;
 export type CommandId = keyof typeof commandManifest.commands;
 export type CommandGroupId = keyof typeof commandManifest.groups;

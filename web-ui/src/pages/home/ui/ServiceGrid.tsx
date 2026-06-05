@@ -1,13 +1,13 @@
 import type { AppText } from "@/entities/infrastructure";
-import type { ServiceStatus, ServiceViewId, ViewId } from "@/entities/infrastructure";
+import type { HomeCardViewId, ServiceStatus, ViewId } from "@/entities/infrastructure";
 import { homeModules, homeServices } from "../model/homeSections";
 import type { HomeService } from "../model/homeSections";
 import { ServiceTile } from "./ServiceTile";
 
 type ServiceGridProps = {
-  statuses: Partial<Record<ServiceViewId, ServiceStatus>>;
+  statuses: Partial<Record<ViewId, ServiceStatus>>;
   text: AppText;
-  onOpenService: (viewId: ViewId) => void;
+  onOpenService: (viewId: HomeCardViewId) => void;
 };
 
 export function ServiceGrid({ onOpenService, statuses, text }: ServiceGridProps) {
@@ -43,10 +43,10 @@ type ServiceSectionProps = {
   countLabel: string;
   eyebrow: string;
   services: HomeService[];
-  statuses: Partial<Record<ServiceViewId, ServiceStatus>>;
+  statuses: Partial<Record<ViewId, ServiceStatus>>;
   text: AppText;
   title: string;
-  onOpenService: (viewId: ViewId) => void;
+  onOpenService: (viewId: HomeCardViewId) => void;
 };
 
 function ServiceSection({ countLabel, eyebrow, onOpenService, services, statuses, text, title }: ServiceSectionProps) {

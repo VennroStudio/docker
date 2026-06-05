@@ -1,4 +1,4 @@
-import type { CommandId, ServiceRuntimeState, ServiceViewId, TerminalState, ViewId } from "../model/types";
+import type { CommandId, HomeCardViewId, ServiceRuntimeState, TerminalState, ViewId } from "../model/types";
 
 export type Language = "en" | "ru";
 
@@ -105,7 +105,15 @@ export type AppText = {
       eyebrow: string;
       title: string;
     };
-    serviceCards: Record<ServiceViewId, { description: string; meta: string; title: string }>;
+    projects: {
+      countLabel: (count: number) => string;
+      empty: string;
+      eyebrow: string;
+      loading: string;
+      openLabel: (name: string) => string;
+      title: string;
+    };
+    serviceCards: Record<HomeCardViewId, { description: string; meta: string; title: string }>;
     workflow: {
       eyebrow: string;
       steps: Array<{ detail: string; title: string }>;

@@ -7,6 +7,11 @@ export const enHome = {
     title: "Control panel",
   },
   serviceCards: {
+    ansible: {
+      description: "Build the Ansible container, edit deploy variables and install on SSH servers.",
+      meta: "Deploy service",
+      title: "Ansible",
+    },
     mariadb: {
       description: "MariaDB, Postgres and UI database management.",
       meta: "Data module",
@@ -17,25 +22,10 @@ export const enHome = {
       meta: "Storage module",
       title: "MinIO",
     },
-    nginx: {
-      description: "Container lifecycle, proxy logs and NPM dashboard access.",
-      meta: "Port 81",
-      title: "Nginx Proxy Manager",
-    },
-    postgres: {
-      description: "PostgreSQL and pgAdmin service commands.",
-      meta: "DB tools",
-      title: "Postgres",
-    },
     proxy: {
       description: "Domain, SSL and NPM container management.",
       meta: "NPM module",
       title: "Nginx Proxy Manager",
-    },
-    projects: {
-      description: "Local Docker websites with Apache, nginx + PHP, or Node.",
-      meta: "Web module",
-      title: "Projects",
     },
     redis: {
       description: "Redis and UI cache management.",
@@ -52,6 +42,11 @@ export const enHome = {
       meta: "SSH service",
       title: "SSH Control Panel",
     },
+    utilities: {
+      description: "Archives, extraction and local project tools.",
+      meta: "Tools service",
+      title: "Utilities",
+    },
   },
   modules: {
     eyebrow: "Module panel",
@@ -60,6 +55,14 @@ export const enHome = {
   services: {
     eyebrow: "Service panel",
     title: "Service management",
+  },
+  projects: {
+    countLabel: (count) => `${count} ${count === 1 ? "project" : "projects"}`,
+    empty: "No projects yet.",
+    eyebrow: "Web projects",
+    loading: "Loading projects...",
+    openLabel: (name) => `Open project ${name}`,
+    title: "Projects",
   },
   workflow: {
     eyebrow: "Local flow",

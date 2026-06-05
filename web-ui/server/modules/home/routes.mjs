@@ -1,9 +1,8 @@
 import { sendJson } from "../../http.mjs";
 import { execMake } from "../../make-runner.mjs";
-import { listProjects } from "../projects/routes.mjs";
 
 export async function homeStatus(_req, res) {
-  const [npm, mariadb, postgres, redis, redisinsight, minio, registry, registryUi, projects] = await Promise.all([
+  const [npm, mariadb, postgres, redis, redisinsight, minio, registry, registryUi] = await Promise.all([
     makeJson("npm-status"),
     makeJson("mariadb-status"),
     makeJson("postgres-status"),
@@ -12,7 +11,6 @@ export async function homeStatus(_req, res) {
     makeJson("minio-status"),
     makeJson("registry-status"),
     makeJson("registry-ui-status"),
-    projectJson(),
   ]);
 
   sendJson(res, 200, {
@@ -22,7 +20,6 @@ export async function homeStatus(_req, res) {
       aggregate("redis", [redis.value, redisinsight.value], firstError(redis, redisinsight)),
       aggregate("minio", [minio.value], minio.error),
       aggregate("registry", [registry.value, registryUi.value], firstError(registry, registryUi)),
-      aggregate("projects", projects.value, projects.error),
     ],
   });
 }
@@ -74,15 +71,4 @@ function serviceState(running, existing, total) {
 
 function firstError(...results) {
   return results.find((result) => result.error)?.error;
-}
-
-async function projectJson() {
-  try {
-    return { value: (await listProjects()).map((project) => ({ state: project.state })) };
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : String(error),
-      value: [],
-    };
-  }
 }

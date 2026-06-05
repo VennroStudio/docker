@@ -10,6 +10,7 @@ type ProjectsPageProps = {
   operationDisabled?: boolean;
   operationDisabledTitle?: string;
   projectsState: ReturnType<typeof useProjects>;
+  selectedProjectName?: string;
   text: AppText;
   view: ViewConfig;
   onProjectAction: (project: Project, action: ProjectAction) => void;
@@ -35,6 +36,7 @@ export function ProjectsPage({
   operationDisabled = false,
   operationDisabledTitle,
   projectsState,
+  selectedProjectName = "",
   text,
   view,
 }: ProjectsPageProps) {
@@ -72,6 +74,7 @@ export function ProjectsPage({
               key={project.name}
               activeOperationKey={activeOperationKey}
               copy={copy}
+              initialOpen={project.name === selectedProjectName}
               operationDisabled={operationDisabled}
               operationDisabledTitle={operationDisabledTitle}
               project={project}

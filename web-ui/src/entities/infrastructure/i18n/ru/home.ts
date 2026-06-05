@@ -7,6 +7,11 @@ export const ruHome = {
     title: "Панель управления",
   },
   serviceCards: {
+    ansible: {
+      description: "Сборка Ansible контейнера, переменные deploy и установка на SSH сервер.",
+      meta: "Deploy service",
+      title: "Ansible",
+    },
     mariadb: {
       description: "Mariadb, Postgres и UI управление базами данных",
       meta: "Data module",
@@ -17,25 +22,10 @@ export const ruHome = {
       meta: "Storage module",
       title: "MinIO",
     },
-    nginx: {
-      description: "Жизненный цикл контейнера, логи proxy и доступ к NPM.",
-      meta: "Port 81",
-      title: "Nginx Proxy Manager",
-    },
-    postgres: {
-      description: "Команды PostgreSQL и pgAdmin.",
-      meta: "DB tools",
-      title: "Postgres",
-    },
     proxy: {
       description: "Управление доменами, SSL и контейнером NPM",
       meta: "NPM module",
       title: "Nginx Proxy Manager",
-    },
-    projects: {
-      description: "Локальные сайты на Docker с Apache, nginx + PHP или Node.",
-      meta: "Web module",
-      title: "Проекты",
     },
     redis: {
       description: "Redis и UI управление кэшем",
@@ -52,6 +42,11 @@ export const ruHome = {
       meta: "SSH service",
       title: "SSH Control Panel",
     },
+    utilities: {
+      description: "Архивы, распаковка и локальные инструменты проекта.",
+      meta: "Tools service",
+      title: "Утилиты",
+    },
   },
   modules: {
     eyebrow: "Панель модулей",
@@ -60,6 +55,24 @@ export const ruHome = {
   services: {
     eyebrow: "Панель сервисов",
     title: "Управление сервисами",
+  },
+  projects: {
+    countLabel: (count) => {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      const word =
+        mod10 === 1 && mod100 !== 11
+          ? "проект"
+          : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)
+            ? "проекта"
+            : "проектов";
+      return `${count} ${word}`;
+    },
+    empty: "Проектов пока нет.",
+    eyebrow: "Web projects",
+    loading: "Загрузка проектов...",
+    openLabel: (name) => `Открыть проект ${name}`,
+    title: "Проекты",
   },
   workflow: {
     eyebrow: "Локальный flow",

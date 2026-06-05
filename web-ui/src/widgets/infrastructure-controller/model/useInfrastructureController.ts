@@ -69,21 +69,23 @@ export function useInfrastructureController() {
   const navigate = useNavigate();
   const activeConfig = getViewByPath(location.pathname);
   const activeView = activeConfig.id;
+  const homeView = activeView === "home";
   const ansibleView = activeView === "ansible";
   const redisView = activeView === "redis";
   const minioView = activeView === "minio";
   const registryView = activeView === "registry";
   const projectsView = activeView === "projects";
+  const selectedProjectName = projectsView ? new URLSearchParams(location.search).get("project") || "" : "";
   const utilitiesView = activeView === "utilities";
   const sshView = activeView === "ssh";
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const redisStatus = useRedisStatus(redisView);
   const minioStatus = useMinioStatus(minioView);
   const registryStatus = useRegistryStatus(registryView);
-  const projects = useProjects(projectsView);
+  const projects = useProjects(homeView || projectsView);
   const ansible = useAnsible(ansibleView);
   const sshServers = useSshServers(sshView || ansibleView);
-  const serviceStatuses = useServiceStatuses({ enabled: activeView === "home" });
+  const serviceStatuses = useServiceStatuses({ enabled: homeView });
   const statusRefresh = redisView
     ? redisStatus.refresh
     : minioView
@@ -193,6 +195,13 @@ export function useInfrastructureController() {
     text,
   });
   const selectView = (view: ViewId) => navigate(getViewById(view).path);
+  const selectProject = (projectName: string) => {
+    const search = new URLSearchParams({ project: projectName });
+    navigate({
+      pathname: getViewById("projects").path,
+      search: `?${search.toString()}`,
+    });
+  };
   const translateActions = (actions: CommandAction[]) =>
     actions.map((action) => ({
       ...action,
@@ -279,7 +288,9 @@ export function useInfrastructureController() {
     runAnsibleClean,
     runAnsibleSetup,
     runShell,
+    selectProject,
     selectView,
+    selectedProjectName,
     serviceStatuses,
     settings,
     setProxyForm,

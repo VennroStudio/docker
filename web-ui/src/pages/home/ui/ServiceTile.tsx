@@ -1,14 +1,14 @@
 import { ArrowUpRight } from "lucide-react";
 import { getViewById } from "@/entities/infrastructure";
 import type { AppText } from "@/entities/infrastructure";
-import type { ServiceStatus, ViewId } from "@/entities/infrastructure";
+import type { HomeCardViewId, ServiceStatus } from "@/entities/infrastructure";
 import type { HomeService } from "../model/homeSections";
 
 type ServiceTileProps = {
   service: HomeService;
   status?: ServiceStatus;
   text: AppText;
-  onOpen: (viewId: ViewId) => void;
+  onOpen: (viewId: HomeCardViewId) => void;
 };
 
 export function ServiceTile({ onOpen, service, status, text }: ServiceTileProps) {

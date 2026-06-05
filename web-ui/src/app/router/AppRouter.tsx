@@ -76,7 +76,9 @@ export function AppRouter({ controller }: AppRouterProps) {
     runProxy,
     runProxyDelete,
     runShell,
+    selectProject,
     selectView,
+    selectedProjectName,
     serviceStatuses,
     settings,
     setProxyForm,
@@ -88,7 +90,15 @@ export function AppRouter({ controller }: AppRouterProps) {
   } = controller;
 
   if (activeView === "home") {
-    return <HomePage statuses={serviceStatuses.statuses} text={text} onOpenView={selectView} />;
+    return (
+      <HomePage
+        projectsState={projects}
+        statuses={serviceStatuses.statuses}
+        text={text}
+        onOpenProject={selectProject}
+        onOpenView={selectView}
+      />
+    );
   }
 
   if (activeView === "proxy") {
@@ -176,6 +186,7 @@ export function AppRouter({ controller }: AppRouterProps) {
         operationDisabled={operationRunning}
         operationDisabledTitle={operationBlockTitle}
         projectsState={projects}
+        selectedProjectName={selectedProjectName}
         text={text}
         view={activeConfig}
         onProjectAction={runProjectAction}
