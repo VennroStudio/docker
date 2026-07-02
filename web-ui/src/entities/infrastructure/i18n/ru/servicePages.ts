@@ -13,11 +13,11 @@ export const ruServicePages = {
     panelEyebrow: "База данных",
     panelTitle: "Базы данных",
   },
-  minio: {
-    description: "Управляй MinIO storage и смотри поток логов сервиса.",
+  rustfs: {
+    description: "Управляй RustFS storage и смотри поток логов сервиса.",
     eyebrow: "Storage",
     panelEyebrow: "S3 storage",
-    panelTitle: "Команды MinIO",
+    panelTitle: "Команды RustFS",
   },
   nginx: {
     description: "Управляй жизненным циклом NPM контейнера и смотри логи proxy manager.",

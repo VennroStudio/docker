@@ -4,6 +4,9 @@
 /.runtime
 /build
 /archives
+/logs
+/storage
+/storage-rustfs
 /docker/nginx/data
 /docker/nginx/letsencrypt
 /docker/registry/data

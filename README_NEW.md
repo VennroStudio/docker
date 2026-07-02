@@ -36,11 +36,11 @@ make settings-set KEY=pgadmin.pgaPassword VALUE=secret
 make settings-set KEY=redis.redisPassword VALUE=secret
 ```
 
-Изменить настройки MinIO:
+Изменить настройки RustFS:
 
 ```sh
-make settings-set KEY=minio.minioRootUser VALUE=minio
-make settings-set KEY=minio.minioRootPassword VALUE=secret
+make settings-set KEY=rustfs.rustfsAccessKey VALUE=rustfsadmin
+make settings-set KEY=rustfs.rustfsSecretKey VALUE=secret
 ```
 
 Изменить настройки Registry:
@@ -409,13 +409,13 @@ make redis-stop
 make redisinsight-stop
 ```
 
-### Пример: MinIO
+### Пример: RustFS
 
-Задать логин и пароль MinIO в settings:
+Задать access key и secret key RustFS в settings:
 
 ```sh
-make settings-set KEY=minio.minioRootUser VALUE=minio
-make settings-set KEY=minio.minioRootPassword VALUE=secret
+make settings-set KEY=rustfs.rustfsAccessKey VALUE=rustfsadmin
+make settings-set KEY=rustfs.rustfsSecretKey VALUE=secret
 ```
 
 Сгенерировать `.env`:
@@ -424,39 +424,39 @@ make settings-set KEY=minio.minioRootPassword VALUE=secret
 make settings-env
 ```
 
-Запустить MinIO:
+Запустить RustFS:
 
 ```sh
-make minio-up
+make rustfs-up
 ```
 
-Проверить статус MinIO. URL консоли возвращается в этом же ответе:
+Проверить статус RustFS. URL консоли возвращается в этом же ответе:
 
 ```sh
-make minio-status
+make rustfs-status
 ```
 
-Если нужен локальный домен для MinIO console:
+Если нужен локальный домен для RustFS console:
 
 ```sh
-make host-add DOMAIN=minio.local
-make app-proxy DOMAIN=minio.local TARGET=minio-container PORT=9001
+make host-add DOMAIN=rustfs.local
+make app-proxy DOMAIN=rustfs.local TARGET=rustfs-container PORT=9001
 ```
 
 После создания proxy host скрипт обновит `config/settings.json`:
 
 ```json
 {
-  "minio": {
-    "minioUrl": "http://minio.local"
+  "rustfs": {
+    "rustfsUrl": "http://rustfs.local/rustfs/console/"
   }
 }
 ```
 
-При удалении proxy host значение вернется на `http://localhost:3901`:
+При удалении proxy host значение вернется на `http://localhost:3901/rustfs/console/`:
 
 ```sh
-make app-proxy-remove DOMAIN=minio.local
+make app-proxy-remove DOMAIN=rustfs.local
 ```
 
 ### Пример: Registry и Registry UI
@@ -1193,60 +1193,60 @@ make redisinsight-logs
 make redisinsight-shell
 ```
 
-### MinIO
+### RustFS
 
-Показать статус MinIO и URL консоли:
+Показать статус RustFS и URL консоли:
 
 ```sh
-make minio-status
+make rustfs-status
 ```
 
-Скачать или обновить Docker image MinIO:
+Скачать или обновить Docker image RustFS:
 
 ```sh
-make minio-pull
+make rustfs-pull
 ```
 
-Создать и запустить контейнер MinIO:
+Создать и запустить контейнер RustFS:
 
 ```sh
-make minio-up
+make rustfs-up
 ```
 
-Запустить уже созданный контейнер MinIO:
+Запустить уже созданный контейнер RustFS:
 
 ```sh
-make minio-start
+make rustfs-start
 ```
 
-Остановить контейнер MinIO:
+Остановить контейнер RustFS:
 
 ```sh
-make minio-stop
+make rustfs-stop
 ```
 
-Удалить контейнер MinIO:
+Удалить контейнер RustFS:
 
 ```sh
-make minio-down
+make rustfs-down
 ```
 
-Удалить контейнер MinIO и Docker image `minio/minio`:
+Удалить контейнер RustFS и Docker image `rustfs/rustfs`:
 
 ```sh
-make minio-clean
+make rustfs-clean
 ```
 
-Показать логи MinIO:
+Показать логи RustFS:
 
 ```sh
-make minio-logs
+make rustfs-logs
 ```
 
-Зайти в shell контейнера MinIO:
+Зайти в shell контейнера RustFS:
 
 ```sh
-make minio-shell
+make rustfs-shell
 ```
 
 ### Registry

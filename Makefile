@@ -479,34 +479,36 @@ redisinsight-logs: ## Логи RedisInsight
 redisinsight-shell: ## Shell внутри контейнера RedisInsight
 	$(MAKE) compose-shell NAME=redisinsight
 
-##@ MinIO
-minio-status: ## Показать статус MinIO
-	@$(NODE_RUN) ./scripts/minio/status.mjs minio
+##@ RustFS
+rustfs-status: ## Показать статус RustFS
+	@$(NODE_RUN) ./scripts/rustfs/status.mjs rustfs
 
-minio-up: ## Запустить контейнер MinIO
-	$(MAKE) compose-up NAME=minio
+rustfs-up: ## Запустить контейнер RustFS
+	@mkdir -p storage-rustfs logs/rustfs
+	@chown -R 10001:10001 storage-rustfs logs/rustfs 2>/dev/null || true
+	$(MAKE) compose-up NAME=rustfs
 
-minio-pull: ## Скачать/обновить образ MinIO
-	$(MAKE) compose-pull NAME=minio
+rustfs-pull: ## Скачать/обновить образ RustFS
+	$(MAKE) compose-pull NAME=rustfs
 
-minio-start: ## Запустить существующий контейнер MinIO
-	$(MAKE) compose-start NAME=minio
+rustfs-start: ## Запустить существующий контейнер RustFS
+	$(MAKE) compose-start NAME=rustfs
 
-minio-stop: ## Остановить контейнер MinIO
-	$(MAKE) compose-stop NAME=minio
+rustfs-stop: ## Остановить контейнер RustFS
+	$(MAKE) compose-stop NAME=rustfs
 
-minio-down: ## Удалить контейнер MinIO
-	$(MAKE) compose-down NAME=minio
+rustfs-down: ## Удалить контейнер RustFS
+	$(MAKE) compose-down NAME=rustfs
 
-minio-clean: ## Удалить контейнер и образ MinIO
-	$(MAKE) compose-down NAME=minio
-	docker rmi minio/minio 2>/dev/null || true
+rustfs-clean: ## Удалить контейнер и образ RustFS
+	$(MAKE) compose-down NAME=rustfs
+	docker rmi rustfs/rustfs:latest 2>/dev/null || true
 
-minio-logs: ## Логи MinIO
-	$(MAKE) compose-logs NAME=minio
+rustfs-logs: ## Логи RustFS
+	$(MAKE) compose-logs NAME=rustfs
 
-minio-shell: ## Shell внутри контейнера MinIO
-	$(MAKE) compose-shell NAME=minio
+rustfs-shell: ## Shell внутри контейнера RustFS
+	$(MAKE) compose-shell NAME=rustfs
 
 ##@ Registry
 registry-status: ## Показать статус Registry
@@ -730,7 +732,7 @@ archive-delete: ## Удалить архив из папки archives, пере�
 .PHONY: pgadmin-status pgadmin-require-running pgadmin-up pgadmin-pull pgadmin-start pgadmin-stop pgadmin-down pgadmin-clean pgadmin-logs pgadmin-shell
 .PHONY: redis-status redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs redis-shell
 .PHONY: redisinsight-status redis-require-running redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs redisinsight-shell
-.PHONY: minio-status minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs minio-shell
+.PHONY: rustfs-status rustfs-up rustfs-pull rustfs-start rustfs-stop rustfs-down rustfs-clean rustfs-logs rustfs-shell
 .PHONY: registry-status registry-auth-generate registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs registry-shell registry-require-running
 .PHONY: registry-ui-status registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs registry-ui-shell
 .PHONY: project-catalog project-list project-show project-create project-update project-remove project-generate project-shell project-up project-down project-start project-stop project-build project-logs project-logs-follow project-clean project-status

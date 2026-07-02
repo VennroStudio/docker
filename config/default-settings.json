@@ -18,10 +18,10 @@
   "redisinsight": {
     "riUrl": "http://localhost:5540"
   },
-  "minio": {
-    "minioUrl": "http://localhost:3901",
-    "minioRootUser": "minio",
-    "minioRootPassword": "minioadmin"
+  "rustfs": {
+    "rustfsUrl": "http://localhost:3901/rustfs/console/",
+    "rustfsAccessKey": "rustfsadmin",
+    "rustfsSecretKey": "rustfsadmin"
   },
   "registry": {
     "registryPort": "5051",

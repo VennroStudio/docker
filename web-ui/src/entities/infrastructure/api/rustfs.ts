@@ -1,7 +1,7 @@
 import { fetchJson } from "@/shared/api";
 import type { ContainerRuntimeState } from "../model/types";
 
-export type MinioStatusResponse = {
+export type RustfsStatusResponse = {
   container: string;
   running: boolean;
   state: ContainerRuntimeState;
@@ -10,6 +10,6 @@ export type MinioStatusResponse = {
   url?: string;
 };
 
-export async function fetchMinioStatus(signal?: AbortSignal) {
-  return fetchJson<MinioStatusResponse>("/api/minio/status", { signal }, "MinIO status request failed");
+export async function fetchRustfsStatus(signal?: AbortSignal) {
+  return fetchJson<RustfsStatusResponse>("/api/rustfs/status", { signal }, "RustFS status request failed");
 }

@@ -8,7 +8,7 @@ export const homeModules: HomeService[] = [
   { id: "proxy" },
   { id: "mariadb" },
   { id: "redis" },
-  { id: "minio" },
+  { id: "rustfs" },
   { id: "registry" },
 ];
 

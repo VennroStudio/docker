@@ -17,10 +17,10 @@ export const ruHome = {
       meta: "Data module",
       title: "Базы данных",
     },
-    minio: {
+    rustfs: {
       description: "S3-совместимое хранилище с доступом к консоли.",
       meta: "Storage module",
-      title: "MinIO",
+      title: "RustFS",
     },
     proxy: {
       description: "Управление доменами, SSL и контейнером NPM",

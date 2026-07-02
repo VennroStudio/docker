@@ -18,10 +18,10 @@ export type AppSettings = {
   redisinsight: {
     riUrl: string;
   };
-  minio: {
-    minioUrl: string;
-    minioRootUser: string;
-    minioRootPassword: string;
+  rustfs: {
+    rustfsUrl: string;
+    rustfsAccessKey: string;
+    rustfsSecretKey: string;
   };
   registry: {
     registryPort: string;

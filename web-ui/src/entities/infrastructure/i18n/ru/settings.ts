@@ -14,7 +14,7 @@ export const ruSettings = {
   sections: {
     pgadmin: "pgAdmin",
     phpmyadmin: "phpMyAdmin",
-    minio: "MinIO",
+    rustfs: "RustFS",
     proxy: "Nginx Proxy Manager",
     redis: "Redis",
     registry: "Registry",

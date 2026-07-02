@@ -10,18 +10,18 @@ export const redisConfigFields = [
   },
 ] satisfies ServiceModuleConfigSection["fields"];
 
-export const minioConfigFields = [
+export const rustfsConfigFields = [
   {
     autocomplete: "username",
-    group: "minio",
-    label: "MinIO root user",
-    name: "minioRootUser",
+    group: "rustfs",
+    label: "RustFS access key",
+    name: "rustfsAccessKey",
   },
   {
     autocomplete: "current-password",
-    group: "minio",
-    label: "MinIO root password",
-    name: "minioRootPassword",
+    group: "rustfs",
+    label: "RustFS secret key",
+    name: "rustfsSecretKey",
     type: "password",
   },
 ] satisfies ServiceModuleConfigSection["fields"];

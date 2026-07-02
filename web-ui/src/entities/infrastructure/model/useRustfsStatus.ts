@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fetchMinioStatus, type MinioStatusResponse } from "../api/minio";
+import { fetchRustfsStatus, type RustfsStatusResponse } from "../api/rustfs";
 
-export function useMinioStatus(enabled: boolean) {
-  const [status, setStatus] = useState<MinioStatusResponse | null>(null);
+export function useRustfsStatus(enabled: boolean) {
+  const [status, setStatus] = useState<RustfsStatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(
@@ -14,7 +14,7 @@ export function useMinioStatus(enabled: boolean) {
       }
 
       try {
-        setStatus(await fetchMinioStatus(signal));
+        setStatus(await fetchRustfsStatus(signal));
         setError(null);
       } catch (requestError) {
         if (signal?.aborted) return;

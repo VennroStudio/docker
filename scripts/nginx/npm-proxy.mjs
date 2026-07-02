@@ -45,10 +45,11 @@ const publicTargets = {
     key: "riUrl",
     name: "redisinsight.riUrl",
   },
-  "minio-container": {
-    group: "minio",
-    key: "minioUrl",
-    name: "minio.minioUrl",
+  "rustfs-container": {
+    group: "rustfs",
+    key: "rustfsUrl",
+    name: "rustfs.rustfsUrl",
+    path: "/rustfs/console/",
   },
   "registry-container": {
     group: "registry",
@@ -352,7 +353,7 @@ async function updatePublicUrl() {
 
   settings[binding.group] = {
     ...(settings[binding.group] || {}),
-    [binding.key]: `${config.ssl ? "https" : config.scheme}://${config.domain}`,
+    [binding.key]: `${config.ssl ? "https" : config.scheme}://${config.domain}${binding.path || ""}`,
   };
   await writeSettings(settings);
   console.log(

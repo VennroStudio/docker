@@ -7,7 +7,7 @@ import {
   useAppMeta,
   useAnsible,
   useArchives,
-  useMinioStatus,
+  useRustfsStatus,
   useNginxStatus,
   useRedisStatus,
   useRegistryStatus,
@@ -72,7 +72,7 @@ export function useInfrastructureController() {
   const homeView = activeView === "home";
   const ansibleView = activeView === "ansible";
   const redisView = activeView === "redis";
-  const minioView = activeView === "minio";
+  const rustfsView = activeView === "rustfs";
   const registryView = activeView === "registry";
   const projectsView = activeView === "projects";
   const selectedProjectName = projectsView ? new URLSearchParams(location.search).get("project") || "" : "";
@@ -80,7 +80,7 @@ export function useInfrastructureController() {
   const sshView = activeView === "ssh";
   const nginxStatus = useNginxStatus(activeView === "proxy");
   const redisStatus = useRedisStatus(redisView);
-  const minioStatus = useMinioStatus(minioView);
+  const rustfsStatus = useRustfsStatus(rustfsView);
   const registryStatus = useRegistryStatus(registryView);
   const projects = useProjects(homeView || projectsView);
   const ansible = useAnsible(ansibleView);
@@ -88,8 +88,8 @@ export function useInfrastructureController() {
   const serviceStatuses = useServiceStatuses({ enabled: homeView });
   const statusRefresh = redisView
     ? redisStatus.refresh
-    : minioView
-      ? minioStatus.refresh
+    : rustfsView
+      ? rustfsStatus.refresh
       : registryView
         ? registryStatus.refresh
         : projectsView
@@ -267,7 +267,7 @@ export function useInfrastructureController() {
     databaseRefreshSignal,
     language,
     mariaDbInstances,
-    minioStatus,
+    rustfsStatus,
     nginxStatus,
     operationBlockTitle,
     operationRunning,

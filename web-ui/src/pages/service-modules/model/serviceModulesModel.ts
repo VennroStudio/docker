@@ -1,21 +1,21 @@
 import type {
   AppText,
   CommandAction,
-  MinioStatusResponse,
+  RustfsStatusResponse,
   RedisStatusResponse,
   RegistryStatusResponse,
   ShellAction,
   ViewId,
 } from "@/entities/infrastructure";
 import type { AppSettings } from "@/entities/settings";
-import { getMinioPageModel } from "./minioPageModel";
+import { getRustfsPageModel } from "./rustfsPageModel";
 import { getRedisPageModel } from "./redisPageModel";
 import { getRegistryPageModel } from "./registryPageModel";
 import type { ServiceModuleDescriptor } from "./types";
 
 export type ServiceModulesModelSource = {
   activeView: ViewId;
-  minioStatus: null | MinioStatusResponse;
+  rustfsStatus: null | RustfsStatusResponse;
   redisStatus: null | RedisStatusResponse;
   registryStatus: null | RegistryStatusResponse;
   settings: AppSettings | null;
@@ -32,7 +32,7 @@ type ServiceModulesPageModel = {
 
 export function getServiceModulesPageModel(source: ServiceModulesModelSource): ServiceModulesPageModel | null {
   if (source.activeView === "redis") return getRedisPageModel(source);
-  if (source.activeView === "minio") return getMinioPageModel(source);
+  if (source.activeView === "rustfs") return getRustfsPageModel(source);
   if (source.activeView === "registry") return getRegistryPageModel(source);
 
   return null;

@@ -13,11 +13,11 @@ export const enServicePages = {
     panelEyebrow: "Database",
     panelTitle: "Databases",
   },
-  minio: {
-    description: "Manage MinIO storage and stream service logs.",
+  rustfs: {
+    description: "Manage RustFS storage and stream service logs.",
     eyebrow: "Storage",
     panelEyebrow: "S3 storage",
-    panelTitle: "MinIO commands",
+    panelTitle: "RustFS commands",
   },
   nginx: {
     description: "Manage the NPM container lifecycle and stream proxy manager logs.",

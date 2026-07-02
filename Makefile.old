@@ -4,7 +4,7 @@ export
 COMPOSE_DIR := docker/compose
 COMPOSE_ENV := $(if $(wildcard .env),--env-file .env,)
 ANSIBLE_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-ansible.yml --profile deploy
-MINIO_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-minio.yml
+RUSTFS_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-rustfs.yml
 NPM_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-npm.yml
 PHPMYADMIN_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-phpmyadmin.yml
 PGADMIN_COMPOSE := docker compose $(COMPOSE_ENV) -f $(COMPOSE_DIR)/docker-compose-pgadmin.yml
@@ -251,28 +251,28 @@ import-env: ## Импорт .env.server на сервер, передать TARG
 	@if [ -z "$(TARGET_PATH)" ]; then echo "TARGET_PATH is required"; exit 1; fi
 	scp -P $(SERVER_PORT) docker/ansible/.env.server $(SSH):$(TARGET_PATH)
 
-##@ S3 Minio
-minio-up: ## Запустить контейнер MinIO
-	$(MINIO_COMPOSE) up -d
+##@ S3 RustFS
+rustfs-up: ## Запустить контейнер RustFS
+	$(RUSTFS_COMPOSE) up -d
 
-minio-pull: ## Скачать/обновить образ MinIO
-	$(MINIO_COMPOSE) pull
+rustfs-pull: ## Скачать/обновить образ RustFS
+	$(RUSTFS_COMPOSE) pull
 
-minio-start: ## Запустить существующий контейнер MinIO
-	$(MINIO_COMPOSE) start
+rustfs-start: ## Запустить существующий контейнер RustFS
+	$(RUSTFS_COMPOSE) start
 
-minio-stop: ## Остановить контейнер MinIO
-	$(MINIO_COMPOSE) stop
+rustfs-stop: ## Остановить контейнер RustFS
+	$(RUSTFS_COMPOSE) stop
 
-minio-down: ## Удалить контейнер MinIO
-	$(MINIO_COMPOSE) down
+rustfs-down: ## Удалить контейнер RustFS
+	$(RUSTFS_COMPOSE) down
 
-minio-clean: ## Удалить контейнер и образ MinIO
-	$(MINIO_COMPOSE) down
-	docker rmi minio/minio 2>/dev/null || true
+rustfs-clean: ## Удалить контейнер и образ RustFS
+	$(RUSTFS_COMPOSE) down
+	docker rmi rustfs/rustfs:latest 2>/dev/null || true
 
-minio-logs: ## Логи MinIO
-	$(MINIO_COMPOSE) logs -f
+rustfs-logs: ## Логи RustFS
+	$(RUSTFS_COMPOSE) logs -f
 
 ##@ Redis
 redis-up: ## Запустить контейнер Redis
@@ -429,8 +429,8 @@ rclone-config: ## Настроить подключение к Яндекс Ди
 rclone-test: ## Проверить подключение к Яндекс Диску
 	rclone ls yadisk:test-connect/
 
-rclone-backup-s3: ## Создать бекап MinIO на Яндекс Диск
-	rclone copy /home/vennro/infrastructure/storage yadisk:backup/storage
+rclone-backup-s3: ## Создать бекап RustFS на Яндекс Диск
+	rclone copy /home/vennro/infrastructure/storage-rustfs yadisk:backup/storage-rustfs
 
 ##@ Архиватор
 archive: ## Архивирование в формате data-DD-MM-YYYY, передать FOLDER=folderName
@@ -457,7 +457,7 @@ push: ## Auto save
 .PHONY: phpmyadmin-config-generate phpmyadmin-reload
 .PHONY: registry-up registry-pull registry-start registry-stop registry-down registry-clean registry-logs
 .PHONY: registry-ui-up registry-ui-pull registry-ui-start registry-ui-stop registry-ui-down registry-ui-clean registry-ui-logs
-.PHONY: minio-up minio-pull minio-start minio-stop minio-down minio-clean minio-logs
+.PHONY: rustfs-up rustfs-pull rustfs-start rustfs-stop rustfs-down rustfs-clean rustfs-logs
 .PHONY: redis-up redis-pull redis-start redis-stop redis-down redis-clean redis-logs
 .PHONY: redisinsight-up redisinsight-pull redisinsight-start redisinsight-stop redisinsight-down redisinsight-clean redisinsight-logs
 .PHONY: postgres-up postgres-start postgres-stop postgres-down postgres-clean postgres-logs postgres-shell postgres-import postgres-export postgres-db-list postgres-db-create postgres-db-drop postgres-dump-upload

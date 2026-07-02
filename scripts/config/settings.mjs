@@ -129,10 +129,10 @@ function normalizeSettings(settings = {}) {
     redisinsight: {
       riUrl: source.redisinsight?.riUrl || "http://localhost:5540",
     },
-    minio: {
-      minioUrl: source.minio?.minioUrl || "http://localhost:3901",
-      minioRootUser: source.minio?.minioRootUser || "minio",
-      minioRootPassword: source.minio?.minioRootPassword || "minioadmin",
+    rustfs: {
+      rustfsUrl: source.rustfs?.rustfsUrl || "http://localhost:3901/rustfs/console/",
+      rustfsAccessKey: source.rustfs?.rustfsAccessKey || "rustfsadmin",
+      rustfsSecretKey: source.rustfs?.rustfsSecretKey || "rustfsadmin",
     },
     registry: {
       registryPort,
@@ -150,8 +150,9 @@ function envEntries(settings) {
     ["PGADMIN_EMAIL", settings.pgadmin?.pgaEmail],
     ["PGADMIN_PASSWORD", settings.pgadmin?.pgaPassword],
     ["REDIS_PASSWORD", settings.redis?.redisPassword],
-    ["MINIO_ROOT_USER", settings.minio?.minioRootUser],
-    ["MINIO_ROOT_PASSWORD", settings.minio?.minioRootPassword],
+    ["RUSTFS_ACCESS_KEY", settings.rustfs?.rustfsAccessKey],
+    ["RUSTFS_SECRET_KEY", settings.rustfs?.rustfsSecretKey],
+    ["RUSTFS_CONSOLE_ENABLE", "true"],
     ["REGISTRY_PORT", settings.registry?.registryPort],
     ["REGISTRY_UI_PORT", settings.registry?.registryUiPort],
     ["REGISTRY_USER", settings.registry?.registryUser],

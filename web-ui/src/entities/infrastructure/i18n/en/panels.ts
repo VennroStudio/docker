@@ -15,7 +15,7 @@ export const enPanels = {
     database: "Database",
     interface: "Interface",
     mariadbRequired: "Start MariaDB first.",
-    minioCredentialsRequired: "Fill MinIO root user and MinIO root password first.",
+    rustfsCredentialsRequired: "Fill RustFS access key and RustFS secret key first.",
     port: "Port",
     pgadminCredentialsRequired: "Fill pgAdmin email and pgAdmin password first.",
     postgresRequired: "Start PostgreSQL first.",

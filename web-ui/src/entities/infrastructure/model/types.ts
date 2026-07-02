@@ -7,7 +7,7 @@ export type ViewId =
   | "mariadb"
   | "postgres"
   | "redis"
-  | "minio"
+  | "rustfs"
   | "registry"
   | "projects"
   | "ssh"

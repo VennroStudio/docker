@@ -17,10 +17,10 @@ export const enHome = {
       meta: "Data module",
       title: "Databases",
     },
-    minio: {
+    rustfs: {
       description: "S3-compatible storage with console access.",
       meta: "Storage module",
-      title: "MinIO",
+      title: "RustFS",
     },
     proxy: {
       description: "Domain, SSL and NPM container management.",

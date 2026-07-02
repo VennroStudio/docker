@@ -4,21 +4,21 @@ import {
   shellDisabledForContainerState,
 } from "@/entities/infrastructure";
 import type { ServiceModulesModelSource } from "./serviceModulesModel";
-import { minioConfigFields } from "./serviceModuleFields";
+import { rustfsConfigFields } from "./serviceModuleFields";
 import { serviceLink } from "./serviceModuleHelpers";
 
-export function getMinioPageModel({
-  minioStatus,
+export function getRustfsPageModel({
+  rustfsStatus,
   settings,
   text,
   translateActions,
   translateShells,
 }: ServiceModulesModelSource) {
-  const page = text.servicePages.minio;
-  const shell = translateShells(commandPageRegistry.minio.shells || [])[0];
-  const link = minioStatus?.state === "running" ? serviceLink("MinIO", minioStatus?.url) : undefined;
-  const minioCredentialsReady = Boolean(
-    settings?.minio?.minioRootUser?.trim() && settings.minio.minioRootPassword?.trim(),
+  const page = text.servicePages.rustfs;
+  const shell = translateShells(commandPageRegistry.rustfs.shells || [])[0];
+  const link = rustfsStatus?.state === "running" ? serviceLink("RustFS", rustfsStatus?.url) : undefined;
+  const rustfsCredentialsReady = Boolean(
+    settings?.rustfs?.rustfsAccessKey?.trim() && settings.rustfs.rustfsSecretKey?.trim(),
   );
 
   return {
@@ -26,25 +26,25 @@ export function getMinioPageModel({
     eyebrow: page.eyebrow,
     modules: [
       {
-        actions: applyContainerActionRules(translateActions(commandPageRegistry.minio.actions), minioStatus?.state, {
+        actions: applyContainerActionRules(translateActions(commandPageRegistry.rustfs.actions), rustfsStatus?.state, {
           disabledTitle: text.panels.serviceControl.containerRequired,
-          upBlockedTitle: minioCredentialsReady ? undefined : text.panels.serviceControl.minioCredentialsRequired,
+          upBlockedTitle: rustfsCredentialsReady ? undefined : text.panels.serviceControl.rustfsCredentialsRequired,
         }),
         configSection: {
-          fields: minioConfigFields,
+          fields: rustfsConfigFields,
           generateEnvAfterSave: true,
         },
         details: [
-          { label: text.mariadbInstances.containerLabel, value: minioStatus?.container || shell?.container },
+          { label: text.mariadbInstances.containerLabel, value: rustfsStatus?.container || shell?.container },
           ...(link ? [{ href: link.url, label: text.common.link, value: link.url }] : []),
         ],
         eyebrow: page.panelEyebrow,
         link,
         shell,
-        shellDisabled: shellDisabledForContainerState(minioStatus?.state),
+        shellDisabled: shellDisabledForContainerState(rustfsStatus?.state),
         shellDisabledTitle: text.panels.serviceControl.containerRequired,
         stateEyebrow: true,
-        status: minioStatus || undefined,
+        status: rustfsStatus || undefined,
         statusLabel: text.mariadbInstances.statusLabel,
         title: page.panelTitle,
       },

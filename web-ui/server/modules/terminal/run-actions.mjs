@@ -149,7 +149,7 @@ async function resolveShellCommand(container) {
   if (container === "nginx-container") return ["make", ["npm-shell"]];
   if (container === "redis-container") return ["make", ["redis-shell"]];
   if (container === "redisinsight-container") return ["make", ["redisinsight-shell"]];
-  if (container === "minio-container") return ["make", ["minio-shell"]];
+  if (container === "rustfs-container") return ["make", ["rustfs-shell"]];
   if (container === "registry-container") return ["make", ["registry-shell"]];
   if (container === "registry-ui-container") return ["make", ["registry-ui-shell"]];
   return resolveDatabaseShellCommand(container);

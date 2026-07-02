@@ -2,13 +2,13 @@ import { sendJson } from "../../http.mjs";
 import { execMake } from "../../make-runner.mjs";
 
 export async function homeStatus(_req, res) {
-  const [npm, mariadb, postgres, redis, redisinsight, minio, registry, registryUi] = await Promise.all([
+  const [npm, mariadb, postgres, redis, redisinsight, rustfs, registry, registryUi] = await Promise.all([
     makeJson("npm-status"),
     makeJson("mariadb-status"),
     makeJson("postgres-status"),
     makeJson("redis-status"),
     makeJson("redisinsight-status"),
-    makeJson("minio-status"),
+    makeJson("rustfs-status"),
     makeJson("registry-status"),
     makeJson("registry-ui-status"),
   ]);
@@ -18,7 +18,7 @@ export async function homeStatus(_req, res) {
       aggregate("proxy", [npm.value], npm.error),
       aggregate("mariadb", databaseTargets(mariadb.value, postgres.value), firstError(mariadb, postgres)),
       aggregate("redis", [redis.value, redisinsight.value], firstError(redis, redisinsight)),
-      aggregate("minio", [minio.value], minio.error),
+      aggregate("rustfs", [rustfs.value], rustfs.error),
       aggregate("registry", [registry.value, registryUi.value], firstError(registry, registryUi)),
     ],
   });

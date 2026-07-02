@@ -4,7 +4,7 @@ export const enViews = {
   ansible: "Ansible",
   home: "Home",
   mariadb: "Databases",
-  minio: "MinIO",
+  rustfs: "RustFS",
   nginx: "Nginx",
   postgres: "Postgres",
   proxy: "Nginx Proxy Manager",

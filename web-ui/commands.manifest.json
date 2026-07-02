@@ -252,46 +252,46 @@
       "preview": "make redisinsight-logs",
       "tone": "primary"
     },
-    "minio:up": {
+    "rustfs:up": {
       "confirm": false,
-      "group": "minio",
-      "make": ["minio-up"],
-      "preview": "make minio-up",
+      "group": "rustfs",
+      "make": ["rustfs-up"],
+      "preview": "make rustfs-up",
       "tone": "primary"
     },
-    "minio:start": {
+    "rustfs:start": {
       "confirm": false,
-      "group": "minio",
-      "make": ["minio-start"],
-      "preview": "make minio-start",
+      "group": "rustfs",
+      "make": ["rustfs-start"],
+      "preview": "make rustfs-start",
       "tone": "default"
     },
-    "minio:stop": {
+    "rustfs:stop": {
       "confirm": true,
-      "group": "minio",
-      "make": ["minio-stop"],
-      "preview": "make minio-stop",
+      "group": "rustfs",
+      "make": ["rustfs-stop"],
+      "preview": "make rustfs-stop",
       "tone": "danger"
     },
-    "minio:down": {
+    "rustfs:down": {
       "confirm": true,
-      "group": "minio",
-      "make": ["minio-down"],
-      "preview": "make minio-down",
+      "group": "rustfs",
+      "make": ["rustfs-down"],
+      "preview": "make rustfs-down",
       "tone": "danger"
     },
-    "minio:clean": {
+    "rustfs:clean": {
       "confirm": true,
-      "group": "minio",
-      "make": ["minio-clean"],
-      "preview": "make minio-clean",
+      "group": "rustfs",
+      "make": ["rustfs-clean"],
+      "preview": "make rustfs-clean",
       "tone": "danger"
     },
-    "minio:logs": {
+    "rustfs:logs": {
       "confirm": false,
-      "group": "minio",
-      "make": ["minio-logs"],
-      "preview": "make minio-logs",
+      "group": "rustfs",
+      "make": ["rustfs-logs"],
+      "preview": "make rustfs-logs",
       "tone": "primary"
     },
     "registry:up": {
@@ -389,7 +389,7 @@
       "phpmyadmin:logs",
       "phpmyadmin:clean"
     ],
-    "minio": ["minio:up", "minio:down", "minio:start", "minio:stop", "minio:logs", "minio:clean"],
+    "rustfs": ["rustfs:up", "rustfs:down", "rustfs:start", "rustfs:stop", "rustfs:logs", "rustfs:clean"],
     "nginx": ["npm:up", "npm:down", "npm:start", "npm:stop", "npm:logs", "npm:clean"],
     "pgadmin": ["pgadmin:up", "pgadmin:down", "pgadmin:start", "pgadmin:stop", "pgadmin:logs", "pgadmin:clean"],
     "postgres": ["postgres:up", "postgres:down", "postgres:start", "postgres:stop", "postgres:logs", "postgres:clean"],
@@ -419,10 +419,10 @@
         "label": "phpMyAdmin"
       }
     ],
-    "minio": [
+    "rustfs": [
       {
-        "container": "minio-container",
-        "label": "MinIO"
+        "container": "rustfs-container",
+        "label": "RustFS"
       }
     ],
     "nginx": [
@@ -466,7 +466,7 @@
   },
   "services": {
     "mariadb": ["phpmyadmin-container"],
-    "minio": ["minio-container"],
+    "rustfs": ["rustfs-container"],
     "nginx": ["nginx-container"],
     "proxy": ["nginx-container"],
     "redis": ["redis-container", "redisinsight-container"],

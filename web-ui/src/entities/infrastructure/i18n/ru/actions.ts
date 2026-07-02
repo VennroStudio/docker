@@ -1,12 +1,12 @@
 import type { AppText } from "../types";
 
 export const ruActions = {
-  "minio:clean": { label: "MinIO clean", detail: "удалить образ" },
-  "minio:down": { label: "MinIO down", detail: "удалить контейнер" },
-  "minio:logs": { label: "MinIO logs", detail: "поток логов" },
-  "minio:start": { label: "MinIO start", detail: "запустить существующий контейнер" },
-  "minio:stop": { label: "MinIO stop", detail: "остановить сервис" },
-  "minio:up": { label: "MinIO up", detail: "docker compose up" },
+  "rustfs:clean": { label: "RustFS clean", detail: "удалить образ" },
+  "rustfs:down": { label: "RustFS down", detail: "удалить контейнер" },
+  "rustfs:logs": { label: "RustFS logs", detail: "поток логов" },
+  "rustfs:start": { label: "RustFS start", detail: "запустить существующий контейнер" },
+  "rustfs:stop": { label: "RustFS stop", detail: "остановить сервис" },
+  "rustfs:up": { label: "RustFS up", detail: "docker compose up" },
   "npm:clean": { label: "NPM clean", detail: "удалить образ" },
   "npm:down": { label: "NPM down", detail: "удалить контейнер" },
   "npm:logs": { label: "NPM logs", detail: "поток логов" },

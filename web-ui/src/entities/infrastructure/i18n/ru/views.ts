@@ -4,7 +4,7 @@ export const ruViews = {
   ansible: "Ansible",
   home: "Главная",
   mariadb: "Базы данных",
-  minio: "MinIO",
+  rustfs: "RustFS",
   nginx: "Nginx",
   postgres: "Postgres",
   proxy: "Nginx Proxy Manager",

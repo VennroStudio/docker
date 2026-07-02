@@ -365,7 +365,7 @@ export type AppText = {
       port: string;
       pgadminCredentialsRequired: string;
       postgresRequired: string;
-      minioCredentialsRequired: string;
+      rustfsCredentialsRequired: string;
       redisPasswordRequired: string;
       redisRequired: string;
       registryCredentialsRequired: string;
@@ -522,7 +522,7 @@ export type AppText = {
     sections: {
       pgadmin: string;
       phpmyadmin: string;
-      minio: string;
+      rustfs: string;
       proxy: string;
       redis: string;
       registry: string;

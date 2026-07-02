@@ -15,7 +15,7 @@ export const ruPanels = {
     database: "База данных",
     interface: "Интерфейс",
     mariadbRequired: "Сначала запусти MariaDB.",
-    minioCredentialsRequired: "Сначала заполни MinIO root user и MinIO root password.",
+    rustfsCredentialsRequired: "Сначала заполни RustFS access key и RustFS secret key.",
     port: "Порт",
     pgadminCredentialsRequired: "Сначала заполни pgAdmin email и pgAdmin password.",
     postgresRequired: "Сначала запусти PostgreSQL.",

@@ -23,7 +23,7 @@ export function AppRouter({ controller }: AppRouterProps) {
     archives,
     databaseRefreshSignal,
     mariaDbInstances,
-    minioStatus,
+    rustfsStatus,
     nginxStatus,
     operationBlockTitle,
     operationRunning,
@@ -244,7 +244,7 @@ export function AppRouter({ controller }: AppRouterProps) {
 
   const serviceModulesPage = getServiceModulesPageModel({
     activeView,
-    minioStatus: minioStatus.status,
+    rustfsStatus: rustfsStatus.status,
     redisStatus: redisStatus.status,
     registryStatus: registryStatus.status,
     settings: settings.settings,

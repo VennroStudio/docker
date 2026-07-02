@@ -72,9 +72,9 @@ const routeViews: ViewConfig[] = [
     icon: Box,
   },
   {
-    id: "minio",
-    label: "MinIO",
-    path: "/minio",
+    id: "rustfs",
+    label: "RustFS",
+    path: "/rustfs",
     shortLabel: "S3",
     subtitle: "Storage",
     icon: HardDrive,

@@ -9,7 +9,7 @@ import { homeStatus } from "./server/modules/home/routes.mjs";
 import { nginxStatus } from "./server/modules/nginx/routes.mjs";
 import { projectsOverview } from "./server/modules/projects/routes.mjs";
 import { redisStatus } from "./server/modules/redis/routes.mjs";
-import { minioStatus } from "./server/modules/minio/routes.mjs";
+import { rustfsStatus } from "./server/modules/rustfs/routes.mjs";
 import { registryStatus } from "./server/modules/registry/routes.mjs";
 import { sshServers } from "./server/modules/ssh/routes.mjs";
 import { archives } from "./server/modules/utilities/routes.mjs";
@@ -29,7 +29,7 @@ const server = createServer(async (req, res) => {
     if (req.method === "GET" && pathname.startsWith("/api/databases")) return await databases(req, res);
     if (req.method === "GET" && pathname.startsWith("/api/dumps")) return await dumps(req, res);
     if (req.method === "GET" && pathname === "/api/redis/status") return await redisStatus(req, res);
-    if (req.method === "GET" && pathname === "/api/minio/status") return await minioStatus(req, res);
+    if (req.method === "GET" && pathname === "/api/rustfs/status") return await rustfsStatus(req, res);
     if (req.method === "GET" && pathname === "/api/registry/status") return await registryStatus(req, res);
     if (req.method === "GET" && pathname === "/api/ssh/servers") return await sshServers(req, res);
     if (req.method === "GET" && pathname === "/api/ansible") return await ansible(req, res);
